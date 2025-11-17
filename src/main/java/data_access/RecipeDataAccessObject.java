@@ -1,6 +1,8 @@
 package data_access;
 
+import entity.Ingredient;
 import entity.Recipe;
+import org.jetbrains.annotations.NotNull;
 import use_case.recipe_search.RecipeSearchRecipeDataAccessInterface;
 
 import java.io.IOException;
@@ -42,20 +44,8 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
                 final JSONArray recipesJSONArray = responseJson.getJSONArray("meals");
                 List<Recipe> recipeList = new ArrayList<>();
                 for (int i = 0; i < recipesJSONArray.length(); i++) {
-                    JSONObject recipeJson = recipesJSONArray.getJSONObject(i);
-                    Recipe recipe = new Recipe(
-                            recipeJson.getString("idMeal"),
-                            "N/A", // authorId is not available in the API response
-                            recipeJson.getString("strMeal"),
-                            recipeJson.getString("strInstructions"),
-                            new ArrayList<>(), // Ingredients are not provided in a structured way
-                            recipeJson.getString("strCategory"),
-                            Arrays.asList(recipeJson.optString("strTags", "").split(",")),
-                            Recipe.Status.PUBLISHED,
-                            new Date(), // creationDate is not available
-                            new Date(), // updateDate is not available
-                            recipeJson.getString("strMealThumb")
-                    );
+                    JSONObject recipeJSON = recipesJSONArray.getJSONObject(i);
+                    Recipe recipe = parseRecipeJSON(recipeJSON);
                     recipeList.add(recipe);
                 }
                 return recipeList;
@@ -65,5 +55,31 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         } catch (IOException | JSONException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    @NotNull
+    private static Recipe parseRecipeJSON(JSONObject recipeJSON) {
+        List<Ingredient> ingredientsList = new ArrayList<>();
+        for (int i = 1; i <= 20; i++) {
+            String ingredientName = recipeJSON.optString("strIngredient" + i);
+            String measure = recipeJSON.optString("strMeasure" + i);
+            if (!ingredientName.isEmpty()) {
+                ingredientsList.add(new Ingredient(ingredientName, measure));
+            }
+        }
+
+        return new Recipe(
+                recipeJSON.getString("idMeal"),
+                "N/A", // authorId is not available in the API response
+                recipeJSON.getString("strMeal"),
+                recipeJSON.getString("strInstructions"),
+                ingredientsList,
+                recipeJSON.getString("strCategory"),
+                Arrays.asList(recipeJSON.optString("strTags", "").split(",")),
+                Recipe.Status.PUBLISHED,
+                new Date(), // creationDate is not available
+                new Date(), // updateDate is not available
+                recipeJSON.getString("strMealThumb")
+        );
     }
 }

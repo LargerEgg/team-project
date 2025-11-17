@@ -1,5 +1,6 @@
 package view;
 
+import entity.Ingredient;
 import entity.Recipe;
 import interface_adapter.recipe_search.RecipeSearchController;
 import interface_adapter.recipe_search.RecipeSearchState;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RecipeSearchView extends JPanel implements ActionListener, PropertyChangeListener {
     public final String viewName = "recipe search";
@@ -72,7 +74,8 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
                         recipe.getTitle(),
                         String.join(", ", recipe.getTags()),
                         recipe.getViews(),
-                        recipe.getImagePath()
+                        recipe.getImagePath(),
+                        recipe.getIngredients()
                 ));
             }
         }
@@ -193,33 +196,21 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     /**
      * Creates a single panel representing a recipe result row.
      */
-    private JPanel createRecipeItem(String name, String tags, int views, String imageUrl) {
-        JPanel itemPanel = new JPanel(new BorderLayout());
-        itemPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
+    private JPanel createRecipeItem(String name, String tags, int views, String imageUrl, List<Ingredient> ingredients) {
+        JPanel itemPanel = new JPanel();
+        itemPanel.setLayout(new BoxLayout(itemPanel, BoxLayout.X_AXIS));
+        itemPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
+                new EmptyBorder(10, 10, 10, 10)
+        ));
         itemPanel.setBackground(Color.WHITE);
+        itemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
-        centerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
-        centerPanel.setBackground(Color.WHITE);
-
-        JLabel nameLabel = new JLabel(name);
-        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
-
-        JLabel tagsLabel = new JLabel(tags);
-        tagsLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        tagsLabel.setForeground(Color.GRAY);
-
-        centerPanel.add(nameLabel);
-        centerPanel.add(Box.createVerticalStrut(5));
-        centerPanel.add(tagsLabel);
-        centerPanel.add(Box.createVerticalGlue());
-
+        // Image
         JLabel imageLabel = new JLabel();
         imageLabel.setPreferredSize(new Dimension(80, 80));
         imageLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
         try {
             URL url = new URL(imageUrl);
             BufferedImage image = ImageIO.read(url);
@@ -234,16 +225,44 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             imageLabel.setText("[IMG]");
         }
 
+        // Name and Tags
+        String nameAndTagsHtml;
+        if (tags != null && !tags.isEmpty()) {
+            nameAndTagsHtml = "<html><b>" + name + "</b> <font color='gray'>(" + tags + ")</font></html>";
+        } else {
+            nameAndTagsHtml = "<html><b>" + name + "</b></html>";
+        }
+        JLabel nameLabel = new JLabel(nameAndTagsHtml);
+
+        // Ingredients
+        JTextArea ingredientsArea = new JTextArea(
+                ingredients.stream().map(Ingredient::toString).collect(Collectors.joining("\n"))
+        );
+        ingredientsArea.setEditable(false);
+        ingredientsArea.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        ingredientsArea.setLineWrap(true);
+        ingredientsArea.setWrapStyleWord(true);
+        JScrollPane ingredientsScrollPane = new JScrollPane(ingredientsArea);
+        ingredientsScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        ingredientsScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        ingredientsScrollPane.setPreferredSize(new Dimension(200, 80));
+        ingredientsScrollPane.setBorder(BorderFactory.createEmptyBorder());
+
+        // Views
         JLabel viewsLabel = new JLabel(views + " views");
         viewsLabel.setFont(new Font("SansSerif", Font.ITALIC, 14));
-        viewsLabel.setBorder(new EmptyBorder(0, 10, 0, 10));
-        viewsLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 
-        itemPanel.add(imageLabel, BorderLayout.WEST);
-        itemPanel.add(centerPanel, BorderLayout.CENTER);
-        itemPanel.add(viewsLabel, BorderLayout.EAST);
+        // Add components to panel
+        itemPanel.add(imageLabel);
+        itemPanel.add(Box.createHorizontalStrut(20));
+        itemPanel.add(nameLabel);
+        itemPanel.add(Box.createHorizontalGlue());
+        itemPanel.add(ingredientsScrollPane);
+        itemPanel.add(Box.createHorizontalStrut(20));
+        itemPanel.add(viewsLabel);
+        itemPanel.add(Box.createHorizontalStrut(10));
 
-        itemPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
+        itemPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
 
         return itemPanel;
     }

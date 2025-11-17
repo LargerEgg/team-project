@@ -63,7 +63,7 @@ public class PostRecipeInteractor implements PostRecipeInputBoundary {
         List<Ingredient> ingredients = new ArrayList<>();
         if (inputData.getIngredients() != null){
             for (PostRecipeInputData.IngredientDTO ingredientDTO : inputData.getIngredients()){
-                Ingredient ingredient = new Ingredient(ingredientDTO.getName(), ingredientDTO.getQuantity(), ingredientDTO.getUnit());
+                Ingredient ingredient = new Ingredient(ingredientDTO.getName(), ingredientDTO.getQuantity());
                 ingredients.add(ingredient);
             }
         }
