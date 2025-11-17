@@ -1,0 +1,23 @@
+package interface_adapter.edit_review;
+
+import interface_adapter.ViewModel;
+
+/**
+ * The ViewModel for the Reviews View.
+ */
+public class EditReviewViewModel extends ViewModel<EditReviewState> {
+
+    public static final String TITLE_LABEL = "Reviews View";
+    public static final String REVIEW_LABEL = "Title";
+    public static final String DESCRIPTION_LABEL = "Description";
+    public static final String RATING_LABEL = "Rating";
+
+    public static final String PUBLISH_BUTTON_LABEL = "Publish";
+    public static final String TO_REVIEWS_BUTTON_LABEL = "Exit";
+
+    public EditReviewViewModel() {
+        super("edit review");
+        setState(new EditReviewState());
+    }
+
+}
