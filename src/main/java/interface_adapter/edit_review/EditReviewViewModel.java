@@ -3,11 +3,11 @@ package interface_adapter.edit_review;
 import interface_adapter.ViewModel;
 
 /**
- * The ViewModel for the Reviews View.
+ * The ViewModel for the Edit Reviews View.
  */
 public class EditReviewViewModel extends ViewModel<EditReviewState> {
 
-    public static final String TITLE_LABEL = "Reviews View";
+    public static final String TITLE_LABEL = "Edit Review View";
     public static final String REVIEW_LABEL = "Title";
     public static final String DESCRIPTION_LABEL = "Description";
     public static final String RATING_LABEL = "Rating";
