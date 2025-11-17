@@ -1,10 +1,12 @@
 package view;
 
-import interface_adapter.signup.SignupController;
-import interface_adapter.signup.SignupState;
-import interface_adapter.signup.SignupViewModel;
+import interface_adapter.edit_review.EditReviewController;
+import interface_adapter.edit_review.EditReviewState;
+import interface_adapter.edit_review.EditReviewViewModel;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -14,90 +16,86 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**
- * The View for the Signup Use Case.
+ * The View for the Edit Review Use Case.
  */
-public class SignupView extends JPanel implements ActionListener, PropertyChangeListener {
-    private final String viewName = "sign up";
+public class EditReviewView extends JPanel implements ActionListener, PropertyChangeListener {
+    private final String viewName = "Edit Review";
 
-    private final SignupViewModel signupViewModel;
-    private final JTextField usernameInputField = new JTextField(15);
-    private final JPasswordField passwordInputField = new JPasswordField(15);
-    private final JPasswordField repeatPasswordInputField = new JPasswordField(15);
-    private SignupController signupController = null;
+    private final EditReviewViewModel EditReviewViewModel;
+    private final JTextField reviewInputField = new JTextField(15);
+    private final JTextArea descriptionInputField = new JTextArea(10, 15);
+    private final SpinnerModel ratingModel = new SpinnerNumberModel(5, 1, 5, 1);
+    private final JSpinner ratingInputField = new JSpinner(ratingModel);
+    private EditReviewController EditReviewController = null;
 
-    private final JButton signUp;
-    private final JButton cancel;
-    private final JButton toLogin;
+    private final JButton publish;
+    private final JButton toReviews;
 
-    public SignupView(SignupViewModel signupViewModel) {
-        this.signupViewModel = signupViewModel;
-        signupViewModel.addPropertyChangeListener(this);
+    public EditReviewView(EditReviewViewModel EditReviewViewModel) {
+        this.EditReviewViewModel = EditReviewViewModel;
+        EditReviewViewModel.addPropertyChangeListener(this);
 
-        final JLabel title = new JLabel(SignupViewModel.TITLE_LABEL);
+        final JLabel title = new JLabel(EditReviewViewModel.TITLE_LABEL);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        final LabelTextPanel usernameInfo = new LabelTextPanel(
-                new JLabel(SignupViewModel.USERNAME_LABEL), usernameInputField);
-        final LabelTextPanel passwordInfo = new LabelTextPanel(
-                new JLabel(SignupViewModel.PASSWORD_LABEL), passwordInputField);
-        final LabelTextPanel repeatPasswordInfo = new LabelTextPanel(
-                new JLabel(SignupViewModel.REPEAT_PASSWORD_LABEL), repeatPasswordInputField);
+        final LabelTextPanel reviewInfo = new LabelTextPanel(
+                new JLabel(EditReviewViewModel.REVIEW_LABEL), reviewInputField);
+        final LabelTextPanel descriptionInfo = new LabelTextPanel(
+                new JLabel(EditReviewViewModel.DESCRIPTION_LABEL), descriptionInputField);
+        final LabelTextPanel ratingInfo = new LabelTextPanel(
+                new JLabel(EditReviewViewModel.RATING_LABEL), ratingInputField);
 
         final JPanel buttons = new JPanel();
-        toLogin = new JButton(SignupViewModel.TO_LOGIN_BUTTON_LABEL);
-        buttons.add(toLogin);
-        signUp = new JButton(SignupViewModel.SIGNUP_BUTTON_LABEL);
-        buttons.add(signUp);
-        cancel = new JButton(SignupViewModel.CANCEL_BUTTON_LABEL);
-        buttons.add(cancel);
+        toReviews = new JButton(EditReviewViewModel.TO_REVIEWS_BUTTON_LABEL);
+        buttons.add(toReviews);
+        publish = new JButton(EditReviewViewModel.PUBLISH_BUTTON_LABEL);
+        buttons.add(publish);
 
-        signUp.addActionListener(
+        publish.addActionListener(
                 // This creates an anonymous subclass of ActionListener and instantiates it.
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
-                        if (evt.getSource().equals(signUp)) {
-                            final SignupState currentState = signupViewModel.getState();
+                        if (evt.getSource().equals(publish)) {
+                            final EditReviewState currentState = EditReviewViewModel.getState();
 
-                            signupController.execute(
-                                    currentState.getUsername(),
-                                    currentState.getPassword(),
-                                    currentState.getRepeatPassword()
+                            EditReviewController.execute(
+                                    currentState.getReview(),
+                                    currentState.getDescription(),
+                                    currentState.getRating()
                             );
                         }
                     }
                 }
         );
 
-        toLogin.addActionListener(
+        toReviews.addActionListener(
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
-                        signupController.switchToLoginView();
+                        EditReviewController.switchToReviewsView();
                     }
                 }
         );
 
-        cancel.addActionListener(this);
-
-        addUsernameListener();
-        addPasswordListener();
-        addRepeatPasswordListener();
+        addReviewListener();
+        addDescriptionListener();
+        addRatingListener();
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         this.add(title);
-        this.add(usernameInfo);
-        this.add(passwordInfo);
-        this.add(repeatPasswordInfo);
+        this.add(reviewInfo);
+        this.add(descriptionInfo);
+        this.add(ratingInfo);
         this.add(buttons);
     }
 
-    private void addUsernameListener() {
-        usernameInputField.getDocument().addDocumentListener(new DocumentListener() {
+    private void addReviewListener() {
+        reviewInputField.getDocument().addDocumentListener(new DocumentListener() {
 
             private void documentListenerHelper() {
-                final SignupState currentState = signupViewModel.getState();
-                currentState.setUsername(usernameInputField.getText());
-                signupViewModel.setState(currentState);
+                final EditReviewState currentState = EditReviewViewModel.getState();
+                currentState.setReview(reviewInputField.getText());
+                EditReviewViewModel.setState(currentState);
             }
 
             @Override
@@ -117,13 +115,13 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         });
     }
 
-    private void addPasswordListener() {
-        passwordInputField.getDocument().addDocumentListener(new DocumentListener() {
+    private void addDescriptionListener() {
+        descriptionInputField.getDocument().addDocumentListener(new DocumentListener() {
 
             private void documentListenerHelper() {
-                final SignupState currentState = signupViewModel.getState();
-                currentState.setPassword(new String(passwordInputField.getPassword()));
-                signupViewModel.setState(currentState);
+                final EditReviewState currentState = EditReviewViewModel.getState();
+                currentState.setDescription(new String(descriptionInputField.getText()));
+                EditReviewViewModel.setState(currentState);
             }
 
             @Override
@@ -143,28 +141,18 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         });
     }
 
-    private void addRepeatPasswordListener() {
-        repeatPasswordInputField.getDocument().addDocumentListener(new DocumentListener() {
-
-            private void documentListenerHelper() {
-                final SignupState currentState = signupViewModel.getState();
-                currentState.setRepeatPassword(new String(repeatPasswordInputField.getPassword()));
-                signupViewModel.setState(currentState);
-            }
+    private void addRatingListener() {
+        ratingInputField.getModel().addChangeListener(new ChangeListener() {
 
             @Override
-            public void insertUpdate(DocumentEvent e) {
-                documentListenerHelper();
+            public void stateChanged(ChangeEvent e) {
+                changeListenerHelper();
             }
 
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                documentListenerHelper();
+            private void changeListenerHelper() {
+                final EditReviewState currentState = EditReviewViewModel.getState();
+                currentState.setRating((Integer) ratingInputField.getValue());
+                EditReviewViewModel.setState(currentState);
             }
         });
     }
@@ -176,9 +164,9 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        final SignupState state = (SignupState) evt.getNewValue();
-        if (state.getUsernameError() != null) {
-            JOptionPane.showMessageDialog(this, state.getUsernameError());
+        final EditReviewState state = (EditReviewState) evt.getNewValue();
+        if (state.getReviewError() != null) {
+            JOptionPane.showMessageDialog(this, state.getReviewError());
         }
     }
 
@@ -186,7 +174,7 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         return viewName;
     }
 
-    public void setSignupController(SignupController controller) {
-        this.signupController = controller;
+    public void setEditReviewController(EditReviewController controller) {
+        this.EditReviewController = controller;
     }
 }
