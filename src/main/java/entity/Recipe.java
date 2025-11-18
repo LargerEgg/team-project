@@ -218,4 +218,17 @@ public class Recipe {
     public double getAverageRating() {
         return averageRating;
     }
+
+    public void recalculateAverageRating() {
+        if (reviews.isEmpty()) {
+            this.averageRating = 0.0;
+        } else {
+            double total = 0.0;
+            for (Review review : reviews) {
+                total += review.getRating();
+            }
+            this.averageRating = total / reviews.size();
+        }
+        touchUpdateDate();
+    }
 }
