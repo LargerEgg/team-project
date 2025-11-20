@@ -15,7 +15,7 @@ public class SaveRecipeInteractor implements SaveRecipeInputBoundary {
     }
 
     @Override
-    public SaveRecipeOutputData execute(SaveRecipeInputData input) {
+    public void execute(SaveRecipeInputData input) {
         String username = input.getUsername();
         String recipeId = input.getRecipeId();
 
@@ -23,14 +23,17 @@ public class SaveRecipeInteractor implements SaveRecipeInputBoundary {
         Recipe recipe = dataAccessObject.findRecipeById(recipeId);
 
         if (user == null) {
-            return presenter.prepareFailView("User not found: " + username);
+            presenter.prepareFailView("User not found: " + username);
+            return;
         }
         if (recipe == null) {
-            return presenter.prepareFailView("Recipe not found: " + recipeId);
+            presenter.prepareFailView("Recipe not found: " + recipeId);
+            return;
         }
 
         if (dataAccessObject.isRecipeSavedByUser(username, recipeId)) {
-            return presenter.prepareFailView("You have already saved this recipe.");
+            presenter.prepareFailView("You have already saved this recipe.");
+            return;
         }
 
         user.saveRecipe(recipe);
@@ -39,6 +42,6 @@ public class SaveRecipeInteractor implements SaveRecipeInputBoundary {
         dataAccessObject.saveRecipe(recipe);
 
         SaveRecipeOutputData outputData = new SaveRecipeOutputData(true, "Recipe saved successfully.");
-        return presenter.prepareSuccessView(outputData);
+        presenter.prepareSuccessView(outputData);
     }
 }

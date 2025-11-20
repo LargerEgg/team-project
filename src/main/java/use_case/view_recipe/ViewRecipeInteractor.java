@@ -1,7 +1,6 @@
 package use_case.view_recipe;
 
 import entity.Recipe;
-import use_case.view_recipe.ViewRecipeDataAccessInterface;
 
 public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
 
@@ -15,19 +14,25 @@ public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
     }
 
     @Override
-    public ViewRecipeOutputData execute(ViewRecipeInputData input) {
+    public void execute(ViewRecipeInputData input) {
 
         Recipe recipe = repo.findById(input.getRecipeId());
+
+        if (recipe == null) {
+            presenter.prepareFailView("Recipe not found with ID: " + input.getRecipeId());
+            return;
+        }
 
         recipe.incrementViews();
         repo.save(recipe);
 
-        return presenter.prepareSuccess(new ViewRecipeOutputData(
+        ViewRecipeOutputData outputData = new ViewRecipeOutputData(
                 recipe.getTitle(),
                 recipe.getRecipeId(),
                 recipe.getViews(),
                 recipe.getSaves(),
                 recipe.getAverageRating()
-        ));
+        );
+        presenter.prepareSuccessView(outputData);
     }
 }
