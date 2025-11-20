@@ -19,12 +19,15 @@ public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
 
         Recipe recipe = repo.findById(input.getRecipeId());
 
-        recipe.incrementViews();      // ⭐views +1
-        repo.save(recipe);            // 保存更新
+        recipe.incrementViews();
+        repo.save(recipe);
 
         return presenter.prepareSuccess(new ViewRecipeOutputData(
+                recipe.getTitle(),
+                recipe.getRecipeId(),
                 recipe.getViews(),
-                recipe.getRecipeId()
+                recipe.getSaves(),
+                recipe.getAverageRating()
         ));
     }
 }
