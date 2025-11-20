@@ -36,3 +36,5 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+src/main/resources/recipe-app-29d1d-firebase-adminsdk-fbsvc-ad98bb22f1.json

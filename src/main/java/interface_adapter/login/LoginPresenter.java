@@ -1,37 +1,36 @@
 package interface_adapter.login;
 
 import interface_adapter.ViewManagerModel;
-import interface_adapter.logged_in.LoggedInState;
-import interface_adapter.logged_in.LoggedInViewModel;
+import interface_adapter.recipe_search.RecipeSearchState;
+import interface_adapter.recipe_search.RecipeSearchViewModel;
 import use_case.login.LoginOutputBoundary;
 import use_case.login.LoginOutputData;
 
 public class LoginPresenter implements LoginOutputBoundary {
 
     private final LoginViewModel loginViewModel;
-    private final LoggedInViewModel loggedInViewModel;
+    private final RecipeSearchViewModel recipeSearchViewModel;
     private final ViewManagerModel viewManagerModel;
 
     public LoginPresenter(ViewManagerModel viewManagerModel,
-                          LoggedInViewModel loggedInViewModel,
+                          RecipeSearchViewModel recipeSearchViewModel,
                           LoginViewModel loginViewModel) {
         this.viewManagerModel = viewManagerModel;
-        this.loggedInViewModel = loggedInViewModel;
+        this.recipeSearchViewModel = recipeSearchViewModel;
         this.loginViewModel = loginViewModel;
     }
 
     @Override
     public void prepareSuccessView(LoginOutputData response) {
         // On success, update the loggedInViewModel's state
-        final LoggedInState loggedInState = loggedInViewModel.getState();
-        loggedInState.setUsername(response.getUsername());
-        this.loggedInViewModel.firePropertyChange();
+        final RecipeSearchState loggedInState = recipeSearchViewModel.getState();
+        this.recipeSearchViewModel.firePropertyChange();
 
         // and clear everything from the LoginViewModel's state
         loginViewModel.setState(new LoginState());
 
         // switch to the logged in view
-        this.viewManagerModel.setState(loggedInViewModel.getViewName());
+        this.viewManagerModel.setState(recipeSearchViewModel.getViewName());
         this.viewManagerModel.firePropertyChange();
     }
 

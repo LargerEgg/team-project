@@ -14,44 +14,25 @@ public class User
     private List<Review> reviews;
     private String userid;
 
-    public User(String username, String password) {
-        this.username = username;
+    public User(String name, String password) {
+        if ("".equals(name)) {
+            throw new IllegalArgumentException("Username cannot be empty");
+        }
+        if ("".equals(password)) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        }
+        this.username = name;
         this.password = password;
-
-        this.savedRecipes = new ArrayList<>();
-        this.publishedRecipes = new ArrayList<>();
-        this.reviews = new ArrayList<>();
     }
 
     public String getUsername() {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public boolean checkPassword(String inputPassword) {
-        return this.password.equals(inputPassword);
-    }
-
-
-    public String getUserid() {
-        return userid;
-    }
-
-    public void setUserid(String userid) {
-        this.userid = userid;
-    }
 
     public void saveRecipe(Recipe recipe) {
         if (recipe != null && !this.savedRecipes.contains(recipe)) {
