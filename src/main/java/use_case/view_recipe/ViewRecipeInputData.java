@@ -1,4 +1,4 @@
-package use_case.recipe.view_recipe;
+package use_case.view_recipe;
 
 public class ViewRecipeInputData {
     private final String recipeId;

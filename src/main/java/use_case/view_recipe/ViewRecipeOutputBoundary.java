@@ -1,4 +1,4 @@
-package use_case.recipe.view_recipe;
+package use_case.view_recipe;
 
 public interface ViewRecipeOutputBoundary {
     ViewRecipeOutputData prepareSuccess(ViewRecipeOutputData data);

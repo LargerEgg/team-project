@@ -1,14 +1,14 @@
-package use_case.recipe.view_recipe;
+package use_case.view_recipe;
 
 import entity.Recipe;
-import use_case.recipe.RecipeDataAccessInterface;
+import use_case.view_recipe.ViewRecipeDataAccessInterface;
 
 public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
 
-    private final RecipeDataAccessInterface repo;
+    private final ViewRecipeDataAccessInterface repo;
     private final ViewRecipeOutputBoundary presenter;
 
-    public ViewRecipeInteractor(RecipeDataAccessInterface repo,
+    public ViewRecipeInteractor(ViewRecipeDataAccessInterface repo,
                                 ViewRecipeOutputBoundary presenter) {
         this.repo = repo;
         this.presenter = presenter;
