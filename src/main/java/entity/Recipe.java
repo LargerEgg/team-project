@@ -25,6 +25,7 @@ public class Recipe {
 
     private int views;
     private int saves;
+    private double averageRating;
 
     private boolean shareable;
     private Date creationDate;
@@ -61,6 +62,7 @@ public class Recipe {
 
         this.views = 0; // 默认为 0
         this.saves = 0; // 默认为 0
+        this.averageRating = 0.0; // default
 
     }
 
@@ -200,6 +202,33 @@ public class Recipe {
 
     public void setStatus(Status status) {
         this.status = status;
+        touchUpdateDate();
+    }
+
+    public void incrementViews() {
+        this.views += 1;
+        touchUpdateDate();
+    }
+
+    public void incrementSaves() {
+        this.saves += 1;
+        touchUpdateDate();
+    }
+
+    public double getAverageRating() {
+        return averageRating;
+    }
+
+    public void recalculateAverageRating() {
+        if (reviews.isEmpty()) {
+            this.averageRating = 0.0;
+        } else {
+            double total = 0.0;
+            for (Review review : reviews) {
+                total += review.getRating();
+            }
+            this.averageRating = total / reviews.size();
+        }
         touchUpdateDate();
     }
 }
