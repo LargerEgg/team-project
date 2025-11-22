@@ -39,6 +39,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     private JLabel ascendingLabel;
     private JCheckBox ascendingCheckBox;
     private JButton searchButton;
+    private JButton postRecipeButton;
     private JSeparator separator;
 
     // Results components
@@ -165,6 +166,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
         headerPanel.add(searchButton, gbc);
+
 
         // Separator line
         separator = new JSeparator(SwingConstants.HORIZONTAL);
