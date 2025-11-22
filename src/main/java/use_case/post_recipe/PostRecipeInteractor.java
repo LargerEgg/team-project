@@ -40,7 +40,8 @@ public class PostRecipeInteractor implements PostRecipeInputBoundary {
 
         try {
             Recipe saved = recipeDataAccess.saveRecipe(recipe);
-            PostDataOutputData outputData = new PostDataOutputData(saved.getRecipeId(), "Recipe published");
+            PostRecipeOutputData outputData = new PostRecipeOutputData(saved.getRecipeId(), "Recipe published");
+            presenter.prepareSuccessView(outputData);
         } catch (RuntimeException e) {
             presenter.prepareFailedView("Failed to publish recipe", inputData);
         }
@@ -51,7 +52,7 @@ public class PostRecipeInteractor implements PostRecipeInputBoundary {
         Recipe draft = buildRecipeFromInput(inputData, Recipe.Status.DRAFT);
 
         Recipe saved = recipeDataAccess.saveRecipe(draft);
-        PostDataOutputData outputData = new PostDataOutputData(saved.getRecipeId(), "Recipe saved");
+        PostRecipeOutputData outputData = new PostRecipeOutputData(saved.getRecipeId(), "Recipe saved");
         presenter.prepareDraftSavedView(outputData);
     }
 
