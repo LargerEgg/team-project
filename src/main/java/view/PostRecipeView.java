@@ -39,17 +39,14 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
         setLayout(new BorderLayout());
         setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        // Title
         JLabel titleLabel = new JLabel("Post Recipe");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24));
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         add(titleLabel, BorderLayout.NORTH);
 
-        // Form panel
         JPanel formPanel = createFormPanel();
         add(formPanel, BorderLayout.CENTER);
 
-        // Buttons panel
         JPanel buttonPanel = createButtonPanel();
         add(buttonPanel, BorderLayout.SOUTH);
     }
@@ -64,7 +61,6 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
 
         int row = 0;
 
-        // Recipe Title
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.weightx = 0;
@@ -77,7 +73,6 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
 
         row++;
 
-        // Description
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.weightx = 0;
@@ -98,7 +93,6 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Ingredients
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.weightx = 0;
@@ -124,7 +118,6 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Category
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.weightx = 0;
@@ -138,7 +131,6 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
 
         row++;
 
-        // Tags
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.weightx = 0;
@@ -156,7 +148,6 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
 
         row += 2;
 
-        // Image Path
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.weightx = 0;
@@ -169,7 +160,6 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
 
         row++;
 
-        // Message label
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.gridwidth = 2;
@@ -223,12 +213,12 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
         String category = categoryField.getText().trim();
         String imagePath = imagePathField.getText().trim();
 
-        // Parse ingredients
         List<PostRecipeInputData.IngredientDTO> ingredients = parseIngredients(ingredientsArea.getText());
 
         return new PostRecipeInputData(authorId, title, description, ingredients, category, imagePath);
     }
 
+    // Function to allow comma parsing of ingredients
     private List<PostRecipeInputData.IngredientDTO> parseIngredients(String text) {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         String[] lines = text.split("\n");
@@ -242,7 +232,6 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
                     String quantity = parts[1].trim();
                     ingredients.add(new PostRecipeInputData.IngredientDTO(name, quantity));
                 } else if (parts.length == 1) {
-                    // If no comma, treat whole line as ingredient with empty quantity
                     ingredients.add(new PostRecipeInputData.IngredientDTO(parts[0].trim(), ""));
                 }
             }
