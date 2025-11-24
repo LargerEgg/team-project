@@ -9,6 +9,7 @@ public class ViewRecipeViewModel extends ViewModel<ViewRecipeState> {
         setState(new ViewRecipeState());
     }
 
+    @Override
     public ViewRecipeState getState() {
         return super.getState();
     }
