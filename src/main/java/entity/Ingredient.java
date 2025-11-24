@@ -1,13 +1,24 @@
 package entity;
 
 public class Ingredient {
-    private String name;
-    private double quantity;
-    private String unit;
+    private final String name;
+    private final String measure;
 
-    public Ingredient(String name, double quantity, String unit) {
+    public Ingredient(String name, String measure) {
         this.name = name;
-        this.quantity = quantity;
-        this.unit = unit;
+        this.measure = measure;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getMeasure() {
+        return measure;
+    }
+
+    @Override
+    public String toString() {
+        return measure + " " + name;
     }
 }

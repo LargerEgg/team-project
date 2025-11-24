@@ -7,26 +7,20 @@ public class PostRecipeInputData {
 
     // Version of ingredient entity for data transfer
     public static class IngredientDTO {
-        private final  String name;
-        private final double quantity;
-        private final String unit;
+        private final String name;
+        private final String quantity;
 
-        public IngredientDTO(String name, double quantity, String unit) {
+        public IngredientDTO(String name, String quantity) {
             this.name = name;
             this.quantity = quantity;
-            this.unit = unit;
         }
 
         public String getName() {
             return name;
         }
 
-        public double getQuantity() {
+        public String getQuantity() {
             return quantity;
-        }
-
-        public String getUnit() {
-            return unit;
         }
     }
 
