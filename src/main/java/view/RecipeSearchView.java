@@ -168,6 +168,25 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         gbc.gridx = 4;
         headerPanel.add(ascendingCheckBox, gbc);
 
+        // Search Button
+        searchButton = new JButton("Search");
+        searchButton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        searchButton.addActionListener(this);
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.WEST;
+        headerPanel.add(searchButton, gbc);
+
+
+        // Separator line
+        separator = new JSeparator(SwingConstants.HORIZONTAL);
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        headerPanel.add(separator, gbc);
+
         return headerPanel;
     }
 

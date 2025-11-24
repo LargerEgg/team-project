@@ -1,5 +1,6 @@
 package app;
 
+import data_access.PostRecipeDataAccessObject;
 import data_access.RecipeDataAccessObject;
 import data_access.UserDataAccessObject;
 import entity.UserFactory;
@@ -7,6 +8,9 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
+import interface_adapter.post_recipe.PostRecipeController;
+import interface_adapter.post_recipe.PostRecipePresenter;
+import interface_adapter.post_recipe.PostRecipeViewModel;
 import interface_adapter.recipe_search.RecipeSearchController;
 import interface_adapter.recipe_search.RecipeSearchPresenter;
 import interface_adapter.recipe_search.RecipeSearchState;
@@ -17,6 +21,10 @@ import interface_adapter.signup.SignupViewModel;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
+import use_case.post_recipe.PostRecipeDataAccessInterface;
+import use_case.post_recipe.PostRecipeInputBoundary;
+import use_case.post_recipe.PostRecipeInteractor;
+import use_case.post_recipe.PostRecipeOutputBoundary;
 import use_case.recipe_search.RecipeSearchInputBoundary;
 import use_case.recipe_search.RecipeSearchInteractor;
 import use_case.recipe_search.RecipeSearchOutputBoundary;
@@ -26,10 +34,10 @@ import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
 import use_case.signup.SignupUserDataAccessInterface;
 import view.LoginView;
+import view.PostRecipeView;
 import view.RecipeSearchView;
 import view.SignupView;
 import view.ViewManager;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -46,6 +54,8 @@ public class AppBuilder {
     private SignupViewModel signupViewModel;
     private LoginView loginView;
     private LoginViewModel loginViewModel;
+    private PostRecipeView postRecipeView;
+    private PostRecipeViewModel postRecipeViewModel;
     private RecipeSearchViewModel recipeSearchViewModel;
     private RecipeSearchView recipeSearchView;
 
@@ -55,8 +65,8 @@ public class AppBuilder {
 
     public AppBuilder addSignupView() {
         signupViewModel = new SignupViewModel();
-        signupView = new SignupView(signupViewModel, viewManagerModel);
-        cardPanel.add(signupView, signupView.viewName);
+        signupView = new SignupView(signupViewModel);
+        cardPanel.add(signupView, signupView.getViewName());
         return this;
     }
 
@@ -104,6 +114,22 @@ public class AppBuilder {
         RecipeSearchController recipeSearchController = new RecipeSearchController(recipeSearchInteractor);
         recipeSearchView = new RecipeSearchView(recipeSearchViewModel, recipeSearchController, viewManagerModel);
         cardPanel.add(recipeSearchView, recipeSearchView.viewName);
+        return this;
+    }
+
+    public AppBuilder addPostRecipeView() {
+        postRecipeViewModel = new PostRecipeViewModel();
+        PostRecipeOutputBoundary postRecipeOutputBoundary =
+                new PostRecipePresenter(viewManagerModel, postRecipeViewModel);
+        PostRecipeDataAccessInterface postRecipeDataAccessInterface =
+                new PostRecipeDataAccessObject();
+        PostRecipeInputBoundary postRecipeInteractor =
+                new PostRecipeInteractor(postRecipeDataAccessInterface, postRecipeOutputBoundary);
+        PostRecipeController postRecipeController =
+                new PostRecipeController(postRecipeInteractor);
+        postRecipeView = new PostRecipeView(postRecipeViewModel);
+        postRecipeView.setPostRecipeController(postRecipeController);
+        cardPanel.add(postRecipeView, postRecipeView.viewName);
         return this;
     }
 
