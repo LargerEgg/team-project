@@ -27,6 +27,7 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
+import interface_adapter.post_recipe.PostRecipeViewModel;
 import interface_adapter.recipe_search.RecipeSearchController;
 import interface_adapter.recipe_search.RecipeSearchPresenter;
 import interface_adapter.recipe_search.RecipeSearchState;
@@ -37,6 +38,7 @@ import interface_adapter.signup.SignupViewModel;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
+import use_case.post_recipe.PostRecipeDataAccessInterface;
 import use_case.recipe_search.RecipeSearchInputBoundary;
 import use_case.recipe_search.RecipeSearchInteractor;
 import use_case.recipe_search.RecipeSearchOutputBoundary;
@@ -45,10 +47,15 @@ import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
 import use_case.signup.SignupUserDataAccessInterface;
-import view.LoginView;
-import view.RecipeSearchView;
-import view.SignupView;
-import view.ViewManager;
+
+import interface_adapter.post_recipe.PostRecipeController;
+import interface_adapter.post_recipe.PostRecipePresenter;
+import interface_adapter.post_recipe.PostRecipeViewModel;
+import use_case.post_recipe.PostRecipeInputBoundary;
+import use_case.post_recipe.PostRecipeInteractor;
+import use_case.post_recipe.PostRecipeOutputBoundary;
+import data_access.PostRecipeDataAccessObject;
+import view.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -69,6 +76,8 @@ public class AppBuilder {
     private RecipeSearchViewModel recipeSearchViewModel;
     private RecipeSearchView recipeSearchView;
 
+    private PostRecipeView postRecipeView;
+    private PostRecipeViewModel postRecipeViewModel;
     private LoginViewModel loginViewModel;
     private LoginView loginView;
 
@@ -133,6 +142,29 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addPostRecipeView() {
+        // 1. ViewModel
+        postRecipeViewModel = new PostRecipeViewModel();
+
+        // 2. Presenter
+        // Adjust args to match your actual PostRecipePresenter constructor.
+        PostRecipeOutputBoundary postRecipeOutputBoundary =
+                new PostRecipePresenter(viewManagerModel, postRecipeViewModel);
+
+        // 3. Interactor
+        PostRecipeDataAccessInterface postRecipeDataAccess = new PostRecipeDataAccessObject();
+        PostRecipeInputBoundary postRecipeInteractor =
+                new PostRecipeInteractor(postRecipeDataAccess, postRecipeOutputBoundary);
+
+        // 4. Controller
+//        postRecipeController = new PostRecipeController(postRecipeInteractor);
+
+        // 5. View
+        postRecipeView = new PostRecipeView(
+                postRecipeViewModel, viewManagerModel);
+
+        // 6. Register in CardLayout
+        cardPanel.add(postRecipeView, postRecipeView.viewName);
     public AppBuilder addLoginView(Firestore db) {
 
         UserFactory userFactory = new UserFactory();

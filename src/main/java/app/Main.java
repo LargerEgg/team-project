@@ -10,6 +10,9 @@ public class Main {
         AppBuilder appBuilder = new AppBuilder();
         JFrame application = appBuilder
                 .addRecipeSearchView()
+                .addLoginUseCase()
+                .addSignupUseCase()
+                .addPostRecipeView()
                 .addLoginView(null) //Change later when Firestore working
                 .addSignupView(null) // same as above
                 .build();
