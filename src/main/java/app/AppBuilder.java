@@ -78,11 +78,7 @@ public class AppBuilder {
 
     private PostRecipeView postRecipeView;
     private PostRecipeViewModel postRecipeViewModel;
-    private LoginViewModel loginViewModel;
-    private LoginView loginView;
 
-    private SignupViewModel signupViewModel;
-    private SignupView signupView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -174,7 +170,7 @@ public class AppBuilder {
         loginViewModel = new LoginViewModel();
 
         LoginUserDataAccessInterface userDao =
-                new InMemoryUserDataAccessObject(userFactory);
+                new FirebaseUserDataAccessObject(userFactory);
 
         LoginOutputBoundary loginPresenter =
                 new LoginPresenter(viewManagerModel, recipeSearchViewModel, loginViewModel);
@@ -185,7 +181,7 @@ public class AppBuilder {
         LoginController loginController =
                 new LoginController(loginInteractor);
 
-        this.loginView = new LoginView(loginViewModel);
+        this.loginView = new LoginView(loginViewModel, viewManagerModel);
         this.loginView.setLoginController(loginController);
 
         cardPanel.add(loginView, loginView.getViewName());
@@ -198,7 +194,7 @@ public class AppBuilder {
         signupViewModel = new SignupViewModel();
 
         SignupUserDataAccessInterface signupUserDao =
-                new InMemoryUserDataAccessObject(new UserFactory());
+                new FirebaseUserDataAccessObject(new UserFactory());
 
         SignupOutputBoundary signupPresenter =
                 new SignupPresenter(viewManagerModel, signupViewModel, loginViewModel);
@@ -209,7 +205,7 @@ public class AppBuilder {
         SignupController signupController =
                 new SignupController(signupInteractor);
 
-        this.signupView = new SignupView(signupViewModel);
+        this.signupView = new SignupView(signupViewModel, viewManagerModel);
         this.signupView.setSignupController(signupController);
 
         cardPanel.add(signupView, signupView.getViewName());

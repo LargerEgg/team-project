@@ -22,7 +22,7 @@ public class FirebaseUserDataAccessObject implements LoginUserDataAccessInterfac
 
     private String currentUsername;
 
-    public FirebaseUserDataAccessObject(Firestore db, UserFactory userFactory) {
+    public FirebaseUserDataAccessObject(UserFactory userFactory) {
         this.db = db;
         this.userFactory = userFactory;
         this.usersCollection = db.collection("users"); //IMPORTANT: Change name to whatever is chosen for collections
