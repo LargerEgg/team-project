@@ -2,7 +2,6 @@ package app;
 
 import data_access.RecipeDataAccessObject;
 import data_access.UserDataAccessObject;
-import entity.User;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.login.LoginController;
@@ -53,10 +52,10 @@ public class AppBuilder {
     }
 
     public AppBuilder addSignupView() {
-    signupViewModel = new SignupViewModel();
-    signupView = new SignupView(signupViewModel);
-    cardPanel.add(signupView, signupView.getViewName());
-    return this;
+        signupViewModel = new SignupViewModel();
+        signupView = new SignupView(signupViewModel, viewManagerModel);
+        cardPanel.add(signupView, signupView.viewName);
+        return this;
     }
 
     public AppBuilder addSignupUseCase() {
@@ -72,8 +71,8 @@ public class AppBuilder {
 
     public AppBuilder addLoginView() {
         loginViewModel = new LoginViewModel();
-        loginView = new LoginView(loginViewModel);
-        cardPanel.add(loginView, loginView.getViewName());
+        loginView = new LoginView(loginViewModel, viewManagerModel);
+        cardPanel.add(loginView, loginView.viewName);
         return this;
     }
 
@@ -94,7 +93,7 @@ public class AppBuilder {
         RecipeSearchRecipeDataAccessInterface recipeSearchRecipeDataAccessInterface = new RecipeDataAccessObject();
         RecipeSearchInputBoundary recipeSearchInteractor = new RecipeSearchInteractor(recipeSearchRecipeDataAccessInterface, recipeSearchOutputBoundary);
         RecipeSearchController recipeSearchController = new RecipeSearchController(recipeSearchInteractor);
-        recipeSearchView = new RecipeSearchView(recipeSearchViewModel, recipeSearchController);
+        recipeSearchView = new RecipeSearchView(recipeSearchViewModel, recipeSearchController, viewManagerModel);
         cardPanel.add(recipeSearchView, recipeSearchView.viewName);
         return this;
     }

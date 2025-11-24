@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupState;
 import interface_adapter.signup.SignupViewModel;
@@ -13,11 +14,11 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-
 public class SignupView extends JPanel implements ActionListener, PropertyChangeListener {
-    private final String viewName = "sign up";
+    public final String viewName = "sign up";
 
     private final SignupViewModel signupViewModel;
+    private final ViewManagerModel viewManagerModel;
     private final JTextField usernameInputField = new JTextField(15);
     private final JPasswordField passwordInputField = new JPasswordField(15);
     private final JPasswordField repeatPasswordInputField = new JPasswordField(15);
@@ -27,21 +28,19 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
     private final JButton cancel;
     private final JButton toLogin;
 
-    public SignupView(SignupViewModel signupViewModel) {
+    public SignupView(SignupViewModel signupViewModel, ViewManagerModel viewManagerModel) {
         this.signupViewModel = signupViewModel;
+        this.viewManagerModel = viewManagerModel;
         signupViewModel.addPropertyChangeListener(this);
 
-        final JLabel title = new JLabel(SignupViewModel.TITLE_LABEL);
+        JLabel title = new JLabel(SignupViewModel.TITLE_LABEL);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        final LabelTextPanel usernameInfo = new LabelTextPanel(
-                new JLabel(SignupViewModel.USERNAME_LABEL), usernameInputField);
-        final LabelTextPanel passwordInfo = new LabelTextPanel(
-                new JLabel(SignupViewModel.PASSWORD_LABEL), passwordInputField);
-        final LabelTextPanel repeatPasswordInfo = new LabelTextPanel(
-                new JLabel(SignupViewModel.REPEAT_PASSWORD_LABEL), repeatPasswordInputField);
+        LabelTextPanel usernameInfo = new LabelTextPanel(new JLabel(SignupViewModel.USERNAME_LABEL), usernameInputField);
+        LabelTextPanel passwordInfo = new LabelTextPanel(new JLabel(SignupViewModel.PASSWORD_LABEL), passwordInputField);
+        LabelTextPanel repeatPasswordInfo = new LabelTextPanel(new JLabel(SignupViewModel.REPEAT_PASSWORD_LABEL), repeatPasswordInputField);
 
-        final JPanel buttons = new JPanel();
+        JPanel buttons = new JPanel();
         toLogin = new JButton(SignupViewModel.TO_LOGIN_BUTTON_LABEL);
         buttons.add(toLogin);
         signUp = new JButton(SignupViewModel.SIGNUP_BUTTON_LABEL);
@@ -49,31 +48,18 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         cancel = new JButton(SignupViewModel.CANCEL_BUTTON_LABEL);
         buttons.add(cancel);
 
-        signUp.addActionListener(
-                // This creates an anonymous subclass of ActionListener and instantiates it.
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        if (evt.getSource().equals(signUp)) {
-                            final SignupState currentState = signupViewModel.getState();
+        signUp.addActionListener(e -> {
+            if (e.getSource().equals(signUp)) {
+                SignupState currentState = signupViewModel.getState();
+                signupController.execute(
+                        currentState.getUsername(),
+                        currentState.getPassword(),
+                        currentState.getRepeatPassword()
+                );
+            }
+        });
 
-                            signupController.execute(
-                                    currentState.getUsername(),
-                                    currentState.getPassword(),
-                                    currentState.getRepeatPassword()
-                            );
-                        }
-                    }
-                }
-        );
-
-        toLogin.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        signupController.switchToLoginView();
-                    }
-                }
-        );
-
+        toLogin.addActionListener(e -> signupController.switchToLoginView());
         cancel.addActionListener(this);
 
         addUsernameListener();
@@ -81,7 +67,6 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         addRepeatPasswordListener();
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
         this.add(title);
         this.add(usernameInfo);
         this.add(passwordInfo);
@@ -91,90 +76,54 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
 
     private void addUsernameListener() {
         usernameInputField.getDocument().addDocumentListener(new DocumentListener() {
-
-            private void documentListenerHelper() {
-                final SignupState currentState = signupViewModel.getState();
+            private void updateState() {
+                SignupState currentState = signupViewModel.getState();
                 currentState.setUsername(usernameInputField.getText());
                 signupViewModel.setState(currentState);
             }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
+            @Override public void insertUpdate(DocumentEvent e) { updateState(); }
+            @Override public void removeUpdate(DocumentEvent e) { updateState(); }
+            @Override public void changedUpdate(DocumentEvent e) { updateState(); }
         });
     }
 
     private void addPasswordListener() {
         passwordInputField.getDocument().addDocumentListener(new DocumentListener() {
-
-            private void documentListenerHelper() {
-                final SignupState currentState = signupViewModel.getState();
+            private void updateState() {
+                SignupState currentState = signupViewModel.getState();
                 currentState.setPassword(new String(passwordInputField.getPassword()));
                 signupViewModel.setState(currentState);
             }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
+            @Override public void insertUpdate(DocumentEvent e) { updateState(); }
+            @Override public void removeUpdate(DocumentEvent e) { updateState(); }
+            @Override public void changedUpdate(DocumentEvent e) { updateState(); }
         });
     }
 
     private void addRepeatPasswordListener() {
         repeatPasswordInputField.getDocument().addDocumentListener(new DocumentListener() {
-
-            private void documentListenerHelper() {
-                final SignupState currentState = signupViewModel.getState();
+            private void updateState() {
+                SignupState currentState = signupViewModel.getState();
                 currentState.setRepeatPassword(new String(repeatPasswordInputField.getPassword()));
                 signupViewModel.setState(currentState);
             }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
+            @Override public void insertUpdate(DocumentEvent e) { updateState(); }
+            @Override public void removeUpdate(DocumentEvent e) { updateState(); }
+            @Override public void changedUpdate(DocumentEvent e) { updateState(); }
         });
     }
 
     @Override
     public void actionPerformed(ActionEvent evt) {
-        JOptionPane.showMessageDialog(this, "Cancel not implemented yet.");
+        if (evt.getSource() == cancel) {
+            viewManagerModel.setState("recipe search");
+            viewManagerModel.firePropertyChange();
+        }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        final SignupState state = (SignupState) evt.getNewValue();
+        SignupState state = (SignupState) evt.getNewValue();
         if (state.getUsernameError() != null) {
             JOptionPane.showMessageDialog(this, state.getUsernameError());
         }

@@ -2,6 +2,7 @@ package view;
 
 import entity.Ingredient;
 import entity.Recipe;
+import interface_adapter.ViewManagerModel;
 import interface_adapter.recipe_search.RecipeSearchController;
 import interface_adapter.recipe_search.RecipeSearchState;
 import interface_adapter.recipe_search.RecipeSearchViewModel;
@@ -23,6 +24,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     public final String viewName = "recipe search";
     private final RecipeSearchViewModel recipeSearchViewModel;
     private final RecipeSearchController recipeSearchController;
+    private final ViewManagerModel viewManagerModel;
 
     // Header components
     private JTextField nameTextField;
@@ -30,26 +32,32 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     private JComboBox<String> sortByComboBox;
     private JCheckBox ascendingCheckBox;
     private JButton searchButton;
+    private JButton signupButton;
+    private JButton loginButton;
 
     // Results components
     private JPanel resultsPanel;
 
-    public RecipeSearchView(RecipeSearchViewModel recipeSearchViewModel, RecipeSearchController recipeSearchController) {
+    public RecipeSearchView(RecipeSearchViewModel recipeSearchViewModel, RecipeSearchController recipeSearchController, ViewManagerModel viewManagerModel) {
         this.recipeSearchViewModel = recipeSearchViewModel;
         this.recipeSearchController = recipeSearchController;
+        this.viewManagerModel = viewManagerModel;
         this.recipeSearchViewModel.addPropertyChangeListener(this);
 
         setLayout(new BorderLayout());
-        add(createHeaderPanel(), BorderLayout.NORTH);
-        add(createResultsScrollPane(), BorderLayout.CENTER);
+        add(createNavigationBar(), BorderLayout.NORTH);
+        JPanel searchAndResultsPanel = new JPanel(new BorderLayout());
+        searchAndResultsPanel.add(createHeaderPanel(), BorderLayout.NORTH);
+        searchAndResultsPanel.add(createResultsScrollPane(), BorderLayout.CENTER);
+        add(searchAndResultsPanel, BorderLayout.CENTER);
     }
 
     public void updateView(List<Recipe> recipes) {
         resultsPanel.removeAll();
-        resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.Y_AXIS)); // Reset layout
+        resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.Y_AXIS));
 
         if (recipes == null || recipes.isEmpty()) {
-            resultsPanel.setLayout(new GridBagLayout()); // Center the message
+            resultsPanel.setLayout(new GridBagLayout());
             JLabel noResultsLabel = new JLabel("No search results found. Please modify your search query.");
             noResultsLabel.setFont(new Font("SansSerif", Font.ITALIC, 16));
             noResultsLabel.setForeground(Color.GRAY);
@@ -69,6 +77,17 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         resultsPanel.repaint();
     }
 
+    private JPanel createNavigationBar() {
+        JPanel navigationPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        signupButton = new JButton("Sign Up");
+        loginButton = new JButton("Login");
+        signupButton.addActionListener(this);
+        loginButton.addActionListener(this);
+        navigationPanel.add(signupButton);
+        navigationPanel.add(loginButton);
+        return navigationPanel;
+    }
+
     private JPanel createHeaderPanel() {
         JPanel headerPanel = new JPanel(new GridBagLayout());
         headerPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -76,7 +95,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
 
-        // Title
         JLabel titleLabel = new JLabel("Recipe Search");
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
         gbc.gridx = 0;
@@ -85,7 +103,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         gbc.anchor = GridBagConstraints.CENTER;
         headerPanel.add(titleLabel, gbc);
 
-        // Name
         gbc.gridy = 1;
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.WEST;
@@ -98,7 +115,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         gbc.fill = GridBagConstraints.HORIZONTAL;
         headerPanel.add(nameTextField, gbc);
 
-        // Category
         gbc.gridx = 4;
         gbc.gridwidth = 1;
         gbc.fill = GridBagConstraints.NONE;
@@ -110,7 +126,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         gbc.fill = GridBagConstraints.HORIZONTAL;
         headerPanel.add(categoryTextField, gbc);
 
-        // Sorting
         gbc.gridy = 2;
         gbc.gridx = 0;
         gbc.gridwidth = 1;
@@ -131,7 +146,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         gbc.gridx = 4;
         headerPanel.add(ascendingCheckBox, gbc);
 
-        // Search Button
         searchButton = new JButton("Search");
         searchButton.addActionListener(this);
         gbc.gridy = 3;
@@ -140,7 +154,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         gbc.anchor = GridBagConstraints.WEST;
         headerPanel.add(searchButton, gbc);
 
-        // Separator
         gbc.gridy = 4;
         gbc.gridx = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -235,7 +248,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
 
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource() == searchButton) {
-            // Show loading message
             resultsPanel.removeAll();
             resultsPanel.setLayout(new GridBagLayout());
             JLabel loadingLabel = new JLabel("Loading search results...");
@@ -243,11 +255,15 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             resultsPanel.add(loadingLabel);
             resultsPanel.revalidate();
             resultsPanel.repaint();
-
-            // Execute search in background
             recipeSearchController.execute(nameTextField.getText(), categoryTextField.getText());
         } else if (evt.getSource() == sortByComboBox || evt.getSource() == ascendingCheckBox) {
             sortRecipes();
+        } else if (evt.getSource() == signupButton) {
+            viewManagerModel.setState("sign up");
+            viewManagerModel.firePropertyChange();
+        } else if (evt.getSource() == loginButton) {
+            viewManagerModel.setState("log in");
+            viewManagerModel.firePropertyChange();
         }
     }
 
