@@ -1,5 +1,25 @@
 package app;
 
+import com.google.cloud.firestore.Firestore;
+import data_access.InMemoryUserDataAccessObject;
+import use_case.signup.SignupInputBoundary;
+import use_case.signup.SignupInteractor;
+import use_case.signup.SignupOutputBoundary;
+import use_case.signup.SignupUserDataAccessInterface;
+import interface_adapter.signup.SignupController;
+import interface_adapter.signup.SignupPresenter;
+import interface_adapter.signup.SignupViewModel;
+import view.SignupView;
+import entity.UserFactory;
+import data_access.FirebaseUserDataAccessObject;
+import interface_adapter.login.LoginController;
+import interface_adapter.login.LoginPresenter;
+import interface_adapter.login.LoginViewModel;
+import use_case.login.LoginInputBoundary;
+import use_case.login.LoginInteractor;
+import use_case.login.LoginOutputBoundary;
+import use_case.login.LoginUserDataAccessInterface;
+import view.LoginView;
 import data_access.RecipeDataAccessObject;
 import data_access.UserDataAccessObject;
 import entity.UserFactory;
@@ -58,6 +78,11 @@ public class AppBuilder {
 
     private PostRecipeView postRecipeView;
     private PostRecipeViewModel postRecipeViewModel;
+    private LoginViewModel loginViewModel;
+    private LoginView loginView;
+
+    private SignupViewModel signupViewModel;
+    private SignupView signupView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -140,6 +165,51 @@ public class AppBuilder {
 
         // 6. Register in CardLayout
         cardPanel.add(postRecipeView, postRecipeView.viewName);
+    public AppBuilder addLoginView(Firestore db) {
+
+        UserFactory userFactory = new UserFactory();
+        loginViewModel = new LoginViewModel();
+
+        LoginUserDataAccessInterface userDao =
+                new InMemoryUserDataAccessObject(userFactory);
+
+        LoginOutputBoundary loginPresenter =
+                new LoginPresenter(viewManagerModel, recipeSearchViewModel, loginViewModel);
+
+        LoginInputBoundary loginInteractor =
+                new LoginInteractor(userDao, loginPresenter);
+
+        LoginController loginController =
+                new LoginController(loginInteractor);
+
+        this.loginView = new LoginView(loginViewModel);
+        this.loginView.setLoginController(loginController);
+
+        cardPanel.add(loginView, loginView.getViewName());
+
+        return this;
+    }
+
+    public AppBuilder addSignupView(Firestore db) {
+
+        signupViewModel = new SignupViewModel();
+
+        SignupUserDataAccessInterface signupUserDao =
+                new InMemoryUserDataAccessObject(new UserFactory());
+
+        SignupOutputBoundary signupPresenter =
+                new SignupPresenter(viewManagerModel, signupViewModel, loginViewModel);
+
+        SignupInputBoundary signupInteractor =
+                new SignupInteractor(signupUserDao, signupPresenter, new UserFactory());
+
+        SignupController signupController =
+                new SignupController(signupInteractor);
+
+        this.signupView = new SignupView(signupViewModel);
+        this.signupView.setSignupController(signupController);
+
+        cardPanel.add(signupView, signupView.getViewName());
 
         return this;
     }
@@ -150,7 +220,7 @@ public class AppBuilder {
 
         application.add(cardPanel);
 
-        viewManagerModel.setState(recipeSearchView.viewName);
+        viewManagerModel.setState(signupView.getViewName());
         viewManagerModel.firePropertyChange();
 
         return application;
