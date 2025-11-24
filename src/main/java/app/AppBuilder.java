@@ -1,6 +1,8 @@
 package app;
 
 import data_access.RecipeDataAccessObject;
+import data_access.UserDataAccessObject;
+import entity.User;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.login.LoginController;
@@ -22,6 +24,7 @@ import use_case.recipe_search.RecipeSearchRecipeDataAccessInterface;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
+import use_case.signup.SignupUserDataAccessInterface;
 import view.LoginView;
 import view.RecipeSearchView;
 import view.SignupView;
@@ -36,6 +39,7 @@ public class AppBuilder {
     private final UserFactory userFactory = new UserFactory();
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
+    private UserDataAccessObject userDataAccessObject = new UserDataAccessObject();
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
