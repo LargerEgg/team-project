@@ -52,17 +52,17 @@ public class Recipe {
         this.ingredients = ingredients;
         this.imagePath = imagePath;
 
-        this.reviews = new ArrayList<>(); // 初始化为空列表
+        this.reviews = new ArrayList<>();
         this.category = category;
         this.tags = tags;
         this.status = status;
         this.creationDate = creationDate;
         this.updateDate = updateDate;
-        this.shareable = false; // 默认为 false
+        this.shareable = false;
 
-        this.views = 0; // 默认为 0
-        this.saves = 0; // 默认为 0
-        this.averageRating = 0.0; // default
+        this.views = 0;
+        this.saves = 0;
+        this.averageRating = 0.0;
 
     }
 
