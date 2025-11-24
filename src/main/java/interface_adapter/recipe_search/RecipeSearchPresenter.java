@@ -3,7 +3,6 @@ package interface_adapter.recipe_search;
 import interface_adapter.ViewManagerModel;
 import use_case.recipe_search.RecipeSearchOutputBoundary;
 import use_case.recipe_search.RecipeSearchOutputData;
-import view.RecipeSearchView;
 
 /**
  * The Presenter for the Recipe Search Use Case.
@@ -20,15 +19,27 @@ public class RecipeSearchPresenter implements RecipeSearchOutputBoundary {
 
     @Override
     public void prepareSuccessView(RecipeSearchOutputData response) {
-        final RecipeSearchState recipeSearchState = recipeSearchViewModel.getState();
-        recipeSearchState.setRecipeList(response.getRecipeList());
+        RecipeSearchState recipeSearchState = recipeSearchViewModel.getState();
+        recipeSearchState.setRecipeList(response.getRecipes());
+        recipeSearchState.setCurrentImageCount(0); // Reset progress
+        recipeSearchState.setTotalImageCount(0); // Reset progress
         recipeSearchViewModel.firePropertyChange();
     }
 
     @Override
     public void prepareFailView(String error) {
-        final RecipeSearchState recipeSearchState = recipeSearchViewModel.getState();
+        RecipeSearchState recipeSearchState = recipeSearchViewModel.getState();
         recipeSearchState.setSearchError(error);
+        recipeSearchState.setCurrentImageCount(0); // Reset progress
+        recipeSearchState.setTotalImageCount(0); // Reset progress
         recipeSearchViewModel.firePropertyChange();
+    }
+
+    @Override
+    public void prepareProgressView(RecipeSearchOutputData progressData) {
+        RecipeSearchState recipeSearchState = recipeSearchViewModel.getState();
+        recipeSearchState.setCurrentImageCount(progressData.getCurrentImageCount());
+        recipeSearchState.setTotalImageCount(progressData.getTotalImageCount());
+        recipeSearchViewModel.firePropertyChange("progress"); // Fire a specific property change for progress
     }
 }
