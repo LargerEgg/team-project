@@ -38,7 +38,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     private JButton searchButton;
     private JButton signupButton;
     private JButton loginButton;
-    private JButton postRecipeButton;
+    private JButton postRecipeButton; // Declare the new button
 
     // Results components
     private JPanel resultsPanel;
@@ -83,13 +83,13 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         JPanel navigationPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         signupButton = new JButton("Sign Up");
         loginButton = new JButton("Login");
-        postRecipeButton = new JButton("Post a Recipe");
+        postRecipeButton = new JButton("Post a Recipe"); // Initialize the new button
 
         signupButton.addActionListener(this);
         loginButton.addActionListener(this);
-        postRecipeButton.addActionListener(this);
+        postRecipeButton.addActionListener(this); // Add action listener for the new button
 
-        navigationPanel.add(postRecipeButton);
+        navigationPanel.add(postRecipeButton); // Add the new button to the navigation bar
         navigationPanel.add(signupButton);
         navigationPanel.add(loginButton);
 
@@ -337,8 +337,8 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         } else if (evt.getSource() == loginButton) {
             viewManagerModel.setState("log in"); // Corrected method call
             viewManagerModel.firePropertyChange();
-        } else if (evt.getSource() == postRecipeButton) {
-            viewManagerModel.setState("post recipe");
+        } else if (evt.getSource() == postRecipeButton) { // Handle the new button's action
+            viewManagerModel.setState("post recipe"); // Set the active view to "post recipe"
             viewManagerModel.firePropertyChange();
         }
     }

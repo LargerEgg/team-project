@@ -11,13 +11,17 @@ public class Main {
         appBuilder
                 .addLoginView()
                 .addSignupView()
-                .addViewRecipeView(); // This method returns AppBuilder, so chaining is fine
+                .addViewRecipeView()
+                .addPostRecipeView(); // Add the PostRecipeView here
 
         // Get the ViewRecipeController after its use case is built
-        ViewRecipeController viewRecipeController = appBuilder.addViewRecipeUseCase(); // This method now returns ViewRecipeController
+        ViewRecipeController viewRecipeController = appBuilder.addViewRecipeUseCase();
 
         // Now add the RecipeSearchView, passing the initialized ViewRecipeController
-        appBuilder.addRecipeSearchView(viewRecipeController); // This method now accepts ViewRecipeController
+        appBuilder.addRecipeSearchView(viewRecipeController);
+
+        // Add the PostRecipeUseCase
+        appBuilder.addPostRecipeUseCase();
 
         appBuilder
                 .addLoginUseCase()
