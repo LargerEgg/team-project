@@ -91,13 +91,13 @@ public class RecipeView extends JPanel implements ActionListener, PropertyChange
 
         // Description (JTextArea in JScrollPane)
         topRightDetailsPanel.add(new JLabel("Description:")); // Label for description
-        descriptionArea = new JTextArea(5, 30); // 5 rows, 30 columns
+        descriptionArea = new JTextArea(7, 30); // Increased rows from 5 to 7
         descriptionArea.setEditable(false);
         descriptionArea.setLineWrap(true);
         descriptionArea.setWrapStyleWord(true);
         descriptionScrollPane = new JScrollPane(descriptionArea);
         descriptionScrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
-        descriptionScrollPane.setPreferredSize(new Dimension(300, 100)); // Set preferred size
+        descriptionScrollPane.setPreferredSize(new Dimension(300, 140)); // Increased height from 100 to 140
         topRightDetailsPanel.add(descriptionScrollPane);
         topRightDetailsPanel.add(Box.createVerticalStrut(10));
 
