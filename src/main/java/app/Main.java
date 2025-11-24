@@ -11,6 +11,7 @@ public class Main {
                 .addRecipeSearchView()
                 .addLoginUseCase()
                 .addSignupUseCase()
+                .addPostRecipeView()
                 .build();
 
         application.pack();

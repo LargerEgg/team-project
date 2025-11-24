@@ -34,6 +34,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     private JButton searchButton;
     private JButton signupButton;
     private JButton loginButton;
+    private JButton postRecipeButton;
 
     // Results components
     private JPanel resultsPanel;
@@ -83,10 +84,16 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         JPanel navigationPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         signupButton = new JButton("Sign Up");
         loginButton = new JButton("Login");
+        postRecipeButton = new JButton("Post a Recipe");
+
         signupButton.addActionListener(this);
         loginButton.addActionListener(this);
+        postRecipeButton.addActionListener(this);
+
+        navigationPanel.add(postRecipeButton);
         navigationPanel.add(signupButton);
         navigationPanel.add(loginButton);
+
         return navigationPanel;
     }
 
@@ -308,6 +315,9 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             viewManagerModel.firePropertyChange();
         } else if (evt.getSource() == loginButton) {
             viewManagerModel.setState("log in");
+            viewManagerModel.firePropertyChange();
+        } else if (evt.getSource() == postRecipeButton) {
+            viewManagerModel.setState("post recipe");
             viewManagerModel.firePropertyChange();
         }
     }
