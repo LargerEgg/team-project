@@ -1,27 +1,32 @@
 package app;
 
+import interface_adapter.view_recipe.ViewRecipeController; // Import ViewRecipeController
 import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-
-        System.out.println("main running");
-
         AppBuilder appBuilder = new AppBuilder();
-        JFrame application = appBuilder
-                .addRecipeSearchView()
+
+        // Build the views and use cases
+        appBuilder
+                .addLoginView()
+                .addSignupView()
+                .addViewRecipeView(); // This method returns AppBuilder, so chaining is fine
+
+        // Get the ViewRecipeController after its use case is built
+        ViewRecipeController viewRecipeController = appBuilder.addViewRecipeUseCase(); // This method now returns ViewRecipeController
+
+        // Now add the RecipeSearchView, passing the initialized ViewRecipeController
+        appBuilder.addRecipeSearchView(viewRecipeController); // This method now accepts ViewRecipeController
+
+        appBuilder
                 .addLoginUseCase()
-                .addSignupUseCase()
-                .addPostRecipeView()
-                .addLoginView(null) //Change later when Firestore working
-                .addSignupView(null) // same as above
-                .build();
+                .addSignupUseCase();
+
+        JFrame application = appBuilder.build();
 
         application.pack();
         application.setLocationRelativeTo(null);
         application.setVisible(true);
-
-        System.out.println("GUI visible");
-
     }
 }

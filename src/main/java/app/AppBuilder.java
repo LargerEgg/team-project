@@ -1,25 +1,5 @@
 package app;
 
-import com.google.cloud.firestore.Firestore;
-import data_access.InMemoryUserDataAccessObject;
-import use_case.signup.SignupInputBoundary;
-import use_case.signup.SignupInteractor;
-import use_case.signup.SignupOutputBoundary;
-import use_case.signup.SignupUserDataAccessInterface;
-import interface_adapter.signup.SignupController;
-import interface_adapter.signup.SignupPresenter;
-import interface_adapter.signup.SignupViewModel;
-import view.SignupView;
-import entity.UserFactory;
-import data_access.FirebaseUserDataAccessObject;
-import interface_adapter.login.LoginController;
-import interface_adapter.login.LoginPresenter;
-import interface_adapter.login.LoginViewModel;
-import use_case.login.LoginInputBoundary;
-import use_case.login.LoginInteractor;
-import use_case.login.LoginOutputBoundary;
-import use_case.login.LoginUserDataAccessInterface;
-import view.LoginView;
 import data_access.RecipeDataAccessObject;
 import data_access.UserDataAccessObject;
 import entity.UserFactory;
@@ -27,7 +7,6 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
-import interface_adapter.post_recipe.PostRecipeViewModel;
 import interface_adapter.recipe_search.RecipeSearchController;
 import interface_adapter.recipe_search.RecipeSearchPresenter;
 import interface_adapter.recipe_search.RecipeSearchState;
@@ -35,10 +14,12 @@ import interface_adapter.recipe_search.RecipeSearchViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.view_recipe.ViewRecipeController;
+import interface_adapter.view_recipe.ViewRecipePresenter;
+import interface_adapter.view_recipe.ViewRecipeViewModel;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
-import use_case.post_recipe.PostRecipeDataAccessInterface;
 import use_case.recipe_search.RecipeSearchInputBoundary;
 import use_case.recipe_search.RecipeSearchInteractor;
 import use_case.recipe_search.RecipeSearchOutputBoundary;
@@ -47,15 +28,15 @@ import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
 import use_case.signup.SignupUserDataAccessInterface;
-
-import interface_adapter.post_recipe.PostRecipeController;
-import interface_adapter.post_recipe.PostRecipePresenter;
-import interface_adapter.post_recipe.PostRecipeViewModel;
-import use_case.post_recipe.PostRecipeInputBoundary;
-import use_case.post_recipe.PostRecipeInteractor;
-import use_case.post_recipe.PostRecipeOutputBoundary;
-import data_access.PostRecipeDataAccessObject;
-import view.*;
+import use_case.view_recipe.ViewRecipeDataAccessInterface;
+import use_case.view_recipe.ViewRecipeInputBoundary;
+import use_case.view_recipe.ViewRecipeInteractor;
+import use_case.view_recipe.ViewRecipeOutputBoundary;
+import view.LoginView;
+import view.RecipeSearchView;
+import view.RecipeView;
+import view.SignupView;
+import view.ViewManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -68,6 +49,7 @@ public class AppBuilder {
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
     private UserDataAccessObject userDataAccessObject = new UserDataAccessObject();
+    private RecipeDataAccessObject recipeDataAccessObject = new RecipeDataAccessObject();
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -76,13 +58,8 @@ public class AppBuilder {
     private RecipeSearchViewModel recipeSearchViewModel;
     private RecipeSearchView recipeSearchView;
 
-    private PostRecipeView postRecipeView;
-    private PostRecipeViewModel postRecipeViewModel;
-    private LoginViewModel loginViewModel;
-    private LoginView loginView;
-
-    private SignupViewModel signupViewModel;
-    private SignupView signupView;
+    private ViewRecipeViewModel viewRecipeViewModel;
+    private RecipeView recipeView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -124,9 +101,10 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addRecipeSearchView() {
+    // Modified to accept ViewRecipeController
+    public AppBuilder addRecipeSearchView(ViewRecipeController viewRecipeController) {
         recipeSearchViewModel = new RecipeSearchViewModel();
-        RecipeSearchRecipeDataAccessInterface recipeDAO = new RecipeDataAccessObject();
+        RecipeSearchRecipeDataAccessInterface recipeDAO = recipeDataAccessObject;
 
         // Pre-fetch categories and set them in the state
         List<String> categories = recipeDAO.getAllCategories();
@@ -137,84 +115,24 @@ public class AppBuilder {
         RecipeSearchOutputBoundary recipeSearchOutputBoundary = new RecipeSearchPresenter(viewManagerModel, recipeSearchViewModel);
         RecipeSearchInputBoundary recipeSearchInteractor = new RecipeSearchInteractor(recipeDAO, recipeSearchOutputBoundary);
         RecipeSearchController recipeSearchController = new RecipeSearchController(recipeSearchInteractor);
-        recipeSearchView = new RecipeSearchView(recipeSearchViewModel, recipeSearchController, viewManagerModel);
+        recipeSearchView = new RecipeSearchView(recipeSearchViewModel, recipeSearchController, viewManagerModel, viewRecipeController);
         cardPanel.add(recipeSearchView, recipeSearchView.viewName);
         return this;
     }
 
-    public AppBuilder addPostRecipeView() {
-        // 1. ViewModel
-        postRecipeViewModel = new PostRecipeViewModel();
-
-        // 2. Presenter
-        // Adjust args to match your actual PostRecipePresenter constructor.
-        PostRecipeOutputBoundary postRecipeOutputBoundary =
-                new PostRecipePresenter(viewManagerModel, postRecipeViewModel);
-
-        // 3. Interactor
-        PostRecipeDataAccessInterface postRecipeDataAccess = new PostRecipeDataAccessObject();
-        PostRecipeInputBoundary postRecipeInteractor =
-                new PostRecipeInteractor(postRecipeDataAccess, postRecipeOutputBoundary);
-
-        // 4. Controller
-//        postRecipeController = new PostRecipeController(postRecipeInteractor);
-
-        // 5. View
-        postRecipeView = new PostRecipeView(
-                postRecipeViewModel, viewManagerModel);
-
-        // 6. Register in CardLayout
-        cardPanel.add(postRecipeView, postRecipeView.viewName);
+    public AppBuilder addViewRecipeView() {
+        viewRecipeViewModel = new ViewRecipeViewModel();
+        recipeView = new RecipeView(viewRecipeViewModel, viewManagerModel);
+        cardPanel.add(recipeView, recipeView.viewName);
         return this;
     }
 
-    public AppBuilder addLoginView(Firestore db) {
-
-        UserFactory userFactory = new UserFactory();
-        loginViewModel = new LoginViewModel();
-
-        LoginUserDataAccessInterface userDao =
-                new InMemoryUserDataAccessObject(userFactory);
-
-        LoginOutputBoundary loginPresenter =
-                new LoginPresenter(viewManagerModel, recipeSearchViewModel, loginViewModel);
-
-        LoginInputBoundary loginInteractor =
-                new LoginInteractor(userDao, loginPresenter);
-
-        LoginController loginController =
-                new LoginController(loginInteractor);
-
-        this.loginView = new LoginView(loginViewModel);
-        this.loginView.setLoginController(loginController);
-
-        cardPanel.add(loginView, loginView.getViewName());
-
-        return this;
-    }
-
-    public AppBuilder addSignupView(Firestore db) {
-
-        signupViewModel = new SignupViewModel();
-
-        SignupUserDataAccessInterface signupUserDao =
-                new InMemoryUserDataAccessObject(new UserFactory());
-
-        SignupOutputBoundary signupPresenter =
-                new SignupPresenter(viewManagerModel, signupViewModel, loginViewModel);
-
-        SignupInputBoundary signupInteractor =
-                new SignupInteractor(signupUserDao, signupPresenter, new UserFactory());
-
-        SignupController signupController =
-                new SignupController(signupInteractor);
-
-        this.signupView = new SignupView(signupViewModel);
-        this.signupView.setSignupController(signupController);
-
-        cardPanel.add(signupView, signupView.getViewName());
-
-        return this;
+    // Modified to return ViewRecipeController
+    public ViewRecipeController addViewRecipeUseCase() {
+        ViewRecipeOutputBoundary viewRecipeOutputBoundary = new ViewRecipePresenter(viewRecipeViewModel, viewManagerModel);
+        ViewRecipeDataAccessInterface viewRecipeDataAccessObject = recipeDataAccessObject;
+        ViewRecipeInputBoundary viewRecipeInteractor = new ViewRecipeInteractor(viewRecipeDataAccessObject, viewRecipeOutputBoundary);
+        return new ViewRecipeController(viewRecipeInteractor); // Return the controller
     }
 
     public JFrame build() {
@@ -223,7 +141,8 @@ public class AppBuilder {
 
         application.add(cardPanel);
 
-        viewManagerModel.setState(signupView.getViewName());
+        // Set the initial view to the recipe search view
+        viewManagerModel.setState(recipeSearchView.viewName);
         viewManagerModel.firePropertyChange();
 
         return application;

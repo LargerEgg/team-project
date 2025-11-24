@@ -23,15 +23,12 @@ public class LoginInteractor implements LoginInputBoundary {
         }
 
         User user = userDataAccessObject.get(username);
+        // This null check is a safeguard, as existsByName should prevent null here.
         if (user == null) {
-            // This case should ideally not be reached if existsByName is accurate, but it's good practice
-            loginPresenter.prepareFailView("An error occurred: User not found.");
+            loginPresenter.prepareFailView("An unexpected error occurred: User data not found.");
             return;
         }
 
-                final LoginOutputData loginOutputData = new LoginOutputData(user.getName());
-                loginPresenter.prepareSuccessView(loginOutputData);
-            }
         if (!password.equals(user.getPassword())) {
             loginPresenter.prepareFailView("Incorrect password for " + username + ".");
         } else {
