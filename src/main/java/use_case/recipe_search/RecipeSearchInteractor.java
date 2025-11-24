@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutionException;
 public class RecipeSearchInteractor implements RecipeSearchInputBoundary {
     private final RecipeSearchRecipeDataAccessInterface dataAccess;
     private final RecipeSearchOutputBoundary presenter;
-    private SwingWorker<List<Recipe>, Void> activeWorker;
+    private SwingWorker<List<Recipe>, RecipeSearchOutputData> activeWorker; // Changed Void to RecipeSearchOutputData for progress
 
     public RecipeSearchInteractor(RecipeSearchRecipeDataAccessInterface dataAccess,
                                     RecipeSearchOutputBoundary presenter) {
@@ -25,11 +25,19 @@ public class RecipeSearchInteractor implements RecipeSearchInputBoundary {
         }
 
         // Create a new worker for the new search
-        activeWorker = new SwingWorker<List<Recipe>, Void>() {
+        activeWorker = new SwingWorker<List<Recipe>, RecipeSearchOutputData>() {
             @Override
             protected List<Recipe> doInBackground() throws Exception {
-                // This is where the long-running search happens
-                return dataAccess.search(inputData.getName(), inputData.getCategory());
+                // Pass the presenter to the data access layer to report progress
+                return dataAccess.search(inputData.getName(), inputData.getCategory(), presenter);
+            }
+
+            @Override
+            protected void process(List<RecipeSearchOutputData> chunks) {
+                // This method runs on the EDT and receives progress updates
+                for (RecipeSearchOutputData progressData : chunks) {
+                    presenter.prepareProgressView(progressData);
+                }
             }
 
             @Override

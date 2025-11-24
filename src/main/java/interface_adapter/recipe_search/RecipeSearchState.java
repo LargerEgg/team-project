@@ -11,6 +11,8 @@ public class RecipeSearchState {
     private List<String> categories = new ArrayList<>();
     private String sortBy = "Views"; // Default sort by Views
     private boolean ascending = true; // Default ascending
+    private int currentImageCount = 0;
+    private int totalImageCount = 0;
 
     public String getSearchError() {
         return searchError;
@@ -50,5 +52,21 @@ public class RecipeSearchState {
 
     public void setAscending(boolean ascending) {
         this.ascending = ascending;
+    }
+
+    public int getCurrentImageCount() {
+        return currentImageCount;
+    }
+
+    public void setCurrentImageCount(int currentImageCount) {
+        this.currentImageCount = currentImageCount;
+    }
+
+    public int getTotalImageCount() {
+        return totalImageCount;
+    }
+
+    public void setTotalImageCount(int totalImageCount) {
+        this.totalImageCount = totalImageCount;
     }
 }

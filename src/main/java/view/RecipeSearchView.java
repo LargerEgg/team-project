@@ -37,6 +37,8 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
 
     // Results components
     private JPanel resultsPanel;
+    private JProgressBar progressBar;
+    private JLabel loadingLabel; // To hold the "Loading search results..." text
 
     public RecipeSearchView(RecipeSearchViewModel recipeSearchViewModel, RecipeSearchController recipeSearchController, ViewManagerModel viewManagerModel) {
         this.recipeSearchViewModel = recipeSearchViewModel;
@@ -271,10 +273,24 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
 
             resultsPanel.removeAll();
             resultsPanel.setLayout(new GridBagLayout());
-            JLabel loadingLabel = new JLabel("Loading search results...");
+            
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            gbc.anchor = GridBagConstraints.CENTER;
+            loadingLabel = new JLabel("Loading search results...");
             loadingLabel.setFont(new Font("SansSerif", Font.ITALIC, 16));
             loadingLabel.setForeground(Color.GRAY);
-            resultsPanel.add(loadingLabel);
+            resultsPanel.add(loadingLabel, gbc);
+
+            gbc.gridy = 1; // Move to the next row
+            gbc.insets = new Insets(10, 0, 0, 0); // Add some top padding
+            progressBar = new JProgressBar(0, 100);
+            progressBar.setValue(0);
+            progressBar.setStringPainted(true);
+            progressBar.setVisible(false);
+            resultsPanel.add(progressBar, gbc);
+
             resultsPanel.revalidate();
             resultsPanel.repaint();
 
@@ -309,10 +325,22 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
                 resultsPanel.add(errorLabel);
                 resultsPanel.revalidate();
                 resultsPanel.repaint();
+                progressBar.setVisible(false); // Hide progress bar on error
             } else {
                 List<Recipe> recipesToDisplay = new ArrayList<>(state.getRecipeList());
                 sortRecipes(recipesToDisplay); // Sort the new list before displaying
                 updateView(recipesToDisplay);
+                progressBar.setVisible(false); // Hide progress bar on success
+            }
+        } else if ("progress".equals(evt.getPropertyName())) {
+            RecipeSearchState state = (RecipeSearchState) evt.getNewValue();
+            if (progressBar != null && state.getTotalImageCount() > 0) {
+                progressBar.setVisible(true);
+                int progress = (int) ((double) state.getCurrentImageCount() / state.getTotalImageCount() * 100);
+                progressBar.setValue(progress);
+                loadingLabel.setText("Loading search results..."); // Remove fractional text
+            } else if (progressBar != null) {
+                progressBar.setVisible(false);
             }
         }
     }

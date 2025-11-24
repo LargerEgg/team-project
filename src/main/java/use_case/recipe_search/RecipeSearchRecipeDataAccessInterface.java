@@ -10,9 +10,10 @@ public interface RecipeSearchRecipeDataAccessInterface {
      *
      * @param name     The name of the recipe to search for. Can be null or empty.
      * @param category The category to filter by. Can be null or empty.
+     * @param presenter The presenter to report progress to.
      * @return A list of matching recipes.
      */
-    List<Recipe> search(String name, String category);
+    List<Recipe> search(String name, String category, RecipeSearchOutputBoundary presenter);
 
     /**
      * Fetches a list of all available recipe categories from the data source.

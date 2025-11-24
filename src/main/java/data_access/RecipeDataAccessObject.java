@@ -2,7 +2,9 @@ package data_access;
 
 import entity.Ingredient;
 import entity.Recipe;
+import use_case.recipe_search.RecipeSearchOutputBoundary;
 import use_case.recipe_search.RecipeSearchRecipeDataAccessInterface;
+import use_case.recipe_search.RecipeSearchOutputData;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -22,15 +24,6 @@ import org.json.JSONObject;
 public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInterface {
     private static final int SUCCESS_CODE = 200;
     private final OkHttpClient client = new OkHttpClient().newBuilder().build();
-
-    @Override
-    public List<Recipe> search(String name, String category) {
-        if (category != null && !category.isEmpty()) {
-            return searchByCategoryAndName(category, name);
-        } else {
-            return searchByName(name);
-        }
-    }
 
     @Override
     public List<String> getAllCategories() {
@@ -53,14 +46,23 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         }
     }
 
-    private List<Recipe> searchByName(String name) {
+    @Override
+    public List<Recipe> search(String name, String category, RecipeSearchOutputBoundary presenter) {
+        if (category != null && !category.isEmpty()) {
+            return searchByCategoryAndName(category, name, presenter);
+        } else {
+            return searchByName(name, presenter);
+        }
+    }
+
+    private List<Recipe> searchByName(String name, RecipeSearchOutputBoundary presenter) {
         Request request = new Request.Builder()
                 .url(String.format("https://www.themealdb.com/api/json/v1/1/search.php?s=%s", name))
                 .build();
-        return executeAndParse(request);
+        return executeAndParse(request, presenter);
     }
 
-    private List<Recipe> searchByCategoryAndName(String category, String name) {
+    private List<Recipe> searchByCategoryAndName(String category, String name, RecipeSearchOutputBoundary presenter) {
         Request request = new Request.Builder()
                 .url(String.format("https://www.themealdb.com/api/json/v1/1/filter.php?c=%s", category))
                 .build();
@@ -86,9 +88,17 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
             }
 
             List<Recipe> recipes = new ArrayList<>();
+            int currentImageCount = 0;
+            int totalImageCount = filteredMeals.size();
+
             for (JSONObject meal : filteredMeals) {
                 String mealId = meal.getString("idMeal");
-                recipes.addAll(lookupById(mealId));
+                List<Recipe> lookedUpRecipes = lookupById(mealId, presenter);
+                if (!lookedUpRecipes.isEmpty()) {
+                    recipes.add(lookedUpRecipes.get(0)); // lookupById returns a list, but we expect one recipe
+                    currentImageCount++;
+                    presenter.prepareProgressView(new RecipeSearchOutputData(currentImageCount, totalImageCount));
+                }
             }
             return recipes;
         } catch (IOException | JSONException e) {
@@ -96,14 +106,14 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         }
     }
 
-    private List<Recipe> lookupById(String id) {
+    private List<Recipe> lookupById(String id, RecipeSearchOutputBoundary presenter) {
         Request request = new Request.Builder()
                 .url(String.format("https://www.themealdb.com/api/json/v1/1/lookup.php?i=%s", id))
                 .build();
-        return executeAndParse(request);
+        return executeAndParse(request, presenter);
     }
 
-    private List<Recipe> executeAndParse(Request request) {
+    private List<Recipe> executeAndParse(Request request, RecipeSearchOutputBoundary presenter) {
         try {
             Response response = client.newCall(request).execute();
             if (response.code() != SUCCESS_CODE) throw new RuntimeException("API request failed");
@@ -114,8 +124,12 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
             }
             JSONArray meals = responseJson.getJSONArray("meals");
             List<Recipe> recipes = new ArrayList<>();
+            int currentImageCount = 0; // This will be updated by downloadImage
+            int totalImageCount = meals.length();
+
             for (int i = 0; i < meals.length(); i++) {
-                recipes.add(parseRecipe(meals.getJSONObject(i)));
+                recipes.add(parseRecipe(meals.getJSONObject(i), presenter, currentImageCount, totalImageCount));
+                currentImageCount++; // Increment after parsing and downloading image
             }
             return recipes;
         } catch (IOException | JSONException e) {
@@ -123,9 +137,12 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         }
     }
 
-    private Recipe parseRecipe(JSONObject recipeJson) {
+    private Recipe parseRecipe(JSONObject recipeJson, RecipeSearchOutputBoundary presenter, int currentImageCount, int totalImageCount) {
         String imageUrl = recipeJson.getString("strMealThumb");
-        BufferedImage image = downloadImage(imageUrl);
+        BufferedImage image = downloadImage(imageUrl); // Image download happens here
+
+        // Report progress after image download
+        presenter.prepareProgressView(new RecipeSearchOutputData(currentImageCount + 1, totalImageCount));
 
         List<Ingredient> ingredients = new ArrayList<>();
         for (int i = 1; i <= 20; i++) {

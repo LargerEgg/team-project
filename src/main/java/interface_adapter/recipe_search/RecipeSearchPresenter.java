@@ -19,21 +19,27 @@ public class RecipeSearchPresenter implements RecipeSearchOutputBoundary {
 
     @Override
     public void prepareSuccessView(RecipeSearchOutputData response) {
-        // On success, update the state with the new recipe list
-        // and then fire a property change to update the view.
         RecipeSearchState recipeSearchState = recipeSearchViewModel.getState();
-        recipeSearchState.setRecipeList(response.getRecipeList());
-        // The sort criteria are already in the state, so no need to set them here.
-        // The view will re-sort based on the state's current sort criteria.
+        recipeSearchState.setRecipeList(response.getRecipes());
+        recipeSearchState.setCurrentImageCount(0); // Reset progress
+        recipeSearchState.setTotalImageCount(0); // Reset progress
         recipeSearchViewModel.firePropertyChange();
     }
 
     @Override
     public void prepareFailView(String error) {
-        // On failure, update the state with the error message
-        // and then fire a property change to update the view.
         RecipeSearchState recipeSearchState = recipeSearchViewModel.getState();
         recipeSearchState.setSearchError(error);
+        recipeSearchState.setCurrentImageCount(0); // Reset progress
+        recipeSearchState.setTotalImageCount(0); // Reset progress
         recipeSearchViewModel.firePropertyChange();
+    }
+
+    @Override
+    public void prepareProgressView(RecipeSearchOutputData progressData) {
+        RecipeSearchState recipeSearchState = recipeSearchViewModel.getState();
+        recipeSearchState.setCurrentImageCount(progressData.getCurrentImageCount());
+        recipeSearchState.setTotalImageCount(progressData.getTotalImageCount());
+        recipeSearchViewModel.firePropertyChange("progress"); // Fire a specific property change for progress
     }
 }
