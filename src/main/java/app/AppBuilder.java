@@ -1,5 +1,6 @@
 package app;
 
+import data_access.PostRecipeDataAccessObject;
 import data_access.RecipeDataAccessObject;
 import data_access.UserDataAccessObject;
 import entity.UserFactory;
@@ -7,6 +8,9 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.login.LoginController;
 import interface_adapter.login.LoginPresenter;
 import interface_adapter.login.LoginViewModel;
+import interface_adapter.post_recipe.PostRecipeController;
+import interface_adapter.post_recipe.PostRecipePresenter;
+import interface_adapter.post_recipe.PostRecipeViewModel;
 import interface_adapter.recipe_search.RecipeSearchController;
 import interface_adapter.recipe_search.RecipeSearchPresenter;
 import interface_adapter.recipe_search.RecipeSearchState;
@@ -20,6 +24,10 @@ import interface_adapter.view_recipe.ViewRecipeViewModel;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
+import use_case.post_recipe.PostRecipeDataAccessInterface;
+import use_case.post_recipe.PostRecipeInputBoundary;
+import use_case.post_recipe.PostRecipeInteractor;
+import use_case.post_recipe.PostRecipeOutputBoundary;
 import use_case.recipe_search.RecipeSearchInputBoundary;
 import use_case.recipe_search.RecipeSearchInteractor;
 import use_case.recipe_search.RecipeSearchOutputBoundary;
@@ -33,6 +41,7 @@ import use_case.view_recipe.ViewRecipeInputBoundary;
 import use_case.view_recipe.ViewRecipeInteractor;
 import use_case.view_recipe.ViewRecipeOutputBoundary;
 import view.LoginView;
+import view.PostRecipeView;
 import view.RecipeSearchView;
 import view.RecipeView;
 import view.SignupView;
@@ -60,6 +69,11 @@ public class AppBuilder {
 
     private ViewRecipeViewModel viewRecipeViewModel;
     private RecipeView recipeView;
+
+    // New fields for PostRecipe
+    private PostRecipeViewModel postRecipeViewModel;
+    private PostRecipeView postRecipeView;
+    private PostRecipeController postRecipeController; // Declare the controller here
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -133,6 +147,24 @@ public class AppBuilder {
         ViewRecipeDataAccessInterface viewRecipeDataAccessObject = recipeDataAccessObject;
         ViewRecipeInputBoundary viewRecipeInteractor = new ViewRecipeInteractor(viewRecipeDataAccessObject, viewRecipeOutputBoundary);
         return new ViewRecipeController(viewRecipeInteractor); // Return the controller
+    }
+
+    // New method to add PostRecipeView
+    public AppBuilder addPostRecipeView() {
+        postRecipeViewModel = new PostRecipeViewModel();
+        postRecipeView = new PostRecipeView(postRecipeViewModel, viewManagerModel);
+        cardPanel.add(postRecipeView, postRecipeView.viewName);
+        return this;
+    }
+
+    // New method to add PostRecipeUseCase
+    public AppBuilder addPostRecipeUseCase() {
+        PostRecipeOutputBoundary postRecipeOutputBoundary = new PostRecipePresenter(viewManagerModel, postRecipeViewModel);
+        PostRecipeDataAccessInterface postRecipeDataAccess = new PostRecipeDataAccessObject();
+        PostRecipeInputBoundary postRecipeInteractor = new PostRecipeInteractor(postRecipeDataAccess, postRecipeOutputBoundary);
+        postRecipeController = new PostRecipeController(postRecipeInteractor);
+        postRecipeView.setPostRecipeController(postRecipeController);
+        return this;
     }
 
     public JFrame build() {
