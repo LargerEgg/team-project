@@ -32,6 +32,27 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         }
     }
 
+    @Override
+    public List<String> getAllCategories() {
+        Request request = new Request.Builder()
+                .url("https://www.themealdb.com/api/json/v1/1/categories.php")
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            if (response.code() != SUCCESS_CODE) throw new RuntimeException("API request failed");
+
+            JSONObject responseJson = new JSONObject(response.body().string());
+            JSONArray categoriesArray = responseJson.getJSONArray("categories");
+            List<String> categories = new ArrayList<>();
+            for (int i = 0; i < categoriesArray.length(); i++) {
+                categories.add(categoriesArray.getJSONObject(i).getString("strCategory"));
+            }
+            return categories;
+        } catch (IOException | JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private List<Recipe> searchByName(String name) {
         Request request = new Request.Builder()
                 .url(String.format("https://www.themealdb.com/api/json/v1/1/search.php?s=%s", name))
@@ -57,7 +78,6 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
                 filteredMeals.add(meals.getJSONObject(i));
             }
 
-            // Filter by name BEFORE looking up details
             if (name != null && !name.isEmpty()) {
                 String lowerCaseName = name.toLowerCase();
                 filteredMeals = filteredMeals.stream()

@@ -5,12 +5,10 @@ import entity.Recipe;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * The state for the Recipe Search View Model.
- */
 public class RecipeSearchState {
     private String searchError = "";
     private List<Recipe> recipeList = new ArrayList<>();
+    private List<String> categories = new ArrayList<>();
 
     public String getSearchError() {
         return searchError;
@@ -26,5 +24,13 @@ public class RecipeSearchState {
 
     public void setRecipeList(List<Recipe> recipeList) {
         this.recipeList = recipeList;
+    }
+
+    public List<String> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<String> categories) {
+        this.categories = categories;
     }
 }

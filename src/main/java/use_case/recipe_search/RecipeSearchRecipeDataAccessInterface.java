@@ -13,4 +13,11 @@ public interface RecipeSearchRecipeDataAccessInterface {
      * @return A list of matching recipes.
      */
     List<Recipe> search(String name, String category);
+
+    /**
+     * Fetches a list of all available recipe categories from the data source.
+     *
+     * @return A list of category names.
+     */
+    List<String> getAllCategories();
 }

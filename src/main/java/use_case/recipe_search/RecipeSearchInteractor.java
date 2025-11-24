@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 public class RecipeSearchInteractor implements RecipeSearchInputBoundary {
     private final RecipeSearchRecipeDataAccessInterface dataAccess;
     private final RecipeSearchOutputBoundary presenter;
+    private SwingWorker<List<Recipe>, Void> activeWorker;
 
     public RecipeSearchInteractor(RecipeSearchRecipeDataAccessInterface dataAccess,
                                     RecipeSearchOutputBoundary presenter) {
@@ -18,22 +19,37 @@ public class RecipeSearchInteractor implements RecipeSearchInputBoundary {
 
     @Override
     public void execute(RecipeSearchInputData inputData) {
-        new SwingWorker<List<Recipe>, Void>() {
+        // If there's an active worker, cancel it
+        if (activeWorker != null && !activeWorker.isDone()) {
+            activeWorker.cancel(true);
+        }
+
+        // Create a new worker for the new search
+        activeWorker = new SwingWorker<List<Recipe>, Void>() {
             @Override
-            protected List<Recipe> doInBackground() {
+            protected List<Recipe> doInBackground() throws Exception {
+                // This is where the long-running search happens
                 return dataAccess.search(inputData.getName(), inputData.getCategory());
             }
 
             @Override
             protected void done() {
-                try {
-                    List<Recipe> recipes = get();
-                    RecipeSearchOutputData outputData = new RecipeSearchOutputData(recipes);
-                    presenter.prepareSuccessView(outputData);
-                } catch (InterruptedException | ExecutionException e) {
-                    presenter.prepareFailView(e.getCause().getMessage());
+                // This runs on the EDT after the background task is finished
+                if (!isCancelled()) {
+                    try {
+                        List<Recipe> recipes = get(); // Get the result from doInBackground
+                        RecipeSearchOutputData outputData = new RecipeSearchOutputData(recipes);
+                        presenter.prepareSuccessView(outputData);
+                    } catch (InterruptedException | ExecutionException e) {
+                        // If an error occurred in the background, present the fail view
+                        presenter.prepareFailView(e.getCause().getMessage());
+                    }
                 }
+                // If the worker was cancelled, do nothing.
             }
-        }.execute();
+        };
+
+        // Start the new worker
+        activeWorker.execute();
     }
 }

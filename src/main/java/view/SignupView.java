@@ -36,9 +36,20 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         JLabel title = new JLabel(SignupViewModel.TITLE_LABEL);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        LabelTextPanel usernameInfo = new LabelTextPanel(new JLabel(SignupViewModel.USERNAME_LABEL), usernameInputField);
-        LabelTextPanel passwordInfo = new LabelTextPanel(new JLabel(SignupViewModel.PASSWORD_LABEL), passwordInputField);
-        LabelTextPanel repeatPasswordInfo = new LabelTextPanel(new JLabel(SignupViewModel.REPEAT_PASSWORD_LABEL), repeatPasswordInputField);
+        JPanel usernamePanel = new JPanel();
+        usernamePanel.setLayout(new BoxLayout(usernamePanel, BoxLayout.Y_AXIS));
+        usernamePanel.add(new LabelTextPanel(new JLabel(SignupViewModel.USERNAME_LABEL), usernameInputField));
+        usernamePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, usernamePanel.getPreferredSize().height)); // Limit vertical expansion
+
+        JPanel passwordPanel = new JPanel();
+        passwordPanel.setLayout(new BoxLayout(passwordPanel, BoxLayout.Y_AXIS));
+        passwordPanel.add(new LabelTextPanel(new JLabel(SignupViewModel.PASSWORD_LABEL), passwordInputField));
+        passwordPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, passwordPanel.getPreferredSize().height)); // Limit vertical expansion
+
+        JPanel repeatPasswordPanel = new JPanel();
+        repeatPasswordPanel.setLayout(new BoxLayout(repeatPasswordPanel, BoxLayout.Y_AXIS));
+        repeatPasswordPanel.add(new LabelTextPanel(new JLabel(SignupViewModel.REPEAT_PASSWORD_LABEL), repeatPasswordInputField));
+        repeatPasswordPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, repeatPasswordPanel.getPreferredSize().height)); // Limit vertical expansion
 
         JPanel buttons = new JPanel();
         toLogin = new JButton(SignupViewModel.TO_LOGIN_BUTTON_LABEL);
@@ -47,6 +58,8 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
         buttons.add(signUp);
         cancel = new JButton(SignupViewModel.CANCEL_BUTTON_LABEL);
         buttons.add(cancel);
+        buttons.setMaximumSize(new Dimension(Integer.MAX_VALUE, buttons.getPreferredSize().height)); // Limit vertical expansion
+
 
         signUp.addActionListener(e -> {
             if (e.getSource().equals(signUp)) {
@@ -68,9 +81,13 @@ public class SignupView extends JPanel implements ActionListener, PropertyChange
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(title);
-        this.add(usernameInfo);
-        this.add(passwordInfo);
-        this.add(repeatPasswordInfo);
+        this.add(Box.createVerticalStrut(10)); // Add some spacing
+        this.add(usernamePanel);
+        this.add(Box.createVerticalStrut(5)); // Add some spacing
+        this.add(passwordPanel);
+        this.add(Box.createVerticalStrut(5)); // Add some spacing
+        this.add(repeatPasswordPanel);
+        this.add(Box.createVerticalStrut(10)); // Add some spacing
         this.add(buttons);
     }
 
