@@ -35,6 +35,9 @@ import interface_adapter.recipe_search.RecipeSearchViewModel;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.view_recipe.ViewRecipeController;
+import interface_adapter.view_recipe.ViewRecipePresenter;
+import interface_adapter.view_recipe.ViewRecipeViewModel;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
@@ -47,6 +50,15 @@ import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
 import use_case.signup.SignupUserDataAccessInterface;
+import use_case.view_recipe.ViewRecipeDataAccessInterface;
+import use_case.view_recipe.ViewRecipeInputBoundary;
+import use_case.view_recipe.ViewRecipeInteractor;
+import use_case.view_recipe.ViewRecipeOutputBoundary;
+import view.LoginView;
+import view.RecipeSearchView;
+import view.RecipeView;
+import view.SignupView;
+import view.ViewManager;
 
 import interface_adapter.post_recipe.PostRecipeController;
 import interface_adapter.post_recipe.PostRecipePresenter;
@@ -68,6 +80,7 @@ public class AppBuilder {
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
     private UserDataAccessObject userDataAccessObject = new UserDataAccessObject();
+    private RecipeDataAccessObject recipeDataAccessObject = new RecipeDataAccessObject();
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -83,6 +96,8 @@ public class AppBuilder {
 
     private SignupViewModel signupViewModel;
     private SignupView signupView;
+    private ViewRecipeViewModel viewRecipeViewModel;
+    private RecipeView recipeView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -139,6 +154,13 @@ public class AppBuilder {
         RecipeSearchController recipeSearchController = new RecipeSearchController(recipeSearchInteractor);
         recipeSearchView = new RecipeSearchView(recipeSearchViewModel, recipeSearchController, viewManagerModel);
         cardPanel.add(recipeSearchView, recipeSearchView.viewName);
+        return this;
+    }
+
+    public AppBuilder addViewRecipeView() {
+        viewRecipeViewModel = new ViewRecipeViewModel();
+        recipeView = new RecipeView(viewRecipeViewModel, viewManagerModel);
+        cardPanel.add(recipeView, recipeView.viewName);
         return this;
     }
 
