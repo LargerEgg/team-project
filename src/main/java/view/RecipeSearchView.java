@@ -137,11 +137,14 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         gbc.anchor = GridBagConstraints.WEST;
         headerPanel.add(searchButton, gbc);
 
+        JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
+        separator.setForeground(Color.BLACK); // Set separator color to black
+        separator.setBackground(Color.BLACK); // Set separator color to black
         gbc.gridy = 3;
         gbc.gridx = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        headerPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
+        headerPanel.add(separator, gbc);
         
         gbc.gridy = 4;
         gbc.gridwidth = 1;
@@ -227,9 +230,8 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         return itemPanel;
     }
 
-    private void sortRecipes() {
+    private void sortRecipes(List<Recipe> recipesToSort) {
         RecipeSearchState currentState = recipeSearchViewModel.getState();
-        List<Recipe> recipeList = new ArrayList<>(currentState.getRecipeList());
         String sortBy = (String) sortByComboBox.getSelectedItem();
         boolean ascending = ascendingCheckBox.isSelected();
 
@@ -246,8 +248,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             if (!ascending) {
                 comparator = comparator.reversed();
             }
-            recipeList.sort(comparator);
-            updateView(recipeList);
+            recipesToSort.sort(comparator);
         }
     }
 
@@ -282,7 +283,10 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             }
             recipeSearchController.execute(name, category);
         } else if (evt.getSource() == sortByComboBox || evt.getSource() == ascendingCheckBox) {
-            sortRecipes();
+            // When sort criteria change, re-sort the currently displayed list
+            List<Recipe> currentRecipes = new ArrayList<>(recipeSearchViewModel.getState().getRecipeList());
+            sortRecipes(currentRecipes);
+            updateView(currentRecipes);
         } else if (evt.getSource() == signupButton) {
             viewManagerModel.setState("sign up");
             viewManagerModel.firePropertyChange();
@@ -306,7 +310,9 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
                 resultsPanel.revalidate();
                 resultsPanel.repaint();
             } else {
-                updateView(state.getRecipeList());
+                List<Recipe> recipesToDisplay = new ArrayList<>(state.getRecipeList());
+                sortRecipes(recipesToDisplay); // Sort the new list before displaying
+                updateView(recipesToDisplay);
             }
         }
     }

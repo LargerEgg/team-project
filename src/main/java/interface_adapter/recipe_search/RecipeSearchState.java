@@ -9,6 +9,8 @@ public class RecipeSearchState {
     private String searchError = "";
     private List<Recipe> recipeList = new ArrayList<>();
     private List<String> categories = new ArrayList<>();
+    private String sortBy = "Views"; // Default sort by Views
+    private boolean ascending = true; // Default ascending
 
     public String getSearchError() {
         return searchError;
@@ -32,5 +34,21 @@ public class RecipeSearchState {
 
     public void setCategories(List<String> categories) {
         this.categories = categories;
+    }
+
+    public String getSortBy() {
+        return sortBy;
+    }
+
+    public void setSortBy(String sortBy) {
+        this.sortBy = sortBy;
+    }
+
+    public boolean isAscending() {
+        return ascending;
+    }
+
+    public void setAscending(boolean ascending) {
+        this.ascending = ascending;
     }
 }
