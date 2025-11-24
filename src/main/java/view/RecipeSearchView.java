@@ -37,6 +37,8 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
 
     // Results components
     private JPanel resultsPanel;
+    private JProgressBar progressBar;
+    private JLabel loadingLabel; // To hold the "Loading search results..." text
 
     public RecipeSearchView(RecipeSearchViewModel recipeSearchViewModel, RecipeSearchController recipeSearchController, ViewManagerModel viewManagerModel) {
         this.recipeSearchViewModel = recipeSearchViewModel;
@@ -137,11 +139,14 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         gbc.anchor = GridBagConstraints.WEST;
         headerPanel.add(searchButton, gbc);
 
+        JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
+        separator.setForeground(Color.BLACK); // Set separator color to black
+        separator.setBackground(Color.BLACK); // Set separator color to black
         gbc.gridy = 3;
         gbc.gridx = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        headerPanel.add(new JSeparator(SwingConstants.HORIZONTAL), gbc);
+        headerPanel.add(separator, gbc);
         
         gbc.gridy = 4;
         gbc.gridwidth = 1;
@@ -227,9 +232,8 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         return itemPanel;
     }
 
-    private void sortRecipes() {
+    private void sortRecipes(List<Recipe> recipesToSort) {
         RecipeSearchState currentState = recipeSearchViewModel.getState();
-        List<Recipe> recipeList = new ArrayList<>(currentState.getRecipeList());
         String sortBy = (String) sortByComboBox.getSelectedItem();
         boolean ascending = ascendingCheckBox.isSelected();
 
@@ -246,8 +250,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             if (!ascending) {
                 comparator = comparator.reversed();
             }
-            recipeList.sort(comparator);
-            updateView(recipeList);
+            recipesToSort.sort(comparator);
         }
     }
 
@@ -270,10 +273,24 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
 
             resultsPanel.removeAll();
             resultsPanel.setLayout(new GridBagLayout());
-            JLabel loadingLabel = new JLabel("Loading search results...");
+            
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            gbc.anchor = GridBagConstraints.CENTER;
+            loadingLabel = new JLabel("Loading search results...");
             loadingLabel.setFont(new Font("SansSerif", Font.ITALIC, 16));
             loadingLabel.setForeground(Color.GRAY);
-            resultsPanel.add(loadingLabel);
+            resultsPanel.add(loadingLabel, gbc);
+
+            gbc.gridy = 1; // Move to the next row
+            gbc.insets = new Insets(10, 0, 0, 0); // Add some top padding
+            progressBar = new JProgressBar(0, 100);
+            progressBar.setValue(0);
+            progressBar.setStringPainted(true);
+            progressBar.setVisible(false);
+            resultsPanel.add(progressBar, gbc);
+
             resultsPanel.revalidate();
             resultsPanel.repaint();
 
@@ -282,7 +299,10 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             }
             recipeSearchController.execute(name, category);
         } else if (evt.getSource() == sortByComboBox || evt.getSource() == ascendingCheckBox) {
-            sortRecipes();
+            // When sort criteria change, re-sort the currently displayed list
+            List<Recipe> currentRecipes = new ArrayList<>(recipeSearchViewModel.getState().getRecipeList());
+            sortRecipes(currentRecipes);
+            updateView(currentRecipes);
         } else if (evt.getSource() == signupButton) {
             viewManagerModel.setState("sign up");
             viewManagerModel.firePropertyChange();
@@ -305,8 +325,22 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
                 resultsPanel.add(errorLabel);
                 resultsPanel.revalidate();
                 resultsPanel.repaint();
+                progressBar.setVisible(false); // Hide progress bar on error
             } else {
-                updateView(state.getRecipeList());
+                List<Recipe> recipesToDisplay = new ArrayList<>(state.getRecipeList());
+                sortRecipes(recipesToDisplay); // Sort the new list before displaying
+                updateView(recipesToDisplay);
+                progressBar.setVisible(false); // Hide progress bar on success
+            }
+        } else if ("progress".equals(evt.getPropertyName())) {
+            RecipeSearchState state = (RecipeSearchState) evt.getNewValue();
+            if (progressBar != null && state.getTotalImageCount() > 0) {
+                progressBar.setVisible(true);
+                int progress = (int) ((double) state.getCurrentImageCount() / state.getTotalImageCount() * 100);
+                progressBar.setValue(progress);
+                loadingLabel.setText("Loading search results..."); // Remove fractional text
+            } else if (progressBar != null) {
+                progressBar.setVisible(false);
             }
         }
     }
