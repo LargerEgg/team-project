@@ -88,30 +88,3 @@ public class FirestoreDataReader {
 
 }
 
-// Example POJO for mapping Firestore documents (if you choose to use it)
-class Recipe {
-    private String title;
-    private String description;
-    // ... other fields
-
-    public Recipe() {
-        // No-argument constructor required for Firestore object mapping
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-// ... getters and setters for other fields
-}

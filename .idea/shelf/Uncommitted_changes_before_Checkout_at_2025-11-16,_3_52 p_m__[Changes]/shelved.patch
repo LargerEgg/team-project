@@ -1,0 +1,20 @@
+Index: src/main/resources/recipe-app-29d1d-firebase-adminsdk-fbsvc-ad98bb22f1.json
+===================================================================
+diff --git a/src/main/resources/recipe-app-29d1d-firebase-adminsdk-fbsvc-ad98bb22f1.json b/src/main/resources/recipe-app-29d1d-firebase-adminsdk-fbsvc-ad98bb22f1.json
+--- a/src/main/resources/recipe-app-29d1d-firebase-adminsdk-fbsvc-ad98bb22f1.json	(revision f312e60cea398f21b973c8ae83db10e2b780d6e7)
++++ b/src/main/resources/recipe-app-29d1d-firebase-adminsdk-fbsvc-ad98bb22f1.json	(date 1762804270278)
+@@ -1,0 +1,13 @@
++{
++  "type": "service_account",
++  "project_id": "recipe-app-29d1d",
++  "private_key_id": "ad98bb22f15ae7482b0a698daeef7cdd983205fc",
++  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCg4HchshC3sHv4\nAtJVzD+aXHjP+uM3P+rB08uGRbQhMngJWu1QS2/aPi4P8OycPZttEErkRiWOWJnl\nRNce1wEgIzL7n4l3SzmY5ZpfGXlOTuJNm7IMxtgHjO/IAejxeow1AiKi8BjmXeuR\nbVnCVq5EhCnKQCHaRM+wRDl8RVUxOLAKhiTlAx8cDofIK9VJUhKMjHbNk2BjdiGU\nYx3XsE+Zis7c33snvsw87IBQHkppElf7O6b1mkXf6JBpcVU59VSIKPVyxZwvBLWW\n4tqPtswW84yy8BnDMHX4BIVaRz4VXyVtS0pzd+eoSMhgS9LcYTAVEx7Cwo4bT7OQ\nZaX1hePRAgMBAAECggEAAzmkyCqzjf8uT3R9BrMCAARd3quH5ErP5Pb4qlAAH1Da\nWhoPmy+7+RFy9A2PX/pJmqTin3nUu514NMHnZYsHzuVg9DoiGlLKTFynNndcBXW5\nSmpP5jr5SAneoVeadcOp1ALSmQoi5NsAQ6NAOXadgHc9OdY4NFHZvEEN48YldSEt\nGimWuSUt/gKGfgP5YhRx+Hqa6r0bpUwB7Pka5NmXOaJoW7ghrYFjH1aZnVktzGQs\n4P+oB2Fnt34Y2cGA2EMlHn133wBkA1QAKbLoEYJnezNAVBx44PxiXw983/NuPoX+\nhXIJzAhzqn8AvZEnT9AM5XpLFAGC5gWbDfCrely1EQKBgQDXtfcmtH2GrkZjwP1k\nufy+XIduXmXCzzcEB+awRmFcweCMX+kgf6sFobPv7XlMYMaAXdOoM0dtaLjcK17A\nLeRrkOAP4Hmy5FhRJlZ0eBmoWQ3BAymbkzIsVmjtAkfVqHDvzIfe3aqykMfF6GHP\nK33LIMuSSk0k5SqolsSxmXOKyQKBgQC+7Kh2Vd+eBeLGo7prDf96pU2Lz6vhK65g\n5sgw5qUL9A7Dac0TijRKVmqAtc551Zolu/OPEMMx651WEAANV78n4BI4b6aAry7E\nMApdOT1ztMq8So/UmcN4uhQt3KiJRqUxCBbHANnS7Z4rz6Ut1VAFF/o98AJaVBUH\n8jDJhqiMyQKBgQCqgMB8rYnS3Qnya2dfKMuoREcgbCkPVO7tlrk3eEoZIX42NtF0\nyLUL3Ib4DMMmJhCBAqj8eJvq1S3ZicZ5LU0x4O/aXNqVFnzgl+caZJwTP2DpwXAv\n8qdj+GEzhev17BBo20hCVwBH6LyfqFE3ie8CkkeWuHhFw4Z2f8W1g8+aUQKBgFQD\nwhHosfFQt70feT34t+6ZZSlb5k+8sAx2IavbIs/Cwuhc22B41Y/MvSsMVeKpCx8F\nuSTAhJSoEOE5Qzyb20NJx9rLzuIbtKGiXj0tngwXh4sZ6HbufuTWRWD1E7jsvG56\nF8PUbQXziEHRKuejUYYcSgMNZYuoKmUHv04/ElZ5AoGBALiGdDlsVm4HybnnpR3r\noRJs4fVdmMkTeaInvf2JrpDvUT+OFi55tSpXZYu4o2hQiCyC9oICACZtiVhMcorl\ntD7juFB30bpv/qr5qikQJocMKz76vCLmIzjre6wSnXxgj0CQp2Ktz9LUs/F+iHP1\n6WOdLkrB81TRPkhrNqdD8y+O\n-----END PRIVATE KEY-----\n",
++  "client_email": "firebase-adminsdk-fbsvc@recipe-app-29d1d.iam.gserviceaccount.com",
++  "client_id": "113524215764175030134",
++  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
++  "token_uri": "https://oauth2.googleapis.com/token",
++  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
++  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40recipe-app-29d1d.iam.gserviceaccount.com",
++  "universe_domain": "googleapis.com"
++}
+\ No newline at end of file

@@ -10,8 +10,8 @@ public class RecipeSearchController {
         this.recipeSearchInteractor = recipeSearchInteractor;
     }
 
-    public void execute(String query) {
-        RecipeSearchInputData recipeSearchInputData = new RecipeSearchInputData(query);
+    public void execute(String name, String category) {
+        RecipeSearchInputData recipeSearchInputData = new RecipeSearchInputData(name, category);
         recipeSearchInteractor.execute(recipeSearchInputData);
     }
 }
