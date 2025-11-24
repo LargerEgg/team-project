@@ -1,5 +1,6 @@
 package app;
-
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.FirestoreOptions;
 import javax.swing.*;
 
 public class Main {
@@ -7,14 +8,20 @@ public class Main {
 
         System.out.println("main running");
 
+        FirestoreOptions options = FirestoreOptions.newBuilder()
+                .setProjectId("recipe-app-29d1d")   // your real project ID
+                .build();
+
+        Firestore db = options.getService();
+
         AppBuilder appBuilder = new AppBuilder();
         JFrame application = appBuilder
                 .addRecipeSearchView()
+                .addPostRecipeView(db)
+                .addLoginView(db) //Change later when Firestore working
+                .addSignupView(db) // same as above
                 .addLoginUseCase()
                 .addSignupUseCase()
-                .addPostRecipeView()
-                .addLoginView(null) //Change later when Firestore working
-                .addSignupView(null) // same as above
                 .build();
 
         application.pack();

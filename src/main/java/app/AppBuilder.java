@@ -1,7 +1,13 @@
 package app;
 
+// At the top of AppBuilder.java add the imports you need:
 import com.google.cloud.firestore.Firestore;
-import data_access.InMemoryUserDataAccessObject;
+import interface_adapter.post_recipe.PostRecipeViewModel;
+import use_case.post_recipe.PostRecipeInputBoundary;
+import use_case.post_recipe.PostRecipeInteractor;
+import use_case.post_recipe.PostRecipeOutputBoundary;
+import use_case.post_recipe.PostRecipeDataAccessInterface;
+import view.PostRecipeView;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
@@ -138,7 +144,7 @@ public class AppBuilder {
         return this;
     }
 
-    public AppBuilder addPostRecipeView() {
+    public AppBuilder addPostRecipeView(Firestore db) {
         // 1. ViewModel
         postRecipeViewModel = new PostRecipeViewModel();
 
@@ -170,7 +176,7 @@ public class AppBuilder {
         loginViewModel = new LoginViewModel();
 
         LoginUserDataAccessInterface userDao =
-                new FirebaseUserDataAccessObject(userFactory);
+                new FirebaseUserDataAccessObject(db, userFactory);
 
         LoginOutputBoundary loginPresenter =
                 new LoginPresenter(viewManagerModel, recipeSearchViewModel, loginViewModel);
@@ -194,7 +200,7 @@ public class AppBuilder {
         signupViewModel = new SignupViewModel();
 
         SignupUserDataAccessInterface signupUserDao =
-                new FirebaseUserDataAccessObject(new UserFactory());
+                new FirebaseUserDataAccessObject(db, new UserFactory());
 
         SignupOutputBoundary signupPresenter =
                 new SignupPresenter(viewManagerModel, signupViewModel, loginViewModel);

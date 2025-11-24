@@ -22,7 +22,7 @@ public class FirebaseUserDataAccessObject implements LoginUserDataAccessInterfac
 
     private String currentUsername;
 
-    public FirebaseUserDataAccessObject(UserFactory userFactory) {
+    public FirebaseUserDataAccessObject(Firestore db, UserFactory userFactory) {
         this.db = db;
         this.userFactory = userFactory;
         this.usersCollection = db.collection("users"); //IMPORTANT: Change name to whatever is chosen for collections
@@ -78,10 +78,10 @@ public class FirebaseUserDataAccessObject implements LoginUserDataAccessInterfac
     public void save(User user) {
         try {
             Map<String, Object> data = new HashMap<>();
-            data.put("username", user.getName());
+            data.put("username", user.getUsername());
             data.put("password", user.getPassword());
 
-            usersCollection.document(user.getName()).set(data).get();
+            usersCollection.document(user.getUsername()).set(data).get();
 
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Error saving user", e);
