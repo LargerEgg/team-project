@@ -165,6 +165,9 @@ public class AppBuilder {
 
         // 6. Register in CardLayout
         cardPanel.add(postRecipeView, postRecipeView.viewName);
+        return this;
+    }
+
     public AppBuilder addLoginView(Firestore db) {
 
         UserFactory userFactory = new UserFactory();
