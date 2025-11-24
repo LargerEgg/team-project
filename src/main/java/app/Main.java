@@ -9,11 +9,9 @@ public class Main {
                 .addLoginView()
                 .addSignupView()
                 .addRecipeSearchView()
-                .addPostRecipeView()
                 .addLoginUseCase()
                 .addSignupUseCase()
                 .build();
-
 
         application.pack();
         application.setLocationRelativeTo(null);
