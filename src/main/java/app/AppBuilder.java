@@ -232,4 +232,31 @@ public class AppBuilder {
 
         return application;
     }
+
+    private static class CompositeRecipeDataAccess implements ViewRecipeDataAccessInterface {
+        private final FirebaseRecipeDataAccessObject firebaseDAO;
+        private final RecipeDataAccessObject apiDAO;
+
+        public CompositeRecipeDataAccess(FirebaseRecipeDataAccessObject firebaseDAO, RecipeDataAccessObject apiDAO) {
+            this.firebaseDAO = firebaseDAO;
+            this.apiDAO = apiDAO;
+        }
+
+        @Override
+        public entity.Recipe findById(String recipeId) {
+            // Try Firebase first (user-created recipes)
+            entity.Recipe recipe = firebaseDAO.findById(recipeId);
+            if (recipe != null) {
+                return recipe;
+            }
+            // Fall back to API (external recipes)
+            return apiDAO.findById(recipeId);
+        }
+
+        @Override
+        public void save(entity.Recipe recipe) {
+            // Always save to Firebase
+            firebaseDAO.save(recipe);
+        }
+    }
 }

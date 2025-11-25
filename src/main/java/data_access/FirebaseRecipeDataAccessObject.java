@@ -16,6 +16,10 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
     private final Firestore db;
     private final CollectionReference recipesCollection;
 
+    public FirebaseRecipeDataAccessObject() {
+        this(FirebaseInitializer.getFirestore());
+    }
+
     public FirebaseRecipeDataAccessObject(Firestore db) {
         this.db = db;
         this.recipesCollection = db.collection("recipes");
