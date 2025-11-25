@@ -356,22 +356,30 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
                 resultsPanel.add(errorLabel);
                 resultsPanel.revalidate();
                 resultsPanel.repaint();
-                progressBar.setVisible(false); // Hide progress bar on error
+                if (progressBar != null) {
+                    progressBar.setVisible(false); // Hide progress bar on error
+                }
             } else {
                 List<Recipe> recipesToDisplay = new ArrayList<>(state.getRecipeList());
                 sortRecipes(recipesToDisplay); // Sort the new list before displaying
                 updateView(recipesToDisplay);
-                progressBar.setVisible(false); // Hide progress bar on success
+                if (progressBar != null) {
+                    progressBar.setVisible(false); // Hide progress bar on success
+                }
             }
         } else if ("progress".equals(evt.getPropertyName())) {
             RecipeSearchState state = (RecipeSearchState) evt.getNewValue();
-            if (progressBar != null && state.getTotalImageCount() > 0) {
-                progressBar.setVisible(true);
-                int progress = (int) ((double) state.getCurrentImageCount() / state.getTotalImageCount() * 100);
-                progressBar.setValue(progress);
-                loadingLabel.setText("Loading search results..."); // Remove fractional text
-            } else if (progressBar != null) {
-                progressBar.setVisible(false);
+            if (progressBar != null) {
+                if (state.getTotalImageCount() > 0) {
+                    progressBar.setVisible(true);
+                    int progress = (int) ((double) state.getCurrentImageCount() / state.getTotalImageCount() * 100);
+                    progressBar.setValue(progress);
+                    if (loadingLabel != null) {
+                        loadingLabel.setText("Loading search results...");
+                    }
+                } else {
+                    progressBar.setVisible(false);
+                }
             }
         }
     }

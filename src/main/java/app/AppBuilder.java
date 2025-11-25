@@ -125,7 +125,7 @@ public class AppBuilder {
         final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
                 signupViewModel, loginViewModel);
         final SignupInputBoundary userSignupInteractor = new SignupInteractor(
-                userDataAccessObject, signupOutputBoundary, userFactory);
+                userDAO, signupOutputBoundary, userFactory);
 
         SignupController controller = new SignupController(userSignupInteractor);
         signupView.setSignupController(controller);
@@ -140,14 +140,20 @@ public class AppBuilder {
     }
 
     public AppBuilder addLoginUseCase() {
-        use_case.login.LoginUserDataAccessInterface userDAO = USE_FIREBASE && firebaseUserDataAccessObject != null
-                ? firebaseUserDataAccessObject
-                : new data_access.UserDataAccessObject();
+        use_case.login.LoginUserDataAccessInterface userDAO;
+
+        if (USE_FIREBASE && firebaseUserDataAccessObject != null) {
+            System.out.println("✅ Using Firebase for user login");
+            userDAO = firebaseUserDataAccessObject;
+        } else {
+            System.out.println("⚠️  Using in-memory storage for user login");
+            userDAO = new InMemoryUserDataAccessObject();
+        }
 
         final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
                 recipeSearchViewModel, loginViewModel);
         final LoginInputBoundary loginInteractor = new LoginInteractor(
-                userDataAccessObject, loginOutputBoundary);
+                userDAO, loginOutputBoundary);
 
         LoginController loginController = new LoginController(loginInteractor);
         loginView.setLoginController(loginController);
