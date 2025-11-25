@@ -111,9 +111,16 @@ public class AppBuilder {
     }
 
     public AppBuilder addSignupUseCase() {
-        SignupUserDataAccessInterface userDAO = USE_FIREBASE && firebaseUserDataAccessObject != null
-                ? firebaseUserDataAccessObject
-                : new data_access.UserDataAccessObject();
+        SignupUserDataAccessInterface userDAO;
+
+        if (USE_FIREBASE && firebaseUserDataAccessObject != null) {
+            System.out.println("✅ Using Firebase for user signup");
+            userDAO = firebaseUserDataAccessObject;
+        } else {
+            System.out.println("⚠️  Using in-memory storage for user signup");
+            userDAO = new InMemoryUserDataAccessObject();
+        }
+
 
         final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
                 signupViewModel, loginViewModel);
