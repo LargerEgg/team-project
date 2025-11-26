@@ -38,7 +38,9 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     private JButton searchButton;
     private JButton signupButton;
     private JButton loginButton;
+    private JButton logoutButton;
     private JButton postRecipeButton; // Declare the new button
+    private JLabel currentUserLabel;
 
     // Results components
     private JPanel resultsPanel;
@@ -58,6 +60,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         searchAndResultsPanel.add(createHeaderPanel(), BorderLayout.NORTH);
         searchAndResultsPanel.add(createResultsScrollPane(), BorderLayout.CENTER);
         add(searchAndResultsPanel, BorderLayout.CENTER);
+        updateUserRelatedUI(recipeSearchViewModel.getState());
     }
 
     public void updateView(List<Recipe> recipes) {
@@ -80,18 +83,29 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     }
 
     private JPanel createNavigationBar() {
-        JPanel navigationPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel navigationPanel = new JPanel(new BorderLayout());
+        navigationPanel.setBorder(new EmptyBorder(5, 10, 5, 10));
+
+        currentUserLabel = new JLabel("Not signed in");
+        currentUserLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        navigationPanel.add(currentUserLabel, BorderLayout.WEST);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         signupButton = new JButton("Sign Up");
         loginButton = new JButton("Login");
+        logoutButton = new JButton("Logout");
         postRecipeButton = new JButton("Post a Recipe"); // Initialize the new button
 
         signupButton.addActionListener(this);
         loginButton.addActionListener(this);
+        logoutButton.addActionListener(this);
         postRecipeButton.addActionListener(this); // Add action listener for the new button
 
-        navigationPanel.add(postRecipeButton); // Add the new button to the navigation bar
-        navigationPanel.add(signupButton);
-        navigationPanel.add(loginButton);
+        buttonPanel.add(postRecipeButton); // Add the new button to the navigation bar
+        buttonPanel.add(signupButton);
+        buttonPanel.add(loginButton);
+        buttonPanel.add(logoutButton);
+        navigationPanel.add(buttonPanel, BorderLayout.EAST);
 
         return navigationPanel;
     }
@@ -337,9 +351,29 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         } else if (evt.getSource() == loginButton) {
             viewManagerModel.setState("log in"); // Corrected method call
             viewManagerModel.firePropertyChange();
+        } else if (evt.getSource() == logoutButton) {
+            RecipeSearchState currentState = recipeSearchViewModel.getState();
+            currentState.setCurrentUser(null);
+            recipeSearchViewModel.firePropertyChange();
         } else if (evt.getSource() == postRecipeButton) { // Handle the new button's action
             viewManagerModel.setState("post recipe"); // Set the active view to "post recipe"
             viewManagerModel.firePropertyChange();
+        }
+    }
+
+    private void updateUserRelatedUI(RecipeSearchState state) {
+        if (state.getCurrentUser() != null && !state.getCurrentUser().isEmpty()) {
+            currentUserLabel.setText("<html>Signed in as <font color='blue'>" + state.getCurrentUser() + "</font></html>");
+            signupButton.setVisible(false);
+            loginButton.setVisible(false);
+            logoutButton.setVisible(true);
+            postRecipeButton.setEnabled(true);
+        } else {
+            currentUserLabel.setText("Not signed in");
+            signupButton.setVisible(true);
+            loginButton.setVisible(true);
+            logoutButton.setVisible(false);
+            postRecipeButton.setEnabled(false);
         }
     }
 
@@ -347,6 +381,8 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     public void propertyChange(PropertyChangeEvent evt) {
         if ("state".equals(evt.getPropertyName())) {
             RecipeSearchState state = (RecipeSearchState) evt.getNewValue();
+            updateUserRelatedUI(state);
+
             if (state.getSearchError() != null && !state.getSearchError().isEmpty()) {
                 resultsPanel.removeAll();
                 resultsPanel.setLayout(new GridBagLayout());
@@ -356,22 +392,30 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
                 resultsPanel.add(errorLabel);
                 resultsPanel.revalidate();
                 resultsPanel.repaint();
-                progressBar.setVisible(false); // Hide progress bar on error
+                if (progressBar != null) {
+                    progressBar.setVisible(false); // Hide progress bar on error
+                }
             } else {
                 List<Recipe> recipesToDisplay = new ArrayList<>(state.getRecipeList());
                 sortRecipes(recipesToDisplay); // Sort the new list before displaying
                 updateView(recipesToDisplay);
-                progressBar.setVisible(false); // Hide progress bar on success
+                if (progressBar != null) {
+                    progressBar.setVisible(false); // Hide progress bar on success
+                }
             }
         } else if ("progress".equals(evt.getPropertyName())) {
             RecipeSearchState state = (RecipeSearchState) evt.getNewValue();
-            if (progressBar != null && state.getTotalImageCount() > 0) {
-                progressBar.setVisible(true);
-                int progress = (int) ((double) state.getCurrentImageCount() / state.getTotalImageCount() * 100);
-                progressBar.setValue(progress);
-                loadingLabel.setText("Loading search results..."); // Remove fractional text
-            } else if (progressBar != null) {
-                progressBar.setVisible(false);
+            if (progressBar != null) {
+                if (state.getTotalImageCount() > 0) {
+                    progressBar.setVisible(true);
+                    int progress = (int) ((double) state.getCurrentImageCount() / state.getTotalImageCount() * 100);
+                    progressBar.setValue(progress);
+                    if (loadingLabel != null) {
+                        loadingLabel.setText("Loading search results...");
+                    }
+                } else {
+                    progressBar.setVisible(false);
+                }
             }
         }
     }

@@ -24,6 +24,7 @@ public class LoginPresenter implements LoginOutputBoundary {
     public void prepareSuccessView(LoginOutputData response) {
         // On success, update the loggedInViewModel's state
         final RecipeSearchState loggedInState = recipeSearchViewModel.getState();
+        loggedInState.setCurrentUser(response.getUsername());
         this.recipeSearchViewModel.firePropertyChange();
 
         // and clear everything from the LoginViewModel's state

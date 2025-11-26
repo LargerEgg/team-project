@@ -22,8 +22,14 @@ public class FirebaseUserDataAccessObject implements LoginUserDataAccessInterfac
 
     private String currentUsername;
 
+    public FirebaseUserDataAccessObject(UserFactory userFactory) {
+        this.userFactory = userFactory;
+        this.db = FirebaseInitializer.getFirestore();
+        this.usersCollection = db.collection("users");
+    }
+
     public FirebaseUserDataAccessObject(Firestore db, UserFactory userFactory) {
-        this.db = db;
+        this.db = FirebaseInitializer.getFirestore();
         this.userFactory = userFactory;
         this.usersCollection = db.collection("users"); //IMPORTANT: Change name to whatever is chosen for collections
     }
@@ -32,12 +38,10 @@ public class FirebaseUserDataAccessObject implements LoginUserDataAccessInterfac
     public boolean existsByName(String username) {
         try {
             DocumentReference docref = usersCollection.document(username);
-
             ApiFuture<DocumentSnapshot> future =docref.get();
-
             DocumentSnapshot document = future.get();
-
             return document.exists();
+
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Error checking if username exists", e);
         }
@@ -47,13 +51,13 @@ public class FirebaseUserDataAccessObject implements LoginUserDataAccessInterfac
     public User get(String name) {
         try {
             DocumentReference docref = usersCollection.document(name);
-
             ApiFuture<DocumentSnapshot> future = docref.get();
             DocumentSnapshot document = future.get();
 
             if (!document.exists()) {
                 return null;
             }
+
             String username = document.getString("username");
             String password = document.getString("password");
 
@@ -82,6 +86,7 @@ public class FirebaseUserDataAccessObject implements LoginUserDataAccessInterfac
             data.put("password", user.getPassword());
 
             usersCollection.document(user.getUsername()).set(data).get();
+            System.out.println("User saved successfully: " + user.getUsername());
 
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Error saving user", e);
