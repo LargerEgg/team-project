@@ -5,15 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e43c00b6-75ef-40f2-94e8-7abd57be8463" name="Changes" comment="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907">
+      <change afterPath="$PROJECT_DIR$/src/main/java/data_access/RecommendRecipeDataAccessObject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/RecipeDataAccessObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/data_access/RecipeDataAccessObject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/recipe_search/RecipeSearchPresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/recipe_search/RecipeSearchPresenter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/recipe_search/RecipeSearchState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/recipe_search/RecipeSearchState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/recipe_search/RecipeSearchInteractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/recipe_search/RecipeSearchInteractor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/recipe_search/RecipeSearchOutputBoundary.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/recipe_search/RecipeSearchOutputBoundary.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/recipe_search/RecipeSearchOutputData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/recipe_search/RecipeSearchOutputData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/recipe_search/RecipeSearchRecipeDataAccessInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/recipe_search/RecipeSearchRecipeDataAccessInterface.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/RecipeSearchView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/RecipeSearchView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/recommend_recipe/RecommendRecipeInteractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/recommend_recipe/RecommendRecipeInteractor.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +66,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "more__search__improvements",
+    "git-widget-placeholder": "Recommend__Recipe",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/oliverkwun-morfitt/csc207/team-project",
     "node.js.detected.package.eslint": "true",
@@ -108,7 +103,6 @@
     <attachedChunks>
       <set>
         <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.25557.131" />
-        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-IU-252.25557.131" />
       </set>
     </attachedChunks>
   </component>
