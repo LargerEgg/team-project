@@ -26,13 +26,8 @@ public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
         recipe.incrementViews();
         repo.save(recipe);
 
-        ViewRecipeOutputData outputData = new ViewRecipeOutputData(
-                recipe.getTitle(),
-                recipe.getRecipeId(),
-                recipe.getViews(),
-                recipe.getSaves(),
-                recipe.getAverageRating()
-        );
+        // Changed to pass the full Recipe object
+        ViewRecipeOutputData outputData = new ViewRecipeOutputData(recipe);
         presenter.prepareSuccessView(outputData);
     }
 }
