@@ -29,7 +29,7 @@ public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
             return;
         }
 
-        List<Recipe> favorites = user.getsavedRecipe();
+        List<Recipe> favorites = user.getSavedRecipes();
 
         if (favorites == null || favorites.isEmpty()) {
             userPresenter.prepareFailView(
