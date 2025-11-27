@@ -13,14 +13,15 @@ public class Main {
                 appBuilder
                         .addLoginView()
                         .addSignupView()
-                        .addViewRecipeView()
-                        .addPostRecipeView();
-
+                        .addViewRecipeView();
                 // Get the ViewRecipeController after its use case is built
                 ViewRecipeController viewRecipeController = appBuilder.addViewRecipeUseCase();
 
                 // Now add the RecipeSearchView, passing the initialized ViewRecipeController
                 appBuilder.addRecipeSearchView(viewRecipeController);
+
+                // Needs to be added after
+                appBuilder.addPostRecipeView();
 
                 // Add the PostRecipeUseCase
                 appBuilder.addPostRecipeUseCase();

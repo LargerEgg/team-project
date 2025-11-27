@@ -207,7 +207,7 @@ public class AppBuilder {
     // New method to add PostRecipeView
     public AppBuilder addPostRecipeView() {
         postRecipeViewModel = new PostRecipeViewModel();
-        postRecipeView = new PostRecipeView(postRecipeViewModel, viewManagerModel);
+        postRecipeView = new PostRecipeView(postRecipeViewModel, recipeSearchViewModel, viewManagerModel);
         cardPanel.add(postRecipeView, postRecipeView.viewName);
         return this;
     }
