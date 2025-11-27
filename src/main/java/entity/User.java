@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Collections;
 
 public class User
 {
@@ -23,6 +24,9 @@ public class User
         }
         this.username = name;
         this.password = password;
+        this.savedRecipes = new ArrayList<>();
+        this.publishedRecipes = new ArrayList<>();
+        this.reviews = new ArrayList<>();
     }
 
     public String getUsername() {
@@ -34,35 +38,41 @@ public class User
     }
 
     public List<Recipe> getSavedRecipes() {
-        return savedRecipes;
+        if (savedRecipes == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(savedRecipes);
     }
 
     public void saveRecipe(Recipe recipe) {
-        if (recipe != null && !this.savedRecipes.contains(recipe)) {
+        if (recipe != null && savedRecipes != null && !this.savedRecipes.contains(recipe)) {
             this.savedRecipes.add(recipe);
         }
     }
 
     public void removeSavedRecipe(Recipe recipe) {
-        if (recipe != null) {
+        if (recipe != null && savedRecipes != null) {
             this.savedRecipes.remove(recipe);
         }
     }
 
     public void saveReview(Review review) {
-        if (review != null && !this.reviews.contains(review)) {
+        if (review != null && reviews != null && !this.reviews.contains(review)) {
             this.reviews.add(review);
         }
     }
 
     public void removeReview(Review review) {
-        if (review != null) {
+        if (review != null && reviews != null) {
             this.reviews.remove(review);
         }
     }
 
     public List<Review> getReviews() {
-        return this.reviews;
+        if (reviews == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(reviews);
     }
 
     public List<String> getFavouriteCategoriesRanked() {
