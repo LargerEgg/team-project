@@ -391,7 +391,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             viewManagerModel.setState("post recipe");
             viewManagerModel.firePropertyChange();
         } else if (evt.getSource() == recommendButton) {
-            // ★★★ 实现 Recommendation 逻辑 ★★★
             String username = recipeSearchViewModel.getState().getCurrentUser();
             if (username != null) {
                 recommendRecipeController.execute(username);
@@ -403,7 +402,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // 每次属性改变都检查登录状态，确保按钮即时更新
         checkLoginState();
 
         if ("state".equals(evt.getPropertyName())) {

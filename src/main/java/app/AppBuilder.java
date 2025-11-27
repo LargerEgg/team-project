@@ -86,7 +86,6 @@ public class AppBuilder {
     private PostRecipeView postRecipeView;
     private PostRecipeController postRecipeController;
 
-    // ★★★ 修复 1: 添加推荐功能的变量 ★★★
     private RecommendRecipeViewModel recommendRecipeViewModel;
     private RecommendRecipeView recommendRecipeView;
 
@@ -186,14 +185,10 @@ public class AppBuilder {
         RecipeSearchInputBoundary recipeSearchInteractor = new RecipeSearchInteractor(recipeDAO, recipeSearchOutputBoundary);
         RecipeSearchController recipeSearchController = new RecipeSearchController(recipeSearchInteractor);
 
-        // ★★★ 修复 2: 初始化推荐功能的 Use Case ★★★
         recommendRecipeViewModel = new RecommendRecipeViewModel();
         RecommendRecipeOutputBoundary recommendPresenter = new RecommendRecipePresenter(recommendRecipeViewModel, viewManagerModel);
-        // 使用 API DAO (因为 RecommendRecipeDataAccessInterface 在那里实现)
         RecommendRecipeInputBoundary recommendInteractor = new RecommendRecipeInteractor(apiRecipeDataAccessObject, recommendPresenter);
         RecommendRecipeController recommendController = new RecommendRecipeController(recommendInteractor);
-
-        // ★★★ 修复 3: 将 recommendController 作为第5个参数传入 ★★★
         recipeSearchView = new RecipeSearchView(
                 recipeSearchViewModel,
                 recipeSearchController,

@@ -161,7 +161,7 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
 
         // Use getSavedRecipes() to access the favorites list
         if (user.getSavedRecipes() != null) {
-            user.getSavedRecipes().add(mockRecipe);
+            user.saveRecipe(mockRecipe);
         } else {
             System.out.println("Warning: User saved recipes list is null. Please check User entity initialization.");
         }

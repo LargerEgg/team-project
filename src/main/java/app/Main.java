@@ -22,6 +22,9 @@ public class Main {
                 // Now add the RecipeSearchView, passing the initialized ViewRecipeController
                 appBuilder.addRecipeSearchView(viewRecipeController);
 
+                // Add the RecommendRecipeView (must be after addRecipeSearchView)
+                appBuilder.addRecommendRecipeView(viewRecipeController);
+
                 // Add the PostRecipeUseCase
                 appBuilder.addPostRecipeUseCase();
 
