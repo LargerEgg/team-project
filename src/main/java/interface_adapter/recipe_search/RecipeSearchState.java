@@ -78,12 +78,4 @@ public class RecipeSearchState {
     public void setTotalImageCount(int totalImageCount) {
         this.totalImageCount = totalImageCount;
     }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
 }
