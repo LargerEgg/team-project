@@ -33,6 +33,9 @@ public class User
         return password;
     }
 
+    public List<Recipe> getSavedRecipes() {
+        return savedRecipes;
+    }
 
     public void saveRecipe(Recipe recipe) {
         if (recipe != null && !this.savedRecipes.contains(recipe)) {
