@@ -52,8 +52,7 @@ public class PostRecipeInteractor implements PostRecipeInputBoundary {
             );
             presenter.prepareSuccessView(outputData);
         } catch (RuntimeException e) {
-            presenter.prepareFailedView("Failed to publish recipe", inputData);
-        }
+            presenter.prepareFailedView("Failed to publish recipe: " + e.getMessage(), inputData);        }
     }
 
     @Override
