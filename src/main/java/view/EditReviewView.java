@@ -61,7 +61,9 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
                             EditReviewController.execute(
                                     currentState.getReview(),
                                     currentState.getDescription(),
-                                    currentState.getRating()
+                                    currentState.getRating(),
+                                    currentState.getAuthorId(),
+                                    currentState.getRecipeId()
                             );
                         }
                     }

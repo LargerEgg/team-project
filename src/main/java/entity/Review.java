@@ -7,8 +7,8 @@ import java.util.UUID;
  */
 public class Review {
     private UUID reviewId;
-    private UUID recipeId;
-    private UUID authorId;
+    private String recipeId;
+    private String authorId;
     private Date dateCreated;
     private String title;
     private String description;
@@ -23,7 +23,7 @@ public class Review {
      * @param authorId the UUID of the author of this recipe
      * @throws IllegalArgumentException if the password or name are empty
      */
-    public Review(String title, String description, int rating, UUID recipeId, UUID authorId) {
+    public Review(String title, String description, int rating, String recipeId, String authorId) {
         /*
             REPLACE ALL OF THIS SHIT LATER
          */
@@ -74,11 +74,11 @@ public class Review {
         return reviewId;
     }
 
-    public UUID getRecipeId() {
+    public String getRecipeId() {
         return recipeId;
     }
 
-    public UUID getAuthorId() {
+    public String getAuthorId() {
         return authorId;
     }
 }

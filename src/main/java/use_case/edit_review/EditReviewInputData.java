@@ -8,11 +8,15 @@ public class EditReviewInputData {
     private final String review;
     private final String description;
     private final int rating;
+    private final String authorId;
+    private final String recipeId;
 
-    public EditReviewInputData(String review, String description, int rating) {
+    public EditReviewInputData(String review, String description, int rating, String authorId, String recipeId) {
         this.review = review;
         this.description = description;
         this.rating = rating;
+        this.authorId = authorId;
+        this.recipeId = recipeId;
     }
 
     public String getReview() {
@@ -26,4 +30,13 @@ public class EditReviewInputData {
     public int getRating() {
         return rating;
     }
+
+    public String getAuthorId() {
+        return authorId;
+    }
+
+    public String getRecipeId() {
+        return recipeId;
+    }
+
 }

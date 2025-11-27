@@ -5,14 +5,14 @@ package use_case.edit_review;
  */
 public class EditReviewOutputData {
 
-    private final String username;
+    private final String message;
 
-    public EditReviewOutputData(String username) {
-        this.username = username;
+    public EditReviewOutputData(String message) {
+        this.message = message;
     }
 
-    public String getUsername() {
-        return username;
+    public String getMessage() {
+        return message;
     }
 
 }

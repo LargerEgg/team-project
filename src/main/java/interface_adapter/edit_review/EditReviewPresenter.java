@@ -27,7 +27,7 @@ public class EditReviewPresenter implements EditReviewOutputBoundary {
     public void prepareSuccessView(EditReviewOutputData response) {
         // On success, switch to the login view.
         final ReviewsState reviewState = reviewsViewModel.getState();
-        reviewState.setReview(response.getUsername());
+        reviewState.setReview(response.getMessage());
         reviewsViewModel.firePropertyChange();
 
         viewManagerModel.setState(reviewsViewModel.getViewName());

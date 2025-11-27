@@ -20,9 +20,9 @@ public class EditReviewController {
      * @param description the description of the review
      * @param rating the rating of the review (1-5)
      */
-    public void execute(String review, String description, int rating) {
+    public void execute(String review, String description, int rating, String authorId, String recipeId) {
         final EditReviewInputData editReviewInputData = new EditReviewInputData(
-                review, description, rating);
+                review, description, rating, authorId, recipeId);
 
         EditReviewUseCaseInteractor.execute(editReviewInputData);
     }

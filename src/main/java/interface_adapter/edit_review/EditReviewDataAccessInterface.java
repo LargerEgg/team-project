@@ -1,6 +1,8 @@
 package interface_adapter.edit_review;
 
+import entity.Recipe;
 import entity.Review;
+import entity.User;
 
 import java.util.UUID;
 
@@ -35,5 +37,8 @@ public interface EditReviewDataAccessInterface {
      * @return the review with the given reviewID
      */
     Review get(UUID reviewId);
+
+    User findUserByUsername(String username);
+    Recipe findRecipeById(String recipeId);
 
 }

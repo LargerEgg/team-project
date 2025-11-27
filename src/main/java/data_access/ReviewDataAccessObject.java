@@ -3,6 +3,7 @@ package data_access;
 import entity.Recipe;
 
 import entity.Review;
+import entity.User;
 import interface_adapter.edit_review.EditReviewDataAccessInterface;
 
 import java.io.IOException;
@@ -86,5 +87,14 @@ public class ReviewDataAccessObject implements EditReviewDataAccessInterface {
     public Review get(UUID reviewId) {
         return null;
     }
+
+    public User findUserByUsername(String username){
+        return null;
+    }
+
+    public Recipe findRecipeById(String recipeId){
+        return null;
+    };
+
 }
 

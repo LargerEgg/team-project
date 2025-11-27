@@ -10,6 +10,8 @@ public class EditReviewState {
     private String descriptionError;
     private int rating;
     private String ratingError;
+    private String authorId;
+    private String recipeId;
 
     public String getReview() {
         return review;
@@ -34,6 +36,13 @@ public class EditReviewState {
     public String getRatingError() {
         return ratingError;
     }
+    public String getAuthorId() {
+        return authorId;
+    }
+    public String getRecipeId() {
+        return recipeId;
+    }
+
 
     public void setReview(String review) {
         this.review = review;
@@ -57,6 +66,14 @@ public class EditReviewState {
 
     public void setRatingError(String ratingError) {
         this.ratingError = ratingError;
+    }
+
+    public void setAuthorId(String authorId) {
+        this.authorId = authorId;
+    }
+
+    public void setRecipeId(String recipeId) {
+        this.recipeId = recipeId;
     }
 
     @Override
