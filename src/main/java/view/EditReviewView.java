@@ -1,5 +1,6 @@
 package view;
 
+import interface_adapter.ViewManagerModel;
 import interface_adapter.edit_review.EditReviewController;
 import interface_adapter.edit_review.EditReviewState;
 import interface_adapter.edit_review.EditReviewViewModel;
@@ -19,7 +20,8 @@ import java.beans.PropertyChangeListener;
  * The View for the Edit Review Use Case.
  */
 public class EditReviewView extends JPanel implements ActionListener, PropertyChangeListener {
-    private final String viewName = "Edit Review";
+    private final String viewName = "edit review";
+    private final ViewManagerModel viewManagerModel;
 
     private final EditReviewViewModel EditReviewViewModel;
     private final JTextField reviewInputField = new JTextField(15);
@@ -29,26 +31,27 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
     private EditReviewController EditReviewController = null;
 
     private final JButton publish;
-    private final JButton toReviews;
+    private final JButton backButton;
 
-    public EditReviewView(EditReviewViewModel EditReviewViewModel) {
-        this.EditReviewViewModel = EditReviewViewModel;
-        EditReviewViewModel.addPropertyChangeListener(this);
+    public EditReviewView(EditReviewViewModel editReviewViewModel, ViewManagerModel viewManagerModel) {
+        this.EditReviewViewModel = editReviewViewModel;
+        this.viewManagerModel = viewManagerModel;
+        editReviewViewModel.addPropertyChangeListener(this);
 
-        final JLabel title = new JLabel(EditReviewViewModel.TITLE_LABEL);
+        final JLabel title = new JLabel(editReviewViewModel.TITLE_LABEL);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         final LabelTextPanel reviewInfo = new LabelTextPanel(
-                new JLabel(EditReviewViewModel.REVIEW_LABEL), reviewInputField);
+                new JLabel(editReviewViewModel.REVIEW_LABEL), reviewInputField);
         final LabelTextPanel descriptionInfo = new LabelTextPanel(
-                new JLabel(EditReviewViewModel.DESCRIPTION_LABEL), descriptionInputField);
+                new JLabel(editReviewViewModel.DESCRIPTION_LABEL), descriptionInputField);
         final LabelTextPanel ratingInfo = new LabelTextPanel(
-                new JLabel(EditReviewViewModel.RATING_LABEL), ratingInputField);
+                new JLabel(editReviewViewModel.RATING_LABEL), ratingInputField);
 
         final JPanel buttons = new JPanel();
-        toReviews = new JButton(EditReviewViewModel.TO_REVIEWS_BUTTON_LABEL);
-        buttons.add(toReviews);
-        publish = new JButton(EditReviewViewModel.PUBLISH_BUTTON_LABEL);
+        backButton = new JButton(editReviewViewModel.BACK_BUTTON_LABEL);
+        buttons.add(backButton);
+        publish = new JButton(editReviewViewModel.PUBLISH_BUTTON_LABEL);
         buttons.add(publish);
 
         publish.addActionListener(
@@ -56,7 +59,7 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
                 new ActionListener() {
                     public void actionPerformed(ActionEvent evt) {
                         if (evt.getSource().equals(publish)) {
-                            final EditReviewState currentState = EditReviewViewModel.getState();
+                            final EditReviewState currentState = editReviewViewModel.getState();
 
                             EditReviewController.execute(
                                     currentState.getReview(),
@@ -70,13 +73,7 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
                 }
         );
 
-        toReviews.addActionListener(
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        EditReviewController.switchToReviewsView();
-                    }
-                }
-        );
+        backButton.addActionListener(this);
 
         addReviewListener();
         addDescriptionListener();
@@ -161,15 +158,25 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
 
     @Override
     public void actionPerformed(ActionEvent evt) {
-        JOptionPane.showMessageDialog(this, "Cancel not implemented yet.");
+        if (evt.getSource() == backButton) {
+            viewManagerModel.setState("view recipe");
+            viewManagerModel.firePropertyChange();
+        }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         final EditReviewState state = (EditReviewState) evt.getNewValue();
-        if (state.getReviewError() != null) {
+        if (state.getDescriptionError() != null && !state.getDescriptionError().isEmpty()) {
+            JOptionPane.showMessageDialog(this, state.getDescriptionError());
+        }
+        else if (state.getReviewError() != null && !state.getReviewError().isEmpty()) {
             JOptionPane.showMessageDialog(this, state.getReviewError());
         }
+        else if (state.getRatingError() != null && !state.getRatingError().isEmpty()) {
+            JOptionPane.showMessageDialog(this, state.getRatingError());
+        }
+
     }
 
     public String getViewName() {

@@ -19,6 +19,9 @@ import interface_adapter.signup.SignupViewModel;
 import interface_adapter.view_recipe.ViewRecipeController;
 import interface_adapter.view_recipe.ViewRecipePresenter;
 import interface_adapter.view_recipe.ViewRecipeViewModel;
+import interface_adapter.edit_review.EditReviewViewModel;
+import interface_adapter.edit_review.EditReviewController;
+import interface_adapter.edit_review.EditReviewPresenter;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
@@ -38,12 +41,17 @@ import use_case.view_recipe.ViewRecipeDataAccessInterface;
 import use_case.view_recipe.ViewRecipeInputBoundary;
 import use_case.view_recipe.ViewRecipeInteractor;
 import use_case.view_recipe.ViewRecipeOutputBoundary;
+import use_case.edit_review.EditReviewDataAccessInterface;
+import use_case.edit_review.EditReviewInputBoundary;
+import use_case.edit_review.EditReviewInteractor;
+import use_case.edit_review.EditReviewOutputBoundary;
 import view.LoginView;
 import view.PostRecipeView;
 import view.RecipeSearchView;
 import view.RecipeView;
 import view.SignupView;
 import view.ViewManager;
+import view.EditReviewView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -70,6 +78,7 @@ public class AppBuilder {
     private LoginViewModel loginViewModel;
     private RecipeSearchViewModel recipeSearchViewModel;
     private RecipeSearchView recipeSearchView;
+    private EditReviewView editReviewView;
 
     private ViewRecipeViewModel viewRecipeViewModel;
     private RecipeView recipeView;
@@ -78,6 +87,9 @@ public class AppBuilder {
     private PostRecipeViewModel postRecipeViewModel;
     private PostRecipeView postRecipeView;
     private PostRecipeController postRecipeController; // Declare the controller here
+
+    private EditReviewViewModel editReviewViewModel;
+    private EditReviewController editReviewController;
 
     public AppBuilder() {
 
@@ -183,6 +195,13 @@ public class AppBuilder {
         viewRecipeViewModel = new ViewRecipeViewModel();
         recipeView = new RecipeView(viewRecipeViewModel, viewManagerModel);
         cardPanel.add(recipeView, recipeView.viewName);
+        return this;
+    }
+
+    public AppBuilder addEditReviewView() {
+        editReviewViewModel = new EditReviewViewModel();
+        editReviewView = new EditReviewView(editReviewViewModel, viewManagerModel);
+        cardPanel.add(editReviewView, editReviewView.getViewName());
         return this;
     }
 

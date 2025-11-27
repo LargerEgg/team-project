@@ -14,7 +14,8 @@ public class Main {
                         .addLoginView()
                         .addSignupView()
                         .addViewRecipeView()
-                        .addPostRecipeView();
+                        .addPostRecipeView()
+                        .addEditReviewView();
 
                 // Get the ViewRecipeController after its use case is built
                 ViewRecipeController viewRecipeController = appBuilder.addViewRecipeUseCase();

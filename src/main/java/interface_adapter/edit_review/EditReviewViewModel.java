@@ -13,7 +13,7 @@ public class EditReviewViewModel extends ViewModel<EditReviewState> {
     public static final String RATING_LABEL = "Rating";
 
     public static final String PUBLISH_BUTTON_LABEL = "Publish";
-    public static final String TO_REVIEWS_BUTTON_LABEL = "Exit";
+    public static final String BACK_BUTTON_LABEL = "Back";
 
     public EditReviewViewModel() {
         super("edit review");
