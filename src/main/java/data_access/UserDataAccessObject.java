@@ -4,40 +4,30 @@ import entity.User;
 import use_case.login.LoginUserDataAccessInterface;
 import use_case.signup.SignupUserDataAccessInterface;
 
-import java.util.HashMap;
-import java.util.Map;
-
-/**
- * N.
- */
 public class UserDataAccessObject implements SignupUserDataAccessInterface, LoginUserDataAccessInterface {
-
-    private final Map<String, User> users = new HashMap<>();
-
-    private String currentUsername = null;
-
+    // TODO implement all over-rided methods
     @Override
     public boolean existsByName(String username) {
-        return users.containsKey(username);
+        return true;
     }
 
     @Override
     public void save(User user) {
-        users.put(user.getUsername(), user);
+        return;
     }
 
     @Override
     public User get(String username) {
-        return users.get(username);
+        return null;
     }
 
     @Override
     public String getCurrentUsername() {
-        return this.currentUsername;
+        return "";
     }
 
     @Override
     public void setCurrentUsername(String name) {
-        this.currentUsername = name;
+
     }
 }

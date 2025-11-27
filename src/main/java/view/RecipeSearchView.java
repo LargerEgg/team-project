@@ -6,16 +6,16 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.recipe_search.RecipeSearchController;
 import interface_adapter.recipe_search.RecipeSearchState;
 import interface_adapter.recipe_search.RecipeSearchViewModel;
-import interface_adapter.view_recipe.ViewRecipeController;
-import interface_adapter.recommend_recipe.RecommendRecipeController;
+import interface_adapter.view_recipe.ViewRecipeController; // Import the new controller
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.MouseAdapter; // Import MouseAdapter
+import java.awt.event.MouseEvent; // Import MouseEvent
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -28,9 +28,9 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     private final RecipeSearchViewModel recipeSearchViewModel;
     private final RecipeSearchController recipeSearchController;
     private final ViewManagerModel viewManagerModel;
-    private final ViewRecipeController viewRecipeController;
-    private final RecommendRecipeController recommendRecipeController;
+    private final ViewRecipeController viewRecipeController; // Add ViewRecipeController
 
+    // Header components
     private JTextField nameTextField;
     private JComboBox<String> categoryComboBox;
     private JComboBox<String> sortByComboBox;
@@ -42,21 +42,16 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     private JButton postRecipeButton; // Declare the new button
     private JLabel currentUserLabel;
 
+    // Results components
     private JPanel resultsPanel;
     private JProgressBar progressBar;
-    private JLabel loadingLabel;
+    private JLabel loadingLabel; // To hold the "Loading search results..." text
 
-    public RecipeSearchView(RecipeSearchViewModel recipeSearchViewModel,
-                            RecipeSearchController recipeSearchController,
-                            ViewManagerModel viewManagerModel,
-                            ViewRecipeController viewRecipeController,
-                            RecommendRecipeController recommendRecipeController) {
+    public RecipeSearchView(RecipeSearchViewModel recipeSearchViewModel, RecipeSearchController recipeSearchController, ViewManagerModel viewManagerModel, ViewRecipeController viewRecipeController) {
         this.recipeSearchViewModel = recipeSearchViewModel;
         this.recipeSearchController = recipeSearchController;
         this.viewManagerModel = viewManagerModel;
-        this.viewRecipeController = viewRecipeController;
-        this.recommendRecipeController = recommendRecipeController;
-
+        this.viewRecipeController = viewRecipeController; // Initialize the new controller
         this.recipeSearchViewModel.addPropertyChangeListener(this);
 
         setLayout(new BorderLayout());
@@ -80,7 +75,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             resultsPanel.add(noResultsLabel);
         } else {
             for (Recipe recipe : recipes) {
-                resultsPanel.add(createRecipeItem(recipe));
+                resultsPanel.add(createRecipeItem(recipe)); // Pass the full Recipe object
             }
         }
         resultsPanel.revalidate();
@@ -165,14 +160,14 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         headerPanel.add(searchButton, gbc);
 
         JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
-        separator.setForeground(Color.BLACK);
-        separator.setBackground(Color.BLACK);
+        separator.setForeground(Color.BLACK); // Set separator color to black
+        separator.setBackground(Color.BLACK); // Set separator color to black
         gbc.gridy = 3;
         gbc.gridx = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         headerPanel.add(separator, gbc);
-
+        
         gbc.gridy = 4;
         gbc.gridwidth = 1;
         gbc.fill = GridBagConstraints.NONE;
@@ -205,7 +200,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         return resultsScrollPane;
     }
 
-    private JPanel createRecipeItem(Recipe recipe) {
+    private JPanel createRecipeItem(Recipe recipe) { // Modified to accept a Recipe object
         JPanel itemPanel = new JPanel();
         itemPanel.setLayout(new BoxLayout(itemPanel, BoxLayout.X_AXIS));
         itemPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -215,24 +210,25 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         itemPanel.setBackground(Color.WHITE);
         itemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+        // Add MouseListener to the itemPanel
         itemPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == 1) {
+                if (e.getClickCount() == 1) { // Single click
                     viewRecipeController.execute(recipe.getRecipeId());
                 }
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
-                itemPanel.setBackground(new Color(240, 240, 240));
-                itemPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                itemPanel.setBackground(new Color(240, 240, 240)); // Light gray on hover
+                itemPanel.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Change cursor to hand
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                itemPanel.setBackground(Color.WHITE);
-                itemPanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                itemPanel.setBackground(Color.WHITE); // Restore original background
+                itemPanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR)); // Restore default cursor
             }
         });
 
@@ -300,23 +296,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         }
     }
 
-    private void checkLoginState() {
-        RecipeSearchState state = recipeSearchViewModel.getState();
-        String username = state.getUsername();
-
-        if (username != null && !username.isEmpty()) {
-            recommendButton.setVisible(true);
-            postRecipeButton.setVisible(true);
-            loginButton.setVisible(false);
-            signupButton.setVisible(false);
-        } else {
-            recommendButton.setVisible(false);
-            postRecipeButton.setVisible(false);
-            loginButton.setVisible(true);
-            signupButton.setVisible(true);
-        }
-    }
-
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource() == searchButton) {
             String name = nameTextField.getText();
@@ -336,7 +315,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
 
             resultsPanel.removeAll();
             resultsPanel.setLayout(new GridBagLayout());
-
+            
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
             gbc.gridy = 0;
@@ -346,8 +325,8 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             loadingLabel.setForeground(Color.GRAY);
             resultsPanel.add(loadingLabel, gbc);
 
-            gbc.gridy = 1;
-            gbc.insets = new Insets(10, 0, 0, 0);
+            gbc.gridy = 1; // Move to the next row
+            gbc.insets = new Insets(10, 0, 0, 0); // Add some top padding
             progressBar = new JProgressBar(0, 100);
             progressBar.setValue(0);
             progressBar.setStringPainted(true);
@@ -362,14 +341,15 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             }
             recipeSearchController.execute(name, category);
         } else if (evt.getSource() == sortByComboBox || evt.getSource() == ascendingCheckBox) {
+            // When sort criteria change, re-sort the currently displayed list
             List<Recipe> currentRecipes = new ArrayList<>(recipeSearchViewModel.getState().getRecipeList());
             sortRecipes(currentRecipes);
             updateView(currentRecipes);
         } else if (evt.getSource() == signupButton) {
-            viewManagerModel.setState("sign up");
+            viewManagerModel.setState("sign up"); // Corrected method call
             viewManagerModel.firePropertyChange();
         } else if (evt.getSource() == loginButton) {
-            viewManagerModel.setState("log in");
+            viewManagerModel.setState("log in"); // Corrected method call
             viewManagerModel.firePropertyChange();
         } else if (evt.getSource() == logoutButton) {
             RecipeSearchState currentState = recipeSearchViewModel.getState();
@@ -378,13 +358,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         } else if (evt.getSource() == postRecipeButton) { // Handle the new button's action
             viewManagerModel.setState("post recipe"); // Set the active view to "post recipe"
             viewManagerModel.firePropertyChange();
-        } else if (evt.getSource() == recommendButton) {
-            String username = recipeSearchViewModel.getState().getUsername();
-            if (username != null) {
-                recommendRecipeController.execute(username);
-            } else {
-                JOptionPane.showMessageDialog(this, "Please log in first!");
-            }
         }
     }
 
@@ -406,8 +379,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        checkLoginState();
-
         if ("state".equals(evt.getPropertyName())) {
             RecipeSearchState state = (RecipeSearchState) evt.getNewValue();
             updateUserRelatedUI(state);
@@ -426,7 +397,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
                 }
             } else {
                 List<Recipe> recipesToDisplay = new ArrayList<>(state.getRecipeList());
-                sortRecipes(recipesToDisplay);
+                sortRecipes(recipesToDisplay); // Sort the new list before displaying
                 updateView(recipesToDisplay);
                 if (progressBar != null) {
                     progressBar.setVisible(false); // Hide progress bar on success

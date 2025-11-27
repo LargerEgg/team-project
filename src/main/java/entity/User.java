@@ -62,15 +62,45 @@ public class User
         return this.reviews;
     }
 
-    public List<Recipe> getSavedRecipes() {
-        return savedRecipes;
-    }
+    public List<String> getFavouriteCategoriesRanked() {
+        if (this.savedRecipes == null || this.savedRecipes.isEmpty()) {
+            return new ArrayList<>();
+        }
 
-    public List<Recipe> getPublishedRecipes() {
-        return publishedRecipes;
-    }
+        Map<String, Integer> categoryCounts = new HashMap<>();
+        for (Recipe recipe : this.savedRecipes) {
+            if (recipe == null) {
+                continue;
+            }
 
-    public String getUserid() {
-        return userid;
+            String category;
+            try {
+                category = recipe.getCategory();
+            } catch (Exception e) {
+                continue;
+            }
+
+            if (category == null || category.trim().isEmpty()) {
+                continue;
+            }
+
+            category = category.trim();
+            categoryCounts.put(category, categoryCounts.getOrDefault(category, 0) + 1);
+        }
+
+        if (categoryCounts.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Map.Entry<String, Integer>> entryList = new ArrayList<>(categoryCounts.entrySet());
+
+        entryList.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
+
+        List<String> rankedCategories = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : entryList) {
+            rankedCategories.add(entry.getKey());
+        }
+
+        return rankedCategories;
     }
 }
