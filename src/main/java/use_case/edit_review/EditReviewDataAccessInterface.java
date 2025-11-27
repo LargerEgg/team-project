@@ -1,14 +1,12 @@
 package use_case.edit_review;
 
-import entity.Recipe;
+import entity.Review;
 import entity.User;
 
 public interface EditReviewDataAccessInterface {
-    User findUserByUsername(String username);
-    Recipe findRecipeById(String recipeId);
+    Review findReviewById(String reviewId);
 
-    boolean isRecipeSavedByUser(String username, String recipeId);
+    boolean isReviewSavedByUser(String username, String reviewId);
 
-    void saveUser(User user);
-    void saveRecipe(Recipe recipe);
+    void saveReview(Review recipe);
 }

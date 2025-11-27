@@ -5,7 +5,7 @@ package use_case.edit_review;
  */
 public class EditReviewInputData {
 
-    private final String review;
+    private final String review; //title
     private final String description;
     private final int rating;
     private final String authorId;
