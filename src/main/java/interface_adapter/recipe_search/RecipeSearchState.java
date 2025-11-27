@@ -13,6 +13,7 @@ public class RecipeSearchState {
     private boolean ascending = true; // Default ascending
     private int currentImageCount = 0;
     private int totalImageCount = 0;
+    private String username = "";
 
     public String getSearchError() {
         return searchError;
@@ -68,5 +69,13 @@ public class RecipeSearchState {
 
     public void setTotalImageCount(int totalImageCount) {
         this.totalImageCount = totalImageCount;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

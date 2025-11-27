@@ -21,6 +21,9 @@ import interface_adapter.signup.SignupViewModel;
 import interface_adapter.view_recipe.ViewRecipeController;
 import interface_adapter.view_recipe.ViewRecipePresenter;
 import interface_adapter.view_recipe.ViewRecipeViewModel;
+import interface_adapter.recommend_recipe.RecommendRecipeController;
+import interface_adapter.recommend_recipe.RecommendRecipePresenter;
+import interface_adapter.recommend_recipe.RecommendRecipeViewModel;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
@@ -32,10 +35,12 @@ import use_case.recipe_search.RecipeSearchInputBoundary;
 import use_case.recipe_search.RecipeSearchInteractor;
 import use_case.recipe_search.RecipeSearchOutputBoundary;
 import use_case.recipe_search.RecipeSearchRecipeDataAccessInterface;
+import use_case.recommend_recipe.RecommendRecipeInputBoundary;
+import use_case.recommend_recipe.RecommendRecipeInteractor;
+import use_case.recommend_recipe.RecommendRecipeOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
-import use_case.signup.SignupUserDataAccessInterface;
 import use_case.view_recipe.ViewRecipeDataAccessInterface;
 import use_case.view_recipe.ViewRecipeInputBoundary;
 import use_case.view_recipe.ViewRecipeInteractor;
@@ -44,6 +49,7 @@ import view.LoginView;
 import view.PostRecipeView;
 import view.RecipeSearchView;
 import view.RecipeView;
+import view.RecommendRecipeView;
 import view.SignupView;
 import view.ViewManager;
 
@@ -73,7 +79,10 @@ public class AppBuilder {
     // New fields for PostRecipe
     private PostRecipeViewModel postRecipeViewModel;
     private PostRecipeView postRecipeView;
-    private PostRecipeController postRecipeController; // Declare the controller here
+    private PostRecipeController postRecipeController;
+
+    private RecommendRecipeViewModel recommendRecipeViewModel;
+    private RecommendRecipeView recommendRecipeView;
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -129,8 +138,27 @@ public class AppBuilder {
         RecipeSearchOutputBoundary recipeSearchOutputBoundary = new RecipeSearchPresenter(viewManagerModel, recipeSearchViewModel);
         RecipeSearchInputBoundary recipeSearchInteractor = new RecipeSearchInteractor(recipeDAO, recipeSearchOutputBoundary);
         RecipeSearchController recipeSearchController = new RecipeSearchController(recipeSearchInteractor);
-        recipeSearchView = new RecipeSearchView(recipeSearchViewModel, recipeSearchController, viewManagerModel, viewRecipeController);
+
+        recommendRecipeViewModel = new RecommendRecipeViewModel();
+        RecommendRecipeOutputBoundary recommendRecipeOutputBoundary = new RecommendRecipePresenter(recommendRecipeViewModel);
+        RecommendRecipeInputBoundary recommendRecipeInteractor = new RecommendRecipeInteractor(recipeDataAccessObject, recommendRecipeOutputBoundary);
+        RecommendRecipeController recommendRecipeController = new RecommendRecipeController(recommendRecipeInteractor);
+
+        recipeSearchView = new RecipeSearchView(
+                recipeSearchViewModel,
+                recipeSearchController,
+                viewManagerModel,
+                viewRecipeController,
+                recommendRecipeController
+        );
+
         cardPanel.add(recipeSearchView, recipeSearchView.viewName);
+        return this;
+    }
+
+    public AppBuilder addRecommendRecipeView(ViewRecipeController viewRecipeController) {
+        recommendRecipeView = new RecommendRecipeView(recommendRecipeViewModel, viewManagerModel, viewRecipeController);
+        cardPanel.add(recommendRecipeView, recommendRecipeView.viewName);
         return this;
     }
 
