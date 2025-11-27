@@ -1,8 +1,6 @@
 package app;
 
-import data_access.PostRecipeDataAccessObject;
-import data_access.RecipeDataAccessObject;
-import data_access.UserDataAccessObject;
+import data_access.*;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.login.LoginController;
@@ -55,6 +53,7 @@ import view.ViewManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.util.List;
 
 public class AppBuilder {
@@ -65,6 +64,11 @@ public class AppBuilder {
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
     private UserDataAccessObject userDataAccessObject = new UserDataAccessObject();
     private RecipeDataAccessObject recipeDataAccessObject = new RecipeDataAccessObject();
+
+    private static final boolean USE_FIREBASE = true;
+    private FirebaseUserDataAccessObject firebaseUserDataAccessObject;
+    private FirebaseRecipeDataAccessObject firebaseRecipeDataAccessObject;
+    private RecipeDataAccessObject apiRecipeDataAccessObject; // For MealDB API
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -85,7 +89,27 @@ public class AppBuilder {
     private RecommendRecipeView recommendRecipeView;
 
     public AppBuilder() {
+
         cardPanel.setLayout(cardLayout);
+
+        // Initialize Firebase if enabled
+        if (USE_FIREBASE) {
+            try {
+                FirebaseInitializer.initialize();
+                firebaseUserDataAccessObject = new FirebaseUserDataAccessObject(userFactory);
+                firebaseRecipeDataAccessObject = new FirebaseRecipeDataAccessObject();
+                System.out.println("Firebase data access objects initialized successfully!");
+            } catch (IOException e) {
+                System.err.println("Failed to initialize Firebase: " + e.getMessage());
+                System.err.println("Falling back to in-memory data access.");
+                // Fall back to non-Firebase implementation
+                firebaseUserDataAccessObject = null;
+                firebaseRecipeDataAccessObject = null;
+            }
+        }
+
+        // Always initialize API DAO for searching external recipes
+        apiRecipeDataAccessObject = new RecipeDataAccessObject();
     }
 
     public AppBuilder addSignupView() {
@@ -96,10 +120,21 @@ public class AppBuilder {
     }
 
     public AppBuilder addSignupUseCase() {
+        SignupUserDataAccessInterface userDAO;
+
+        if (USE_FIREBASE && firebaseUserDataAccessObject != null) {
+            System.out.println("✅ Using Firebase for user signup");
+            userDAO = firebaseUserDataAccessObject;
+        } else {
+            System.out.println("⚠️  Using in-memory storage for user signup");
+            userDAO = new InMemoryUserDataAccessObject();
+        }
+
+
         final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
                 signupViewModel, loginViewModel);
         final SignupInputBoundary userSignupInteractor = new SignupInteractor(
-                userDataAccessObject, signupOutputBoundary, userFactory);
+                userDAO, signupOutputBoundary, userFactory);
 
         SignupController controller = new SignupController(userSignupInteractor);
         signupView.setSignupController(controller);
@@ -114,10 +149,20 @@ public class AppBuilder {
     }
 
     public AppBuilder addLoginUseCase() {
+        use_case.login.LoginUserDataAccessInterface userDAO;
+
+        if (USE_FIREBASE && firebaseUserDataAccessObject != null) {
+            System.out.println("✅ Using Firebase for user login");
+            userDAO = firebaseUserDataAccessObject;
+        } else {
+            System.out.println("⚠️  Using in-memory storage for user login");
+            userDAO = new InMemoryUserDataAccessObject();
+        }
+
         final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
                 recipeSearchViewModel, loginViewModel);
         final LoginInputBoundary loginInteractor = new LoginInteractor(
-                userDataAccessObject, loginOutputBoundary);
+                userDAO, loginOutputBoundary);
 
         LoginController loginController = new LoginController(loginInteractor);
         loginView.setLoginController(loginController);
@@ -127,7 +172,7 @@ public class AppBuilder {
     // Modified to accept ViewRecipeController
     public AppBuilder addRecipeSearchView(ViewRecipeController viewRecipeController) {
         recipeSearchViewModel = new RecipeSearchViewModel();
-        RecipeSearchRecipeDataAccessInterface recipeDAO = recipeDataAccessObject;
+        RecipeSearchRecipeDataAccessInterface recipeDAO = apiRecipeDataAccessObject;
 
         // Pre-fetch categories and set them in the state
         List<String> categories = recipeDAO.getAllCategories();
@@ -172,9 +217,19 @@ public class AppBuilder {
     // Modified to return ViewRecipeController
     public ViewRecipeController addViewRecipeUseCase() {
         ViewRecipeOutputBoundary viewRecipeOutputBoundary = new ViewRecipePresenter(viewRecipeViewModel, viewManagerModel);
-        ViewRecipeDataAccessInterface viewRecipeDataAccessObject = recipeDataAccessObject;
+
+        ViewRecipeDataAccessInterface viewRecipeDataAccessObject;
+        if (USE_FIREBASE && firebaseRecipeDataAccessObject != null) {
+            viewRecipeDataAccessObject = new CompositeRecipeDataAccess(
+                    firebaseRecipeDataAccessObject,
+                    apiRecipeDataAccessObject
+            );
+        } else {
+            viewRecipeDataAccessObject = apiRecipeDataAccessObject;
+        }
+
         ViewRecipeInputBoundary viewRecipeInteractor = new ViewRecipeInteractor(viewRecipeDataAccessObject, viewRecipeOutputBoundary);
-        return new ViewRecipeController(viewRecipeInteractor); // Return the controller
+        return new ViewRecipeController(viewRecipeInteractor);
     }
 
     // New method to add PostRecipeView
@@ -188,7 +243,12 @@ public class AppBuilder {
     // New method to add PostRecipeUseCase
     public AppBuilder addPostRecipeUseCase() {
         PostRecipeOutputBoundary postRecipeOutputBoundary = new PostRecipePresenter(viewManagerModel, postRecipeViewModel);
-        PostRecipeDataAccessInterface postRecipeDataAccess = new PostRecipeDataAccessObject();
+
+        // Use Firebase for posting recipes if available, otherwise use in-memory
+        PostRecipeDataAccessInterface postRecipeDataAccess = USE_FIREBASE && firebaseRecipeDataAccessObject != null
+                ? firebaseRecipeDataAccessObject
+                : new PostRecipeDataAccessObject();
+
         PostRecipeInputBoundary postRecipeInteractor = new PostRecipeInteractor(postRecipeDataAccess, postRecipeOutputBoundary);
         postRecipeController = new PostRecipeController(postRecipeInteractor);
         postRecipeView.setPostRecipeController(postRecipeController);
@@ -199,6 +259,12 @@ public class AppBuilder {
         final JFrame application = new JFrame("Recipe Application");
         application.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (USE_FIREBASE) {
+                FirebaseInitializer.shutdown();
+            }
+        }));
+
         application.add(cardPanel);
 
         // Set the initial view to the recipe search view
@@ -206,5 +272,32 @@ public class AppBuilder {
         viewManagerModel.firePropertyChange();
 
         return application;
+    }
+
+    private static class CompositeRecipeDataAccess implements ViewRecipeDataAccessInterface {
+        private final FirebaseRecipeDataAccessObject firebaseDAO;
+        private final RecipeDataAccessObject apiDAO;
+
+        public CompositeRecipeDataAccess(FirebaseRecipeDataAccessObject firebaseDAO, RecipeDataAccessObject apiDAO) {
+            this.firebaseDAO = firebaseDAO;
+            this.apiDAO = apiDAO;
+        }
+
+        @Override
+        public entity.Recipe findById(String recipeId) {
+            // Try Firebase first (user-created recipes)
+            entity.Recipe recipe = firebaseDAO.findById(recipeId);
+            if (recipe != null) {
+                return recipe;
+            }
+            // Fall back to API (external recipes)
+            return apiDAO.findById(recipeId);
+        }
+
+        @Override
+        public void save(entity.Recipe recipe) {
+            // Always save to Firebase
+            firebaseDAO.save(recipe);
+        }
     }
 }

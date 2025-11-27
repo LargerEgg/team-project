@@ -13,7 +13,15 @@ public class RecipeSearchState {
     private boolean ascending = true; // Default ascending
     private int currentImageCount = 0;
     private int totalImageCount = 0;
-    private String username = "";
+    private String currentUser;
+
+    public String getCurrentUser() {
+        return currentUser;
+    }
+
+    public void setCurrentUser(String currentUser) {
+        this.currentUser = currentUser;
+    }
 
     public String getSearchError() {
         return searchError;
