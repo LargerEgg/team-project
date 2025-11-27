@@ -47,6 +47,7 @@ import view.ViewManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.util.List;
 
 public class AppBuilder {
@@ -89,7 +90,7 @@ public class AppBuilder {
                 firebaseUserDataAccessObject = new FirebaseUserDataAccessObject(userFactory);
                 firebaseRecipeDataAccessObject = new FirebaseRecipeDataAccessObject();
                 System.out.println("Firebase data access objects initialized successfully!");
-            } catch (Exception e) {
+            } catch (IOException | IllegalStateException e) {
                 System.err.println("Failed to initialize Firebase: " + e.getMessage());
                 System.err.println("Falling back to in-memory data access.");
                 // Fall back to non-Firebase implementation

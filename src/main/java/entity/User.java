@@ -38,45 +38,39 @@ public class User
     }
 
     public List<Recipe> getSavedRecipes() {
-        if (savedRecipes == null) {
-            return Collections.emptyList();
-        }
         return Collections.unmodifiableList(savedRecipes);
     }
 
     public void saveRecipe(Recipe recipe) {
-        if (recipe != null && savedRecipes != null && !this.savedRecipes.contains(recipe)) {
+        if (recipe != null && !this.savedRecipes.contains(recipe)) {
             this.savedRecipes.add(recipe);
         }
     }
 
     public void removeSavedRecipe(Recipe recipe) {
-        if (recipe != null && savedRecipes != null) {
+        if (recipe != null) {
             this.savedRecipes.remove(recipe);
         }
     }
 
     public void saveReview(Review review) {
-        if (review != null && reviews != null && !this.reviews.contains(review)) {
+        if (review != null && !this.reviews.contains(review)) {
             this.reviews.add(review);
         }
     }
 
     public void removeReview(Review review) {
-        if (review != null && reviews != null) {
+        if (review != null) {
             this.reviews.remove(review);
         }
     }
 
     public List<Review> getReviews() {
-        if (reviews == null) {
-            return Collections.emptyList();
-        }
         return Collections.unmodifiableList(reviews);
     }
 
     public List<String> getFavouriteCategoriesRanked() {
-        if (this.savedRecipes == null || this.savedRecipes.isEmpty()) {
+        if (this.savedRecipes.isEmpty()) {
             return new ArrayList<>();
         }
 
