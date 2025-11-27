@@ -19,6 +19,9 @@ import interface_adapter.signup.SignupViewModel;
 import interface_adapter.view_recipe.ViewRecipeController;
 import interface_adapter.view_recipe.ViewRecipePresenter;
 import interface_adapter.view_recipe.ViewRecipeViewModel;
+import interface_adapter.recommend_recipe.RecommendRecipeController;
+import interface_adapter.recommend_recipe.RecommendRecipePresenter;
+import interface_adapter.recommend_recipe.RecommendRecipeViewModel;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
@@ -30,6 +33,9 @@ import use_case.recipe_search.RecipeSearchInputBoundary;
 import use_case.recipe_search.RecipeSearchInteractor;
 import use_case.recipe_search.RecipeSearchOutputBoundary;
 import use_case.recipe_search.RecipeSearchRecipeDataAccessInterface;
+import use_case.recommend_recipe.RecommendRecipeInputBoundary;
+import use_case.recommend_recipe.RecommendRecipeInteractor;
+import use_case.recommend_recipe.RecommendRecipeOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
@@ -42,6 +48,7 @@ import view.LoginView;
 import view.PostRecipeView;
 import view.RecipeSearchView;
 import view.RecipeView;
+import view.RecommendRecipeView;
 import view.SignupView;
 import view.ViewManager;
 
@@ -77,7 +84,11 @@ public class AppBuilder {
     // New fields for PostRecipe
     private PostRecipeViewModel postRecipeViewModel;
     private PostRecipeView postRecipeView;
-    private PostRecipeController postRecipeController; // Declare the controller here
+    private PostRecipeController postRecipeController;
+
+    // ★★★ 修复 1: 添加推荐功能的变量 ★★★
+    private RecommendRecipeViewModel recommendRecipeViewModel;
+    private RecommendRecipeView recommendRecipeView;
 
     public AppBuilder() {
 
@@ -174,8 +185,29 @@ public class AppBuilder {
         RecipeSearchOutputBoundary recipeSearchOutputBoundary = new RecipeSearchPresenter(viewManagerModel, recipeSearchViewModel);
         RecipeSearchInputBoundary recipeSearchInteractor = new RecipeSearchInteractor(recipeDAO, recipeSearchOutputBoundary);
         RecipeSearchController recipeSearchController = new RecipeSearchController(recipeSearchInteractor);
-        recipeSearchView = new RecipeSearchView(recipeSearchViewModel, recipeSearchController, viewManagerModel, viewRecipeController);
+
+        // ★★★ 修复 2: 初始化推荐功能的 Use Case ★★★
+        recommendRecipeViewModel = new RecommendRecipeViewModel();
+        RecommendRecipeOutputBoundary recommendPresenter = new RecommendRecipePresenter(recommendRecipeViewModel, viewManagerModel);
+        // 使用 API DAO (因为 RecommendRecipeDataAccessInterface 在那里实现)
+        RecommendRecipeInputBoundary recommendInteractor = new RecommendRecipeInteractor(apiRecipeDataAccessObject, recommendPresenter);
+        RecommendRecipeController recommendController = new RecommendRecipeController(recommendInteractor);
+
+        // ★★★ 修复 3: 将 recommendController 作为第5个参数传入 ★★★
+        recipeSearchView = new RecipeSearchView(
+                recipeSearchViewModel,
+                recipeSearchController,
+                viewManagerModel,
+                viewRecipeController,
+                recommendController
+        );
         cardPanel.add(recipeSearchView, recipeSearchView.viewName);
+        return this;
+    }
+
+    public AppBuilder addRecommendRecipeView(ViewRecipeController viewRecipeController) {
+        recommendRecipeView = new RecommendRecipeView(recommendRecipeViewModel, viewManagerModel, viewRecipeController);
+        cardPanel.add(recommendRecipeView, recommendRecipeView.viewName);
         return this;
     }
 

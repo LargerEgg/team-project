@@ -62,9 +62,6 @@ public class User
         return this.reviews;
     }
 
-    public List<Recipe> getSavedRecipes() {
-        return savedRecipes;
-    }
 
     public String getUserid() {
         return userid;
@@ -72,5 +69,9 @@ public class User
 
     public List<Recipe> getPublishedRecipes() {
         return publishedRecipes;
+    }
+
+    public List<Recipe> getSavedRecipes() {
+        return savedRecipes;
     }
 }

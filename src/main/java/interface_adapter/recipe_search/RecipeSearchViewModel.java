@@ -15,4 +15,7 @@ public class RecipeSearchViewModel extends ViewModel<RecipeSearchState> {
     public RecipeSearchState getState() {
         return super.getState();
     }
+
+    public void firePropertyChanged() {
+    }
 }
