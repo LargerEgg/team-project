@@ -1,13 +1,15 @@
 package use_case.view_recipe;
 
-public class ViewRecipeInputData {
-    private final String recipeId;
+import entity.Recipe;
 
-    public ViewRecipeInputData(String recipeId) {
-        this.recipeId = recipeId;
+public class ViewRecipeInputData {
+    private final Recipe recipe;
+
+    public ViewRecipeInputData(Recipe recipe) {
+        this.recipe = recipe;
     }
 
-    public String getRecipeId() {
-        return recipeId;
+    public Recipe getRecipe() {
+        return recipe;
     }
 }
