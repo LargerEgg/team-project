@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Collections;
 
 public class User
 {
@@ -23,6 +24,9 @@ public class User
         }
         this.username = name;
         this.password = password;
+        this.savedRecipes = new ArrayList<>();
+        this.publishedRecipes = new ArrayList<>();
+        this.reviews = new ArrayList<>();
     }
 
     public String getUsername() {
@@ -34,7 +38,7 @@ public class User
     }
 
     public List<Recipe> getSavedRecipes() {
-        return savedRecipes;
+        return Collections.unmodifiableList(savedRecipes);
     }
 
     public void saveRecipe(Recipe recipe) {
@@ -62,11 +66,7 @@ public class User
     }
 
     public List<Review> getReviews() {
-        return this.reviews;
-    }
-
-    public List<Recipe> getSavedRecipes() {
-        return savedRecipes;
+        return Collections.unmodifiableList(reviews);
     }
 
     public String getUserid() {
