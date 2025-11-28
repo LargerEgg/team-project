@@ -1,19 +1,22 @@
 package use_case.save_recipe;
 
+import entity.Recipe;
+
 public class SaveRecipeInputData {
     private final String username;
-    private final String recipeId;
+    private final Recipe recipe;
 
-    public SaveRecipeInputData(String username, String recipeId) {
+    public SaveRecipeInputData(String username,Recipe recipe) {
         this.username = username;
-        this.recipeId = recipeId;
+        this.recipe = recipe;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public String getRecipeId() {
-        return recipeId;
+    public Recipe getRecipe() {
+        return recipe;
     }
+
 }
