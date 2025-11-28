@@ -6,13 +6,8 @@ package use_case.edit_review;
 public interface EditReviewInputBoundary {
 
     /**
-     * Executes the signup use case.
+     * Executes the 'publish review' use case.
      * @param editReviewInputData the input data
      */
-    void execute(EditReviewInputData editReviewInputData);
-
-    /**
-     * Executes the switch to login view use case.
-     */
-    void switchToReviewsView();
+    void publish(EditReviewInputData editReviewInputData);
 }

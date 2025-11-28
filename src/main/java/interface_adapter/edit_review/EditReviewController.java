@@ -16,21 +16,9 @@ public class EditReviewController {
 
     /**
      * Executes the Publish Use Case.
-     * @param review the title of the review
-     * @param description the description of the review
-     * @param rating the rating of the review (1-5)
+     * @param inputData the input data in a review
      */
-    public void execute(String review, String description, int rating, String authorId, String recipeId) {
-        final EditReviewInputData editReviewInputData = new EditReviewInputData(
-                review, description, rating, authorId, recipeId);
-
-        EditReviewUseCaseInteractor.execute(editReviewInputData);
-    }
-
-    /**
-     * Executes the "switch to ReviewsView" Use Case.
-     */
-    public void switchToReviewsView() {
-        EditReviewUseCaseInteractor.switchToReviewsView();
+    public void publish(EditReviewInputData inputData) {
+        EditReviewUseCaseInteractor.publish(inputData);
     }
 }

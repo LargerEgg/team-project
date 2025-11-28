@@ -15,47 +15,40 @@ import java.util.UUID;
 public class EditReviewInteractor implements EditReviewInputBoundary {
     private final EditReviewDataAccessInterface reviewDataAccessObject;
     private final EditReviewOutputBoundary reviewPresenter;
-    private final Review review;
 
     public EditReviewInteractor(ReviewDataAccessObject editReviewDataAccessInterface,
-                            EditReviewOutputBoundary editReviewOutputBoundary,
-                            Review review) {
+                                EditReviewOutputBoundary editReviewOutputBoundary,
+                                Review review) {
         this.reviewDataAccessObject = editReviewDataAccessInterface;
         this.reviewPresenter = editReviewOutputBoundary;
-        this.review = review;
     }
 
     @Override
-    public void execute(EditReviewInputData editReviewInputData) {
-        String authorId = editReviewInputData.getAuthorId();
-        String recipeId = editReviewInputData.getRecipeId();
+    public void publish(EditReviewInputData inputData) {
+        String authorId = inputData.getAuthorId();
+        String recipeId = inputData.getRecipeId();
         Date now = new Date();
         String reviewId = UUID.randomUUID().toString();
-        String title = editReviewInputData.getReview();
-        String description = editReviewInputData.getDescription();
-        int rating = editReviewInputData.getRating();
+        String title = inputData.getReview();
+        String description = inputData.getDescription();
+        int rating = inputData.getRating();
 
-        if ("".equals(editReviewInputData.getReview())) {
+        if (title.isBlank()) {
             reviewPresenter.prepareFailView("Title cannot be empty.");
+            return;
         }
-        else if ("".equals(editReviewInputData.getDescription())) {
+        if (description.isBlank()) {
             reviewPresenter.prepareFailView("Description cannot be empty.");
+            return;
         }
-        else {
-            try {
-                final Review review = new Review(reviewId, recipeId, authorId, now, title, description, rating);
-                reviewDataAccessObject.save(review);
-                EditReviewOutputData outputData = new EditReviewOutputData("Review published.");
-                reviewPresenter.prepareSuccessView(outputData);
-            } catch (RuntimeException e) {
-                reviewPresenter.prepareFailView("Failed to publish review");
-            }
 
+        try {
+            final Review review = new Review(reviewId, recipeId, authorId, now, title, description, rating);
+            reviewDataAccessObject.save(review);
+            EditReviewOutputData outputData = new EditReviewOutputData(reviewId, "Review published.");
+            reviewPresenter.prepareSuccessView(outputData);
+        } catch (RuntimeException e) {
+            reviewPresenter.prepareFailView("Failed to publish review");
         }
-    }
-
-    @Override
-    public void switchToReviewsView() {
-        reviewPresenter.switchToReviewsView();
     }
 }

@@ -4,8 +4,11 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.edit_review.EditReviewController;
 import interface_adapter.edit_review.EditReviewState;
 import interface_adapter.edit_review.EditReviewViewModel;
+import use_case.edit_review.EditReviewInputData;
+import use_case.post_recipe.PostRecipeInputData;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -15,86 +18,140 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 
 /**
  * The View for the Edit Review Use Case.
  */
 public class EditReviewView extends JPanel implements ActionListener, PropertyChangeListener {
     private final String viewName = "edit review";
+    private final EditReviewViewModel editReviewViewModel;
+    private EditReviewController editReviewController;
     private final ViewManagerModel viewManagerModel;
 
-    private final EditReviewViewModel EditReviewViewModel;
-    private final JTextField reviewInputField = new JTextField(15);
-    private final JTextArea descriptionInputField = new JTextArea(10, 15);
+    private JTextField titleField;
+    private JTextArea descriptionField = new JTextArea(10, 15);
     private final SpinnerModel ratingModel = new SpinnerNumberModel(5, 1, 5, 1);
-    private final JSpinner ratingInputField = new JSpinner(ratingModel);
-    private EditReviewController EditReviewController = null;
+    private JSpinner ratingField;
 
-    private final JButton publish;
-    private final JButton backButton;
+    private JButton publishButton;
+    private JButton backButton;
+
+    private JLabel messageLabel;
 
     public EditReviewView(EditReviewViewModel editReviewViewModel, ViewManagerModel viewManagerModel) {
-        this.EditReviewViewModel = editReviewViewModel;
-        this.viewManagerModel = viewManagerModel;
+        this.editReviewViewModel = editReviewViewModel;
         editReviewViewModel.addPropertyChangeListener(this);
+        this.viewManagerModel = viewManagerModel;
 
-        final JLabel title = new JLabel(editReviewViewModel.TITLE_LABEL);
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        setLayout(new BorderLayout());
+        setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        final LabelTextPanel reviewInfo = new LabelTextPanel(
-                new JLabel(editReviewViewModel.REVIEW_LABEL), reviewInputField);
-        final LabelTextPanel descriptionInfo = new LabelTextPanel(
-                new JLabel(editReviewViewModel.DESCRIPTION_LABEL), descriptionInputField);
-        final LabelTextPanel ratingInfo = new LabelTextPanel(
-                new JLabel(editReviewViewModel.RATING_LABEL), ratingInputField);
+        JLabel title = new JLabel(interface_adapter.edit_review.EditReviewViewModel.TITLE_LABEL);
+        title.setFont(new Font("SansSerif", Font.BOLD, 24));
+        title.setHorizontalAlignment(SwingConstants.CENTER);
+        add(title, BorderLayout.NORTH);
 
-        final JPanel buttons = new JPanel();
-        backButton = new JButton(editReviewViewModel.BACK_BUTTON_LABEL);
-        buttons.add(backButton);
-        publish = new JButton(editReviewViewModel.PUBLISH_BUTTON_LABEL);
-        buttons.add(publish);
+        JPanel formPanel = createFormPanel();
+        add(formPanel, BorderLayout.CENTER);
 
-        publish.addActionListener(
-                // This creates an anonymous subclass of ActionListener and instantiates it.
-                new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        if (evt.getSource().equals(publish)) {
-                            final EditReviewState currentState = editReviewViewModel.getState();
+        JPanel buttonPanel = createButtonPanel();
+        add(buttonPanel, BorderLayout.SOUTH);
+    }
 
-                            EditReviewController.execute(
-                                    currentState.getReview(),
-                                    currentState.getDescription(),
-                                    currentState.getRating(),
-                                    currentState.getAuthorId(),
-                                    currentState.getRecipeId()
-                            );
-                        }
-                    }
-                }
-        );
+    private JPanel createFormPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
 
+        int row = 0;
+
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        panel.add(new JLabel("Review Title:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        titleField = new JTextField(30);
+        panel.add(titleField, gbc);
+
+        row++;
+
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        panel.add(new JLabel("Description:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 1.0;
+        descriptionField = new JTextArea(5, 30);
+        descriptionField.setLineWrap(true);
+        descriptionField.setWrapStyleWord(true);
+        JScrollPane descScrollPane = new JScrollPane(descriptionField);
+        panel.add(descScrollPane, gbc);
+
+        row++;
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(new JLabel("Rating:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 0.1;
+        gbc.anchor = GridBagConstraints.CENTER;
+        ratingField = new JSpinner(ratingModel);
+        ratingField.setMinimumSize(new Dimension(100, 20));
+        ( (JSpinner.DefaultEditor) ratingField.getEditor()).getTextField().setEnabled(false);
+        panel.add(ratingField, gbc);
+
+        row++;
+
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.gridwidth = 2;
+        messageLabel = new JLabel("");
+        messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        panel.add(messageLabel, gbc);
+
+        return panel;
+    }
+
+    private JPanel createButtonPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
+
+        publishButton = new JButton("Publish");
+        backButton = new JButton("Back");
+
+        publishButton.addActionListener(this);
         backButton.addActionListener(this);
 
-        addReviewListener();
-        addDescriptionListener();
-        addRatingListener();
+        panel.add(publishButton);
+        panel.add(backButton);
 
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-
-        this.add(title);
-        this.add(reviewInfo);
-        this.add(descriptionInfo);
-        this.add(ratingInfo);
-        this.add(buttons);
+        return panel;
     }
 
     private void addReviewListener() {
-        reviewInputField.getDocument().addDocumentListener(new DocumentListener() {
+        titleField.getDocument().addDocumentListener(new DocumentListener() {
 
             private void documentListenerHelper() {
-                final EditReviewState currentState = EditReviewViewModel.getState();
-                currentState.setReview(reviewInputField.getText());
-                EditReviewViewModel.setState(currentState);
+                final EditReviewState currentState = editReviewViewModel.getState();
+                currentState.setReview(titleField.getText());
+                editReviewViewModel.setState(currentState);
             }
 
             @Override
@@ -115,12 +172,12 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
     }
 
     private void addDescriptionListener() {
-        descriptionInputField.getDocument().addDocumentListener(new DocumentListener() {
+        descriptionField.getDocument().addDocumentListener(new DocumentListener() {
 
             private void documentListenerHelper() {
-                final EditReviewState currentState = EditReviewViewModel.getState();
-                currentState.setDescription(new String(descriptionInputField.getText()));
-                EditReviewViewModel.setState(currentState);
+                final EditReviewState currentState = editReviewViewModel.getState();
+                currentState.setDescription(new String(descriptionField.getText()));
+                editReviewViewModel.setState(currentState);
             }
 
             @Override
@@ -141,7 +198,7 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
     }
 
     private void addRatingListener() {
-        ratingInputField.getModel().addChangeListener(new ChangeListener() {
+        ratingField.getModel().addChangeListener(new ChangeListener() {
 
             @Override
             public void stateChanged(ChangeEvent e) {
@@ -149,9 +206,9 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
             }
 
             private void changeListenerHelper() {
-                final EditReviewState currentState = EditReviewViewModel.getState();
-                currentState.setRating((Integer) ratingInputField.getValue());
-                EditReviewViewModel.setState(currentState);
+                final EditReviewState currentState = editReviewViewModel.getState();
+                currentState.setRating((Integer) ratingField.getValue());
+                editReviewViewModel.setState(currentState);
             }
         });
     }
@@ -159,10 +216,37 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
     @Override
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource() == backButton) {
+            clearForm();
             viewManagerModel.setState("view recipe");
             viewManagerModel.firePropertyChange();
         }
+        else if (evt.getSource() == publishButton) {
+            EditReviewInputData inputData = createInputDataFromForm();
+            if (editReviewController != null) {
+                editReviewController.publish(inputData);
+            }
+        }
     }
+
+    private EditReviewInputData createInputDataFromForm() {
+        String authorId = "current-user-id"; // TODO: Get from logged-in user
+        String recipeId = "current-recipe-id"; // TODO: get from somewhere
+        String title = titleField.getText().trim();
+        String description = descriptionField.getText().trim();
+        int rating = (int) ratingField.getValue();
+
+
+        return new EditReviewInputData(title, description, rating, authorId, recipeId);
+    }
+
+    private void clearForm() {
+        titleField.setText("");
+        descriptionField.setText("");
+        ratingField.setValue(5);
+        messageLabel.setText("");
+        messageLabel.setForeground(Color.BLACK);
+    }
+
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -184,6 +268,6 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
     }
 
     public void setEditReviewController(EditReviewController controller) {
-        this.EditReviewController = controller;
+        this.editReviewController = controller;
     }
 }

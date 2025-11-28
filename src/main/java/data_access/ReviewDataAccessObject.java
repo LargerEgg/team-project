@@ -26,6 +26,11 @@ public class ReviewDataAccessObject implements EditReviewDataAccessInterface {
     private static final String PASSWORD = "password";
     private static final String MESSAGE = "message";
 
+    private static final String API_KEY = "1";
+    private static final String API_BASE_URL = "https://www.themealdb.com/api/json/v1/1/filter.php";
+    private final OkHttpClient client = new OkHttpClient().newBuilder().build();
+
+
     /*
     public List<Recipe> search(String name) {
         // Make an API call to get the user object.

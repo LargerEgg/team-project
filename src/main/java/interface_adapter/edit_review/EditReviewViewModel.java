@@ -7,8 +7,8 @@ import interface_adapter.ViewModel;
  */
 public class EditReviewViewModel extends ViewModel<EditReviewState> {
 
-    public static final String TITLE_LABEL = "Edit Review View";
-    public static final String REVIEW_LABEL = "Title";
+    public static final String TITLE_LABEL = "Post Review";
+    public static final String REVIEW_LABEL = "Review Title:";
     public static final String DESCRIPTION_LABEL = "Description";
     public static final String RATING_LABEL = "Rating";
 
