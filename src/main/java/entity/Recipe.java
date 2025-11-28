@@ -173,6 +173,7 @@ public class Recipe {
     public void setStatus(Status status) { this.status = status; touchUpdateDate(); }
 
     public double getAverageRating() { return averageRating; }
+    public void setAverageRating(double averageRating) { this.averageRating = averageRating; touchUpdateDate(); }
 
     public void recalculateAverageRating() {
         if (reviews.isEmpty()) {
