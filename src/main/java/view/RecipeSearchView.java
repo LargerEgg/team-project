@@ -215,7 +215,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1) { // Single click
-                    viewRecipeController.execute(recipe.getRecipeId());
+                    viewRecipeController.execute(recipe);
                 }
             }
 
