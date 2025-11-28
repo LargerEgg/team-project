@@ -3,20 +3,21 @@ package data_access;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import entity.Ingredient;
+import entity.Recipe;
 import use_case.post_recipe.PostRecipeDataAccessInterface;
 import use_case.view_recipe.ViewRecipeDataAccessInterface;
-import entity.Recipe;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-
+import java.util.stream.Stream;
 
 public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInterface, ViewRecipeDataAccessInterface {
     private final Firestore db;
     private final CollectionReference recipesCollection;
     private final CollectionReference recipeViewsCollection;
+    private final CollectionReference categoriesCollection;
 
     public FirebaseRecipeDataAccessObject() {
         this(FirebaseInitializer.getFirestore());
@@ -26,11 +27,13 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
         this.db = db;
         this.recipesCollection = db.collection("recipes");
         this.recipeViewsCollection = db.collection("recipe_views");
+        this.categoriesCollection = db.collection("categories");
     }
 
     @Override
     public Recipe saveRecipe(Recipe recipe) {
         try {
+            // 1. Save the recipe to the "recipes" collection
             Map<String, Object> data = new HashMap<>();
             data.put("recipeId", recipe.getRecipeId());
             data.put("authorId", recipe.getAuthorId());
@@ -42,7 +45,6 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
             data.put("status", recipe.getStatus().toString());
             data.put("creationDate", recipe.getCreationDate().getTime());
             data.put("updateDate", recipe.getUpdateDate().getTime());
-            data.put("views", recipe.getViews());
             data.put("saves", recipe.getSaves());
             data.put("averageRating", recipe.getAverageRating());
             data.put("shareable", recipe.isShareable());
@@ -59,11 +61,92 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
 
             recipesCollection.document(recipe.getRecipeId()).set(data).get();
 
+            // 2. Update the "categories" collection
+            String category = recipe.getCategory();
+            if (category != null && !category.isEmpty()) {
+                DocumentReference categoryDocRef = categoriesCollection.document(category);
+                ApiFuture<Void> future = db.runTransaction(transaction -> {
+                    DocumentSnapshot snapshot = transaction.get(categoryDocRef).get();
+                    if (snapshot.exists()) {
+                        transaction.update(categoryDocRef, "recipes", FieldValue.arrayUnion(recipe.getRecipeId()));
+                    } else {
+                        Map<String, Object> catData = new HashMap<>();
+                        catData.put("recipes", Collections.singletonList(recipe.getRecipeId()));
+                        transaction.set(categoryDocRef, catData);
+                    }
+                    return null;
+                });
+                future.get(); // Wait for transaction to complete
+            }
+
             return recipe;
 
         } catch (InterruptedException | ExecutionException e) {
             System.err.println("Error saving recipe to Firebase: " + e.getMessage());
             throw new RuntimeException("Error saving recipe", e);
+        }
+    }
+
+    public List<String> getAllCategories() {
+        try {
+            ApiFuture<QuerySnapshot> future = categoriesCollection.get();
+            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+            return documents.stream()
+                    .map(QueryDocumentSnapshot::getId)
+                    .collect(Collectors.toList());
+        } catch (InterruptedException | ExecutionException e) {
+            System.err.println("Error fetching categories from Firebase: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Recipe> findByCategory(String category, String name) {
+        try {
+            DocumentReference categoryDocRef = categoriesCollection.document(category);
+            ApiFuture<DocumentSnapshot> future = categoryDocRef.get();
+            DocumentSnapshot document = future.get();
+
+            if (!document.exists()) {
+                return new ArrayList<>();
+            }
+
+            @SuppressWarnings("unchecked")
+            List<String> recipeIds = (List<String>) document.get("recipes");
+            if (recipeIds == null || recipeIds.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            // Fetch all recipes by their IDs
+            List<ApiFuture<DocumentSnapshot>> futures = new ArrayList<>();
+            for (String id : recipeIds) {
+                if (id != null && !id.isEmpty()) {
+                    futures.add(recipesCollection.document(id).get());
+                }
+            }
+
+            List<Recipe> recipes = new ArrayList<>();
+            for (ApiFuture<DocumentSnapshot> f : futures) {
+                DocumentSnapshot doc = f.get();
+                if (doc.exists()) {
+                    recipes.add(documentToRecipe(doc));
+                }
+            }
+
+            Stream<Recipe> recipeStream = recipes.stream();
+
+            // Filter by name if provided
+            if (name != null && !name.isEmpty()) {
+                recipeStream = recipeStream.filter(recipe ->
+                        recipe.getTitle() != null &&
+                        recipe.getTitle().toLowerCase().contains(name.toLowerCase())
+                );
+            }
+
+            return recipeStream.collect(Collectors.toList());
+
+        } catch (InterruptedException | ExecutionException e) {
+            System.err.println("Error finding recipes by category: " + e.getMessage());
+            return new ArrayList<>();
         }
     }
 
@@ -83,6 +166,39 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
         } catch (InterruptedException | ExecutionException e) {
             System.err.println("Error finding recipe by ID: " + e.getMessage());
             throw new RuntimeException("Error finding recipe", e);
+        }
+    }
+
+    public List<Recipe> search(String name, String category) {
+        try {
+            Query query = recipesCollection.whereEqualTo("status", "PUBLISHED");
+
+            ApiFuture<QuerySnapshot> future = query.get();
+            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+            Stream<Recipe> recipeStream = documents.stream().map(this::documentToRecipe);
+
+            // Filter by name
+            if (name != null && !name.isEmpty()) {
+                recipeStream = recipeStream.filter(recipe ->
+                        recipe.getTitle() != null &&
+                        recipe.getTitle().toLowerCase().contains(name.toLowerCase())
+                );
+            }
+
+            // Filter by category
+            if (category != null && !category.isEmpty()) {
+                recipeStream = recipeStream.filter(recipe ->
+                        recipe.getCategory() != null &&
+                        recipe.getCategory().equalsIgnoreCase(category)
+                );
+            }
+
+            return recipeStream.collect(Collectors.toList());
+
+        } catch (InterruptedException | ExecutionException e) {
+            System.err.println("Error searching recipes in Firebase: " + e.getMessage());
+            throw new RuntimeException("Error searching recipes", e);
         }
     }
 
@@ -185,7 +301,6 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
             tags = new ArrayList<>();
         }
 
-        // Convert ingredients
         @SuppressWarnings("unchecked")
         List<Map<String, String>> ingredientsData = (List<Map<String, String>>) doc.get("ingredients");
         List<Ingredient> ingredients = new ArrayList<>();
@@ -200,7 +315,17 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
         Date creationDate = creationTime != null ? new Date(creationTime) : new Date();
         Date updateDate = updateTime != null ? new Date(updateTime) : new Date();
 
-        Recipe.Status status = Recipe.Status.valueOf(statusStr);
+        Recipe.Status status = null;
+        if (statusStr != null) {
+            try {
+                status = Recipe.Status.valueOf(statusStr);
+            } catch (IllegalArgumentException e) {
+                System.err.println("Invalid status value: " + statusStr);
+                // Handle error, maybe default to DRAFT
+                status = Recipe.Status.DRAFT;
+            }
+        }
+
 
         Recipe recipe = new Recipe(
                 recipeId,
@@ -216,16 +341,17 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
                 imagePath
         );
 
-        // Set additional fields
         Long views = doc.getLong("views");
         Long saves = doc.getLong("saves");
-        Double avgRating = doc.getDouble("averageRating");
         Boolean shareable = doc.getBoolean("shareable");
 
         if (views != null) recipe.setViews(views.intValue());
         if (saves != null) recipe.setSaves(saves.intValue());
-        if (avgRating != null) recipe.recalculateAverageRating();
         if (shareable != null) recipe.setShareable(shareable);
+
+        // Recalculate average rating based on reviews (if any)
+        // This assumes reviews are fetched separately or handled elsewhere
+        recipe.recalculateAverageRating();
 
         return recipe;
     }

@@ -37,14 +37,15 @@ public class PostRecipeInputData {
                                String description,
                                List<IngredientDTO> ingredients,
                                String category,
-                               String imagePath) {
+                               String imagePath,
+                               List<String> tags) {
         this.authorId = authorId;
         this.title = title;
         this.description = description;
         this.ingredients = ingredients;
         this.category = category;
         this.imagePath = imagePath;
-        this.tags = new ArrayList<>();
+        this.tags = tags;
     }
 
 
