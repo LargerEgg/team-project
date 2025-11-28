@@ -1,19 +1,13 @@
 package use_case.recipe_search;
 
 public class RecipeSearchInputData {
-    private final String name;
-    private final String category;
+    private final String query;
 
-    public RecipeSearchInputData(String name, String category) {
-        this.name = name;
-        this.category = category;
+    public RecipeSearchInputData(String query) {
+        this.query = query;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getCategory() {
-        return category;
+    public String getQuery() {
+        return query;
     }
 }

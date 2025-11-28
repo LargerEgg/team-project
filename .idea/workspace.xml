@@ -4,17 +4,25 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
+<<<<<<< HEAD
+    <list default="true" id="19e3cd51-8ac4-4eab-956c-29ece4c9847a" name="Changes" comment="" />
+=======
     <list default="true" id="e43c00b6-75ef-40f2-94e8-7abd57be8463" name="Changes" comment="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907">
       <change afterPath="$PROJECT_DIR$/src/test/java/use_case/PostRecipeInteractorTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/use_case/post_recipe/PostRecipeInteractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/post_recipe/PostRecipeInteractor.java" afterDir="false" />
     </list>
+>>>>>>> origin/main
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+<<<<<<< HEAD
+  <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+=======
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
@@ -93,16 +101,25 @@
   <component name="RunManager">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="team-project" />
+>>>>>>> origin/main
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
     <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+<<<<<<< HEAD
+=======
       <module name="team-project" />
+>>>>>>> origin/main
       <option name="filePath" />
       <method v="2" />
     </configuration>
   </component>
+<<<<<<< HEAD
+  <component name="TaskManager">
+    <servers />
+  </component>
+=======
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -160,4 +177,5 @@
     <MESSAGE value="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907" />
     <option name="LAST_COMMIT_MESSAGE" value="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907" />
   </component>
+>>>>>>> origin/main
 </project>

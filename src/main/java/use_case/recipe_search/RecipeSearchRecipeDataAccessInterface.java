@@ -4,21 +4,14 @@ import entity.Recipe;
 
 import java.util.List;
 
+/**
+ * DAO interface for the Login Use Case.
+ */
 public interface RecipeSearchRecipeDataAccessInterface {
     /**
-     * Searches for recipes based on a name and/or a category.
-     *
-     * @param name     The name of the recipe to search for. Can be null or empty.
-     * @param category The category to filter by. Can be null or empty.
-     * @param presenter The presenter to report progress to.
-     * @return A list of matching recipes.
+     * Returns a list of recipes that match the search filters.
+     * @param name the name of the recipe
+     * @return a list of recipes
      */
-    List<Recipe> search(String name, String category, RecipeSearchOutputBoundary presenter);
-
-    /**
-     * Fetches a list of all available recipe categories from the data source.
-     *
-     * @return A list of category names.
-     */
-    List<String> getAllCategories();
+    List<Recipe> search(String name);
 }

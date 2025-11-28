@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ExternalStorageConfigurationManager" enabled="true" />
+<<<<<<< HEAD
+  <component name="ProjectRootManager" version="2" default="true" />
+=======
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
@@ -9,4 +12,5 @@
     </option>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_24" default="true" project-jdk-name="homebrew-24" project-jdk-type="JavaSDK" />
+>>>>>>> origin/main
 </project>
