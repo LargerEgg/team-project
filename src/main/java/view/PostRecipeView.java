@@ -17,6 +17,7 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PostRecipeView extends JPanel implements ActionListener, PropertyChangeListener {
     public final String viewName = "post recipe";
@@ -239,10 +240,15 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
         String description = descriptionArea.getText().trim();
         String category = categoryField.getText().trim();
         String imagePath = imagePathField.getText().trim();
+        String tagsText = tagsField.getText().trim();
+        List<String> tags = Arrays.stream(tagsText.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
 
         List<PostRecipeInputData.IngredientDTO> ingredients = parseIngredients(ingredientsArea.getText());
 
-        return new PostRecipeInputData(authorId, title, description, ingredients, category, imagePath);
+        return new PostRecipeInputData(authorId, title, description, ingredients, category, imagePath, tags);
     }
 
     // Function to allow comma parsing of ingredients
