@@ -10,13 +10,13 @@ package entity;
 public final class PopularityCalculator {
 
     /** Minimum number of views required (sample size threshold) */
-    public static final int MINIMUM_VIEWS = 50;
+    public static final int MINIMUM_VIEWS = 5; // should be 50
 
     /** Minimum average rating required (quality baseline) */
-    public static final double MINIMUM_RATING = 4.0;
+    public static final double MINIMUM_RATING = 0.0; // should be 4.0
 
     /** Minimum engagement conversion rate required (saves/views ratio) */
-    public static final double MINIMUM_CONVERSION_RATE = 0.05;
+    public static final double MINIMUM_CONVERSION_RATE = 0.0; // should be 0.05
 
     /** Fire emoji for popular recipes */
     public static final String FIRE_EMOJI = "🔥";
@@ -43,13 +43,13 @@ public final class PopularityCalculator {
         }
 
         // 2. Check quality baseline (average rating > 4.0)
-        if (recipe.getAverageRating() <= MINIMUM_RATING) {
+        if (recipe.getAverageRating() < MINIMUM_RATING) { // should be <=
             return false;
         }
 
         // 3. Check engagement conversion rate (saves/views > 5%)
         double engagementRate = getEngagementRate(recipe);
-        if (engagementRate <= MINIMUM_CONVERSION_RATE) {
+        if (engagementRate < MINIMUM_CONVERSION_RATE) { // should be <=
             return false;
         }
 
