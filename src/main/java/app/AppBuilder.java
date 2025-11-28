@@ -163,7 +163,12 @@ public class AppBuilder {
     // Modified to accept ViewRecipeController
     public AppBuilder addRecipeSearchView(ViewRecipeController viewRecipeController) {
         recipeSearchViewModel = new RecipeSearchViewModel();
-        RecipeSearchRecipeDataAccessInterface recipeDAO = apiRecipeDataAccessObject;
+        RecipeSearchRecipeDataAccessInterface recipeDAO;
+        if (USE_FIREBASE && firebaseRecipeDataAccessObject != null) {
+            recipeDAO = new CompositeRecipeSearchDAO(apiRecipeDataAccessObject, firebaseRecipeDataAccessObject);
+        } else {
+            recipeDAO = apiRecipeDataAccessObject;
+        }
 
         // Pre-fetch categories and set them in the state
         List<String> categories = recipeDAO.getAllCategories();
@@ -207,7 +212,7 @@ public class AppBuilder {
     // New method to add PostRecipeView
     public AppBuilder addPostRecipeView() {
         postRecipeViewModel = new PostRecipeViewModel();
-        postRecipeView = new PostRecipeView(postRecipeViewModel, viewManagerModel);
+        postRecipeView = new PostRecipeView(postRecipeViewModel, recipeSearchViewModel, viewManagerModel);
         cardPanel.add(postRecipeView, postRecipeView.viewName);
         return this;
     }
@@ -267,9 +272,9 @@ public class AppBuilder {
         }
 
         @Override
-        public void save(entity.Recipe recipe) {
-            // Always save to Firebase
-            firebaseDAO.save(recipe);
+        public void recordView(String recipeId) {
+            firebaseDAO.recordView(recipeId);
+            apiDAO.recordView(recipeId);
         }
     }
 }
