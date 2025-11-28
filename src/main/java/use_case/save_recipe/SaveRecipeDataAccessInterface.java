@@ -1,15 +1,9 @@
 package use_case.save_recipe;
 
 import entity.Recipe;
-import entity.User;
 
 public interface SaveRecipeDataAccessInterface {
-
-    User findUserByUsername(String username);
-    Recipe findRecipeById(String recipeId);
-
-    boolean isRecipeSavedByUser(String username, String recipeId);
-
-    void saveUser(User user);
-    void saveRecipe(Recipe recipe);
+    boolean isRecipeSaved(String username,  Recipe recipe);
+    void saveRecipe(String username, Recipe recipe);
+    void unsaveRecipe(String username, Recipe recipe);
 }

@@ -5,13 +5,8 @@ import interface_adapter.ViewModel;
 public class SaveRecipeViewModel extends ViewModel<SaveRecipeState> {
 
     public SaveRecipeViewModel() {
-        super("save recipe");
+        super("Save Recipe");
         setState(new SaveRecipeState());
     }
 
-    @Override
-    public SaveRecipeState getState() {
-        return super.getState();
-    }
 }
-
