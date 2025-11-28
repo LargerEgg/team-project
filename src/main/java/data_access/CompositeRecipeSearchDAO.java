@@ -47,14 +47,23 @@ public class CompositeRecipeSearchDAO implements RecipeSearchRecipeDataAccessInt
                 .distinct()
                 .collect(Collectors.toList());
 
-        // 4. Asynchronously fetch all view counts from Firebase
+        // 4. Asynchronously fetch popularity data (views, saves, averageRating) from Firebase
         if (firebaseDAO != null && combinedRecipes != null && !combinedRecipes.isEmpty()) {
             List<CompletableFuture<Void>> futures = combinedRecipes.stream()
-                    .map(recipe -> firebaseDAO.getViewCount(recipe.getRecipeId())
-                            .thenAccept(recipe::setViews))
+                    .flatMap(recipe -> {
+                        String recipeId = recipe.getRecipeId();
+                        // Create futures for views, saves, and averageRating
+                        CompletableFuture<Void> viewsFuture = firebaseDAO.getViewCount(recipeId)
+                                .thenAccept(recipe::setViews);
+                        CompletableFuture<Void> savesFuture = firebaseDAO.getSaveCount(recipeId)
+                                .thenAccept(recipe::setSaves);
+                        CompletableFuture<Void> ratingFuture = firebaseDAO.getAverageRating(recipeId)
+                                .thenAccept(recipe::setAverageRating);
+                        return java.util.stream.Stream.of(viewsFuture, savesFuture, ratingFuture);
+                    })
                     .collect(Collectors.toList());
 
-            // 5. Wait for all the view count fetches to complete
+            // 5. Wait for all the fetches to complete
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         }
 

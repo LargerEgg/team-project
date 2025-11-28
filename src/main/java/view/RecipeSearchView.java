@@ -1,6 +1,7 @@
 package view;
 
 import entity.Ingredient;
+import entity.PopularityCalculator;
 import entity.Recipe;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.recipe_search.RecipeSearchController;
@@ -242,7 +243,11 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             imageLabel.setText("[IMG]");
         }
 
-        String nameAndTagsHtml = "<html><b style='font-size: 150%;'>" + recipe.getTitle() + "</b>" +
+        // Add [Hot] label for popular recipes
+        String hotPrefix = PopularityCalculator.isPopular(recipe) 
+                ? "<font color='red'><b>[Hot]</b></font> " 
+                : "";
+        String nameAndTagsHtml = "<html>" + hotPrefix + "<b style='font-size: 150%;'>" + recipe.getTitle() + "</b>" +
                 (recipe.getTags() != null && !recipe.getTags().isEmpty() ? "  <font color='gray' style='font-size: 150%;'>(" + String.join(", ", recipe.getTags()) + ")</font>" : "") +
                 "</html>";
         JLabel nameLabel = new JLabel(nameAndTagsHtml);

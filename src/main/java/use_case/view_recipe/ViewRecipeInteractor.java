@@ -23,6 +23,9 @@ public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
             return;
         }
 
+        // Increment the local view count immediately for UI display
+        recipe.incrementViews();
+
         // Run the database write operation on a separate thread to avoid blocking the UI
         new Thread(() -> {
             try {
