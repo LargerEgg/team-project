@@ -6,5 +6,5 @@ public interface ViewRecipeDataAccessInterface {
 
     Recipe findById(String recipeId);
 
-    void save(Recipe recipe);
+    void recordView(String recipeId);
 }

@@ -4,6 +4,7 @@ import interface_adapter.ViewManagerModel;
 import interface_adapter.post_recipe.PostRecipeController;
 import interface_adapter.post_recipe.PostRecipeState;
 import interface_adapter.post_recipe.PostRecipeViewModel;
+import interface_adapter.recipe_search.RecipeSearchViewModel;
 import use_case.post_recipe.PostRecipeInputData;
 
 import javax.swing.*;
@@ -16,12 +17,14 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PostRecipeView extends JPanel implements ActionListener, PropertyChangeListener {
     public final String viewName = "post recipe";
     private final PostRecipeViewModel postRecipeViewModel;
     private PostRecipeController postRecipeController;
     private final ViewManagerModel viewManagerModel;
+    private final RecipeSearchViewModel recipeSearchViewModel;
 
     private JTextField titleField;
     private JTextArea descriptionArea;
@@ -34,8 +37,9 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
     private JButton cancelButton;
     private JLabel messageLabel;
 
-    public PostRecipeView(PostRecipeViewModel postRecipeViewModel, ViewManagerModel viewManagerModel) {
+    public PostRecipeView(PostRecipeViewModel postRecipeViewModel, RecipeSearchViewModel recipeSearchViewModel, ViewManagerModel viewManagerModel) {
         this.postRecipeViewModel = postRecipeViewModel;
+        this.recipeSearchViewModel = recipeSearchViewModel;
         this.postRecipeViewModel.addPropertyChangeListener(this);
         this.viewManagerModel = viewManagerModel;
 
@@ -197,11 +201,17 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == publishButton) {
             PostRecipeInputData inputData = createInputDataFromForm();
+            if (inputData == null) {
+                return; // Error already shown
+            }
             if (postRecipeController != null) {
                 postRecipeController.publish(inputData);
             }
         } else if (e.getSource() == saveDraftButton) {
             PostRecipeInputData inputData = createInputDataFromForm();
+            if (inputData == null) {
+                return; // Error already shown
+            }
             if (postRecipeController != null) {
                 postRecipeController.saveDraft(inputData);
             }
@@ -213,15 +223,32 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
     }
 
     private PostRecipeInputData createInputDataFromForm() {
-        String authorId = "current-user-id"; // TODO: Get from logged-in user
+        // Get the current logged-in user from RecipeSearchViewModel
+        String authorId = recipeSearchViewModel.getState().getCurrentUser();
+
+        if (authorId == null || authorId.isEmpty()) {
+            messageLabel.setText("Error: You must be logged in to post a recipe");
+            messageLabel.setForeground(Color.RED);
+            JOptionPane.showMessageDialog(this,
+                    "You must be logged in to post a recipe",
+                    "Not Logged In",
+                    JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
         String title = titleField.getText().trim();
         String description = descriptionArea.getText().trim();
         String category = categoryField.getText().trim();
         String imagePath = imagePathField.getText().trim();
+        String tagsText = tagsField.getText().trim();
+        List<String> tags = Arrays.stream(tagsText.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
 
         List<PostRecipeInputData.IngredientDTO> ingredients = parseIngredients(ingredientsArea.getText());
 
-        return new PostRecipeInputData(authorId, title, description, ingredients, category, imagePath);
+        return new PostRecipeInputData(authorId, title, description, ingredients, category, imagePath, tags);
     }
 
     // Function to allow comma parsing of ingredients
@@ -265,6 +292,7 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
             messageLabel.setText(state.getSuccessMessage());
             messageLabel.setForeground(new Color(0, 128, 0));
             JOptionPane.showMessageDialog(this, state.getSuccessMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
+            clearForm();
         } else if ("draft_saved".equals(evt.getPropertyName())) {
             messageLabel.setText(state.getSuccessMessage());
             messageLabel.setForeground(new Color(0, 100, 200));

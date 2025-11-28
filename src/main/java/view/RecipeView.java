@@ -4,6 +4,7 @@ import entity.Ingredient;
 import entity.Recipe;
 import entity.Review;
 import interface_adapter.ViewManagerModel;
+import entity.PopularityCalculator;
 import interface_adapter.view_recipe.ViewRecipeState;
 import interface_adapter.view_recipe.ViewRecipeViewModel;
 
@@ -184,7 +185,11 @@ public class RecipeView extends JPanel implements ActionListener, PropertyChange
 
     private void updateView(Recipe recipe) {
         if (recipe != null) {
-            titleLabel.setText(recipe.getTitle());
+            // Use PopularityCalculator to add hot label for popular recipes
+            String hotPrefix = PopularityCalculator.isPopular(recipe) 
+                    ? "<font color='red'><b>[Hot]</b></font> " 
+                    : "";
+            titleLabel.setText("<html>" + hotPrefix + recipe.getTitle() + "</html>");
             authorLabel.setText("Author: " + recipe.getAuthorId());
             categoryLabel.setText("Category: " + recipe.getCategory());
             

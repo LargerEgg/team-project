@@ -128,10 +128,8 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
     }
 
     @Override
-    public void save(Recipe recipe) {
-        // This DAO is read-only for now.
-        // In a real application, this would save the recipe to a database.
-        System.out.println("Recipe saved (not really, this DAO is read-only): " + recipe.getTitle());
+    public void recordView(String recipeId) {
+        // This DAO is read-only.
     }
 
     private List<Recipe> executeAndParse(Request request, RecipeSearchOutputBoundary presenter) {

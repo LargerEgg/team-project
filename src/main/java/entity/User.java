@@ -69,6 +69,44 @@ public class User
         return Collections.unmodifiableList(reviews);
     }
 
+    public List<String> getFavouriteCategoriesRanked() {
+        if (this.savedRecipes == null || this.savedRecipes.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Map<String, Integer> categoryCounts = new HashMap<>();
+        for (Recipe recipe : this.savedRecipes) {
+            if (recipe == null) {
+                continue;
+            }
+
+            String category;
+            try {
+                category = recipe.getCategory();
+            } catch (Exception e) {
+                continue;
+            }
+
+            if (category == null || category.trim().isEmpty()) {
+                continue;
+            }
+
+            category = category.trim();
+            categoryCounts.put(category, categoryCounts.getOrDefault(category, 0) + 1);
+        }
+
+        List<Map.Entry<String, Integer>> entryList = new ArrayList<>(categoryCounts.entrySet());
+
+        entryList.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
+
+        List<String> rankedCategories = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : entryList) {
+            rankedCategories.add(entry.getKey());
+        }
+
+        return rankedCategories;
+    }
+
     public String getUserid() {
         return userid;
     }
