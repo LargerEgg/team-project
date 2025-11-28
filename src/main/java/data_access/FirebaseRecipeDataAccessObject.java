@@ -128,6 +128,52 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
         return future;
     }
 
+    /**
+     * Asynchronously fetches the save count for a recipe from Firebase.
+     */
+    public CompletableFuture<Integer> getSaveCount(String recipeId) {
+        CompletableFuture<Integer> future = new CompletableFuture<>();
+        DocumentReference docRef = recipesCollection.document(recipeId);
+        ApiFuture<DocumentSnapshot> apiFuture = docRef.get();
+        apiFuture.addListener(() -> {
+            try {
+                DocumentSnapshot document = apiFuture.get();
+                if (document.exists()) {
+                    Long saves = document.getLong("saves");
+                    future.complete(saves != null ? saves.intValue() : 0);
+                } else {
+                    future.complete(0);
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                future.completeExceptionally(e);
+            }
+        }, Runnable::run);
+        return future;
+    }
+
+    /**
+     * Asynchronously fetches the average rating for a recipe from Firebase.
+     */
+    public CompletableFuture<Double> getAverageRating(String recipeId) {
+        CompletableFuture<Double> future = new CompletableFuture<>();
+        DocumentReference docRef = recipesCollection.document(recipeId);
+        ApiFuture<DocumentSnapshot> apiFuture = docRef.get();
+        apiFuture.addListener(() -> {
+            try {
+                DocumentSnapshot document = apiFuture.get();
+                if (document.exists()) {
+                    Double rating = document.getDouble("averageRating");
+                    future.complete(rating != null ? rating : 0.0);
+                } else {
+                    future.complete(0.0);
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                future.completeExceptionally(e);
+            }
+        }, Runnable::run);
+        return future;
+    }
+
     public List<Recipe> findByAuthor(String authorId) {
         try {
             ApiFuture<QuerySnapshot> future = recipesCollection
