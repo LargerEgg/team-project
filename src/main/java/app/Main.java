@@ -33,6 +33,8 @@ public class Main {
                         .addLoginUseCase()
                         .addSignupUseCase();
 
+                appBuilder.addEditReviewUseCase();
+
                 JFrame application = appBuilder.build();
 
                 application.pack();

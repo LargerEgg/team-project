@@ -1,8 +1,7 @@
 package interface_adapter.edit_review;
 
 import interface_adapter.ViewManagerModel;
-import interface_adapter.reviews.ReviewsState;
-import interface_adapter.reviews.ReviewsViewModel;
+import use_case.edit_review.EditReviewInputData;
 import use_case.edit_review.EditReviewOutputBoundary;
 import use_case.edit_review.EditReviewOutputData;
 
@@ -12,38 +11,43 @@ import use_case.edit_review.EditReviewOutputData;
 public class EditReviewPresenter implements EditReviewOutputBoundary {
 
     private final EditReviewViewModel editReviewViewModel;
-    private final ReviewsViewModel reviewsViewModel;
     private final ViewManagerModel viewManagerModel;
 
     public EditReviewPresenter(ViewManagerModel viewManagerModel,
-                           EditReviewViewModel editReviewViewModel,
-                           ReviewsViewModel reviewsViewModel) {
+                           EditReviewViewModel editReviewViewModel) {
         this.viewManagerModel = viewManagerModel;
         this.editReviewViewModel = editReviewViewModel;
-        this.reviewsViewModel = reviewsViewModel;
     }
 
     @Override
-    public void prepareSuccessView(EditReviewOutputData response) {
-        // On success, switch to the login view.
-        final ReviewsState reviewState = reviewsViewModel.getState();
-        reviewState.setReview(response.getMessage());
-        reviewsViewModel.firePropertyChange();
+    public void prepareSuccessView(EditReviewOutputData outputData) {
+        final EditReviewState state = editReviewViewModel.getState();
+        state.setSuccessMessage(outputData.getMessage() + " (ID: " + outputData.getReviewId() + ")");
+        state.setErrorMessage("");
 
-        viewManagerModel.setState(reviewsViewModel.getViewName());
-        viewManagerModel.firePropertyChange();
+        clearForm(state);
+
+        viewManagerModel.firePropertyChange("success");
     }
 
     @Override
-    public void prepareFailView(String error) {
-        final EditReviewState editReviewState = editReviewViewModel.getState();
-        editReviewState.setReviewError(error);
-        editReviewViewModel.firePropertyChange();
+    public void prepareFailView(String errorMessage, EditReviewInputData inputData) {
+        final EditReviewState state = editReviewViewModel.getState();
+        state.setErrorMessage(errorMessage);
+        state.setSuccessMessage("");
+
+        state.setReview(inputData.getReview());
+        state.setDescription(inputData.getDescription());
+        state.setRating(inputData.getRating());
+        state.setAuthorId(inputData.getAuthorId());
+        state.setRecipeId(inputData.getRecipeId());
+
+        editReviewViewModel.firePropertyChange("error");
     }
 
-    @Override
-    public void switchToReviewsView() {
-        viewManagerModel.setState(reviewsViewModel.getViewName());
-        viewManagerModel.firePropertyChange();
+    private void clearForm(EditReviewState state) {
+        state.setReview("");
+        state.setDescription("");
+        state.setRating(5);
     }
 }

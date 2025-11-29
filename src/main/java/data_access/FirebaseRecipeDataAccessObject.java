@@ -48,6 +48,7 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
             data.put("saves", recipe.getSaves());
             data.put("averageRating", recipe.getAverageRating());
             data.put("shareable", recipe.isShareable());
+            data.put("reviews", recipe.getReviews());
 
             List<Map<String, String>> ingredientsList = recipe.getIngredients().stream()
                     .map(ingredient -> {

@@ -5,20 +5,14 @@ import interface_adapter.edit_review.EditReviewController;
 import interface_adapter.edit_review.EditReviewState;
 import interface_adapter.edit_review.EditReviewViewModel;
 import use_case.edit_review.EditReviewInputData;
-import use_case.post_recipe.PostRecipeInputData;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.List;
 
 /**
  * The View for the Edit Review Use Case.
@@ -41,7 +35,7 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
 
     public EditReviewView(EditReviewViewModel editReviewViewModel, ViewManagerModel viewManagerModel) {
         this.editReviewViewModel = editReviewViewModel;
-        editReviewViewModel.addPropertyChangeListener(this);
+        this.editReviewViewModel.addPropertyChangeListener(this);
         this.viewManagerModel = viewManagerModel;
 
         setLayout(new BorderLayout());
@@ -145,74 +139,6 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
         return panel;
     }
 
-    private void addReviewListener() {
-        titleField.getDocument().addDocumentListener(new DocumentListener() {
-
-            private void documentListenerHelper() {
-                final EditReviewState currentState = editReviewViewModel.getState();
-                currentState.setReview(titleField.getText());
-                editReviewViewModel.setState(currentState);
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-        });
-    }
-
-    private void addDescriptionListener() {
-        descriptionField.getDocument().addDocumentListener(new DocumentListener() {
-
-            private void documentListenerHelper() {
-                final EditReviewState currentState = editReviewViewModel.getState();
-                currentState.setDescription(new String(descriptionField.getText()));
-                editReviewViewModel.setState(currentState);
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                documentListenerHelper();
-            }
-        });
-    }
-
-    private void addRatingListener() {
-        ratingField.getModel().addChangeListener(new ChangeListener() {
-
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                changeListenerHelper();
-            }
-
-            private void changeListenerHelper() {
-                final EditReviewState currentState = editReviewViewModel.getState();
-                currentState.setRating((Integer) ratingField.getValue());
-                editReviewViewModel.setState(currentState);
-            }
-        });
-    }
-
     @Override
     public void actionPerformed(ActionEvent evt) {
         if (evt.getSource() == backButton) {
@@ -229,8 +155,8 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
     }
 
     private EditReviewInputData createInputDataFromForm() {
-        String authorId = "current-user-id"; // TODO: Get from logged-in user
-        String recipeId = "current-recipe-id"; // TODO: get from somewhere
+        String authorId = editReviewViewModel.getState().getCurrentUser();
+        String recipeId = editReviewViewModel.getState().getCurrentRecipe();
         String title = titleField.getText().trim();
         String description = descriptionField.getText().trim();
         int rating = (int) ratingField.getValue();
@@ -250,17 +176,19 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        final EditReviewState state = (EditReviewState) evt.getNewValue();
-        if (state.getDescriptionError() != null && !state.getDescriptionError().isEmpty()) {
-            JOptionPane.showMessageDialog(this, state.getDescriptionError());
-        }
-        else if (state.getReviewError() != null && !state.getReviewError().isEmpty()) {
-            JOptionPane.showMessageDialog(this, state.getReviewError());
-        }
-        else if (state.getRatingError() != null && !state.getRatingError().isEmpty()) {
-            JOptionPane.showMessageDialog(this, state.getRatingError());
-        }
+        final EditReviewState state = editReviewViewModel.getState();
 
+        if ("success".equals(evt.getPropertyName())) {
+            messageLabel.setText(state.getSuccessMessage());
+            messageLabel.setForeground(new Color(0, 128, 0));
+            JOptionPane.showMessageDialog(this, state.getSuccessMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
+            clearForm();
+        }
+        else if ("error".equals(evt.getPropertyName())) {
+            messageLabel.setText(state.getErrorMessage());
+            messageLabel.setForeground(Color.RED);
+            JOptionPane.showMessageDialog(this, state.getErrorMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public String getViewName() {

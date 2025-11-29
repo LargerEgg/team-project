@@ -4,6 +4,8 @@ import entity.Ingredient;
 import entity.PopularityCalculator;
 import entity.Recipe;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.edit_review.EditReviewState;
+import interface_adapter.edit_review.EditReviewViewModel;
 import interface_adapter.recipe_search.RecipeSearchController;
 import interface_adapter.recipe_search.RecipeSearchState;
 import interface_adapter.recipe_search.RecipeSearchViewModel;
@@ -31,6 +33,8 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     private final ViewManagerModel viewManagerModel;
     private final ViewRecipeController viewRecipeController; // Add ViewRecipeController
 
+    private final EditReviewViewModel editReviewViewModel;
+
     // Header components
     private JTextField nameTextField;
     private JComboBox<String> categoryComboBox;
@@ -48,12 +52,13 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     private JProgressBar progressBar;
     private JLabel loadingLabel; // To hold the "Loading search results..." text
 
-    public RecipeSearchView(RecipeSearchViewModel recipeSearchViewModel, RecipeSearchController recipeSearchController, ViewManagerModel viewManagerModel, ViewRecipeController viewRecipeController) {
+    public RecipeSearchView(RecipeSearchViewModel recipeSearchViewModel, RecipeSearchController recipeSearchController, ViewManagerModel viewManagerModel, ViewRecipeController viewRecipeController, EditReviewViewModel editReviewViewModel) {
         this.recipeSearchViewModel = recipeSearchViewModel;
         this.recipeSearchController = recipeSearchController;
         this.viewManagerModel = viewManagerModel;
         this.viewRecipeController = viewRecipeController; // Initialize the new controller
         this.recipeSearchViewModel.addPropertyChangeListener(this);
+        this.editReviewViewModel = editReviewViewModel;
 
         setLayout(new BorderLayout());
         add(createNavigationBar(), BorderLayout.NORTH);
@@ -359,6 +364,8 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         } else if (evt.getSource() == logoutButton) {
             RecipeSearchState currentState = recipeSearchViewModel.getState();
             currentState.setCurrentUser(null);
+            EditReviewState editReviewState = editReviewViewModel.getState();
+            editReviewState.setCurrentUser(null);
             recipeSearchViewModel.firePropertyChange();
         } else if (evt.getSource() == postRecipeButton) { // Handle the new button's action
             viewManagerModel.setState("post recipe"); // Set the active view to "post recipe"

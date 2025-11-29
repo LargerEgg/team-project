@@ -15,10 +15,5 @@ public interface EditReviewOutputBoundary {
      * Prepares the failure view for the Edit Reviews Use Case.
      * @param errorMessage the explanation of the failure
      */
-    void prepareFailView(String errorMessage);
-
-    /**
-     * Switches to the Reviews View.
-     */
-    void switchToReviewsView();
+    void prepareFailView(String errorMessage, EditReviewInputData inputData);
 }
