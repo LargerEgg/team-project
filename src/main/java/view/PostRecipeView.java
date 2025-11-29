@@ -224,8 +224,10 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
                 return; // Error already shown
             }
             if (postRecipeController != null) {
-                postRecipeController.saveDraft(inputData);
+                saveDraft();
             }
+        } else if (e.getSource() == loadDraftsButton) {
+            loadDraftsDialog();
         } else if (e.getSource() == cancelButton) {
             clearForm();
             viewManagerModel.setState("recipe search");
