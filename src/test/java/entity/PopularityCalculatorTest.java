@@ -341,5 +341,161 @@ class PopularityCalculatorTest {
             assertTrue(titleAfter.startsWith(PopularityCalculator.FIRE_EMOJI));
         }
     }
+
+    // ==================== REVIEW-BASED RATING TESTS ====================
+
+    @Nested
+    @DisplayName("Review-based rating tests using recalculateAverageRating()")
+    class ReviewBasedRatingTests {
+
+        private Review createReview(int rating) {
+            return new Review("Test Review", "Test description", rating);
+        }
+
+        @Test
+        @DisplayName("Recipe with no reviews should have 0.0 average rating")
+        void testNoReviews_ZeroRating() {
+            Recipe recipe = createTestRecipe(100, 10, 0.0);
+            recipe.recalculateAverageRating();
+            assertEquals(0.0, recipe.getAverageRating());
+            assertFalse(PopularityCalculator.isPopular(recipe));
+        }
+
+        @Test
+        @DisplayName("Adding single 5-star review should set rating to 5.0")
+        void testSingleReview_FiveStar() {
+            Recipe recipe = createTestRecipe(100, 10, 0.0);
+            recipe.getReviews().add(createReview(5));
+            recipe.recalculateAverageRating();
+            
+            assertEquals(5.0, recipe.getAverageRating());
+            assertTrue(PopularityCalculator.isPopular(recipe));
+        }
+
+        @Test
+        @DisplayName("Adding single 4-star review should set rating to 4.0 (not popular)")
+        void testSingleReview_FourStar() {
+            Recipe recipe = createTestRecipe(100, 10, 0.0);
+            recipe.getReviews().add(createReview(4));
+            recipe.recalculateAverageRating();
+            
+            assertEquals(4.0, recipe.getAverageRating());
+            // rating = 4.0 is not > 4.0, so not popular
+            assertFalse(PopularityCalculator.isPopular(recipe));
+        }
+
+        @Test
+        @DisplayName("Multiple reviews should calculate correct average")
+        void testMultipleReviews_CalculateAverage() {
+            Recipe recipe = createTestRecipe(100, 10, 0.0);
+            recipe.getReviews().add(createReview(5)); // 5
+            recipe.getReviews().add(createReview(4)); // 4
+            recipe.getReviews().add(createReview(5)); // 5
+            recipe.recalculateAverageRating();
+            
+            // Average: (5 + 4 + 5) / 3 = 4.666...
+            assertEquals(4.666, recipe.getAverageRating(), 0.01);
+            assertTrue(PopularityCalculator.isPopular(recipe));
+        }
+
+        @Test
+        @DisplayName("Recipe becomes popular after receiving good reviews")
+        void testRecipe_BecomesPopularWithReviews() {
+            Recipe recipe = createTestRecipe(100, 10, 0.0);
+            assertFalse(PopularityCalculator.isPopular(recipe)); // Not popular (rating = 0)
+            
+            // Add positive reviews
+            recipe.getReviews().add(createReview(5));
+            recipe.getReviews().add(createReview(5));
+            recipe.getReviews().add(createReview(4));
+            recipe.recalculateAverageRating();
+            
+            // Average: (5 + 5 + 4) / 3 = 4.666...
+            assertTrue(recipe.getAverageRating() > 4.0);
+            assertTrue(PopularityCalculator.isPopular(recipe));
+        }
+
+        @Test
+        @DisplayName("Recipe loses popularity after receiving bad reviews")
+        void testRecipe_LosesPopularityWithBadReviews() {
+            Recipe recipe = createTestRecipe(100, 10, 0.0);
+            
+            // Start with good reviews
+            recipe.getReviews().add(createReview(5));
+            recipe.getReviews().add(createReview(5));
+            recipe.recalculateAverageRating();
+            assertTrue(PopularityCalculator.isPopular(recipe)); // Popular
+            
+            // Add bad reviews
+            recipe.getReviews().add(createReview(1));
+            recipe.getReviews().add(createReview(2));
+            recipe.getReviews().add(createReview(1));
+            recipe.recalculateAverageRating();
+            
+            // Average: (5 + 5 + 1 + 2 + 1) / 5 = 2.8
+            assertEquals(2.8, recipe.getAverageRating(), 0.01);
+            assertFalse(PopularityCalculator.isPopular(recipe)); // No longer popular
+        }
+
+        @Test
+        @DisplayName("Borderline case: average exactly 4.0 should not be popular")
+        void testBorderlineRating_ExactlyFour() {
+            Recipe recipe = createTestRecipe(100, 10, 0.0);
+            
+            // Add reviews to get exactly 4.0 average
+            recipe.getReviews().add(createReview(3));
+            recipe.getReviews().add(createReview(5));
+            recipe.recalculateAverageRating();
+            
+            // Average: (3 + 5) / 2 = 4.0
+            assertEquals(4.0, recipe.getAverageRating());
+            // 4.0 is NOT > 4.0, so not popular
+            assertFalse(PopularityCalculator.isPopular(recipe));
+        }
+
+        @Test
+        @DisplayName("Borderline case: average just above 4.0 should be popular")
+        void testBorderlineRating_JustAboveFour() {
+            Recipe recipe = createTestRecipe(100, 10, 0.0);
+            
+            // Add reviews to get average just above 4.0
+            recipe.getReviews().add(createReview(4));
+            recipe.getReviews().add(createReview(5));
+            recipe.getReviews().add(createReview(4));
+            recipe.recalculateAverageRating();
+            
+            // Average: (4 + 5 + 4) / 3 = 4.333...
+            assertTrue(recipe.getAverageRating() > 4.0);
+            assertTrue(PopularityCalculator.isPopular(recipe));
+        }
+
+        @Test
+        @DisplayName("All 5-star reviews should make recipe popular")
+        void testAllFiveStarReviews() {
+            Recipe recipe = createTestRecipe(100, 10, 0.0);
+            
+            for (int i = 0; i < 10; i++) {
+                recipe.getReviews().add(createReview(5));
+            }
+            recipe.recalculateAverageRating();
+            
+            assertEquals(5.0, recipe.getAverageRating());
+            assertTrue(PopularityCalculator.isPopular(recipe));
+        }
+
+        @Test
+        @DisplayName("All 1-star reviews should not make recipe popular")
+        void testAllOneStarReviews() {
+            Recipe recipe = createTestRecipe(100, 10, 0.0);
+            
+            for (int i = 0; i < 10; i++) {
+                recipe.getReviews().add(createReview(1));
+            }
+            recipe.recalculateAverageRating();
+            
+            assertEquals(1.0, recipe.getAverageRating());
+            assertFalse(PopularityCalculator.isPopular(recipe));
+        }
+    }
 }
 
