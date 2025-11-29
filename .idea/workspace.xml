@@ -25,7 +25,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="postrecipe-firebase" />
+        <entry key="$PROJECT_DIR$" value="save-draft-functionality" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -62,6 +62,7 @@
     "Application.CheckFirebaseStatus.executor": "Run",
     "Application.FirestoreDataReader.executor": "Run",
     "Application.Main.executor": "Run",
+    "JUnit.PostRecipeInteractorTest.executor": "Coverage",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
@@ -131,6 +132,7 @@
       <workItem from="1764005581001" duration="1212000" />
       <workItem from="1764196649703" duration="1263000" />
       <workItem from="1764335145882" duration="2841000" />
+      <workItem from="1764449834788" duration="1781000" />
     </task>
     <task id="LOCAL-00001" summary="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907">
       <option name="closed" value="true" />
@@ -160,5 +162,10 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907" />
     <option name="LAST_COMMIT_MESSAGE" value="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/team_project$PostRecipeInteractorTest.ic" NAME="PostRecipeInteractorTest Coverage Results" MODIFIED="1764450179157" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>use_case.*</FILTER>
+    </SUITE>
   </component>
 </project>

@@ -38,13 +38,18 @@ class PostRecipeInteractorTest {
         ingredients.add(new PostRecipeInputData.IngredientDTO("Chicken", "500g"));
         ingredients.add(new PostRecipeInputData.IngredientDTO("Rice", "200g"));
 
+        List<String> tags = new ArrayList<>();
+        tags.add("dinner");
+        tags.add("chicken");
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "Test Recipe",
                 "A delicious test recipe",
                 ingredients,
                 "Dinner",
-                "https://example.com/image.jpg"
+                "https://example.com/image.jpg",
+                tags
         );
 
         // Act
@@ -70,13 +75,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Chicken", "500g"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 null,
                 "Test Recipe",
                 "Description",
                 ingredients,
                 "Dinner",
-                "https://example.com/image.jpg"
+                "https://example.com/image.jpg",
+                tags
         );
 
         // Act
@@ -96,13 +104,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Chicken", "500g"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "",
                 "Test Recipe",
                 "Description",
                 ingredients,
                 "Dinner",
-                "https://example.com/image.jpg"
+                "https://example.com/image.jpg",
+                tags
         );
 
         // Act
@@ -121,13 +132,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Chicken", "500g"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "   ",
                 "Test Recipe",
                 "Description",
                 ingredients,
                 "Dinner",
-                "https://example.com/image.jpg"
+                "https://example.com/image.jpg",
+                tags
         );
 
         // Act
@@ -146,13 +160,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Chicken", "500g"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 null,
                 "Description",
                 ingredients,
                 "Dinner",
-                "https://example.com/image.jpg"
+                "https://example.com/image.jpg",
+                tags
         );
 
         // Act
@@ -171,13 +188,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Chicken", "500g"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "",
                 "Description",
                 ingredients,
                 "Dinner",
-                "https://example.com/image.jpg"
+                "https://example.com/image.jpg",
+                tags
         );
 
         // Act
@@ -196,13 +216,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Chicken", "500g"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "   ",
                 "Description",
                 ingredients,
                 "Dinner",
-                "https://example.com/image.jpg"
+                "https://example.com/image.jpg",
+                tags
         );
 
         // Act
@@ -221,13 +244,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Chicken", "500g"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "Test Recipe",
                 null,
                 ingredients,
                 "Dinner",
-                "https://example.com/image.jpg"
+                "https://example.com/image.jpg",
+                tags
         );
 
         // Act
@@ -246,13 +272,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Chicken", "500g"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "Test Recipe",
                 "",
                 ingredients,
                 "Dinner",
-                "https://example.com/image.jpg"
+                "https://example.com/image.jpg",
+                tags
         );
 
         // Act
@@ -271,13 +300,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Chicken", "500g"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "Test Recipe",
                 "   ",
                 ingredients,
                 "Dinner",
-                "https://example.com/image.jpg"
+                "https://example.com/image.jpg",
+                tags
         );
 
         // Act
@@ -293,13 +325,16 @@ class PostRecipeInteractorTest {
     @DisplayName("Publish: Failure - Null ingredients")
     void testPublishFailureNullIngredients() {
         // Arrange
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "Test Recipe",
                 "Description",
                 null,
                 "Dinner",
-                "https://example.com/image.jpg"
+                "https://example.com/image.jpg",
+                tags
         );
 
         // Act
@@ -315,13 +350,16 @@ class PostRecipeInteractorTest {
     @DisplayName("Publish: Failure - Empty ingredients list")
     void testPublishFailureEmptyIngredients() {
         // Arrange
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "Test Recipe",
                 "Description",
                 new ArrayList<>(),
                 "Dinner",
-                "https://example.com/image.jpg"
+                "https://example.com/image.jpg",
+                tags
         );
 
         // Act
@@ -340,13 +378,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Chicken", "500g"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "Test Recipe",
                 "Description",
                 ingredients,
                 "Dinner",
-                "https://example.com/image.jpg"
+                "https://example.com/image.jpg",
+                tags
         );
 
         dataAccess.shouldThrowException = true;
@@ -370,13 +411,17 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Flour", "2 cups"));
 
+        List<String> tags = new ArrayList<>();
+        tags.add("baking");
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "Draft Recipe",
                 "Work in progress",
                 ingredients,
                 "Baking",
-                ""
+                "",
+                tags
         );
 
         // Act
@@ -401,13 +446,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Flour", "2 cups"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 null,
                 "Draft Recipe",
                 "Work in progress",
                 ingredients,
                 "Baking",
-                ""
+                "",
+                tags
         );
 
         // Act
@@ -426,13 +474,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Flour", "2 cups"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "",
                 "Draft Recipe",
                 "Work in progress",
                 ingredients,
                 "Baking",
-                ""
+                "",
+                tags
         );
 
         // Act
@@ -451,13 +502,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Flour", "2 cups"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "  ",
                 "Draft Recipe",
                 "Work in progress",
                 ingredients,
                 "Baking",
-                ""
+                "",
+                tags
         );
 
         // Act
@@ -476,13 +530,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Flour", "2 cups"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "Draft Recipe",
                 "Work in progress",
                 ingredients,
                 "Baking",
-                ""
+                "",
+                tags
         );
 
         dataAccess.shouldThrowException = true;
@@ -496,6 +553,32 @@ class PostRecipeInteractorTest {
         assertEquals("Failed to save draft: Connection timeout", presenter.failMessage);
         assertFalse(presenter.draftSavedViewCalled);
     }
+    @Test
+    @DisplayName("SaveDraft: Success - Draft with null ingredients (allowed for drafts)")
+    void testSaveDraftSuccessNullIngredients() {
+        // Arrange
+        List<String> tags = new ArrayList<>();
+
+        PostRecipeInputData inputData = new PostRecipeInputData(
+                "testUser",
+                "Draft Recipe",
+                "Work in progress",
+                null,  // Null ingredients - allowed for drafts
+                "Baking",
+                "",
+                tags
+        );
+
+        // Act
+        interactor.saveDraft(inputData);
+
+        // Assert
+        assertTrue(presenter.draftSavedViewCalled);
+        assertFalse(presenter.failViewCalled);
+        assertNotNull(dataAccess.savedRecipe);
+        assertEquals(Recipe.Status.DRAFT, dataAccess.savedRecipe.getStatus());
+        assertTrue(dataAccess.savedRecipe.getIngredients().isEmpty());
+    }
 
     // ==================== BUILD RECIPE TESTS ====================
 
@@ -506,13 +589,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Salt", "1 tsp"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "Test Recipe",
                 "Description",
                 ingredients,
                 "Seasoning",
-                "https://example.com/salt.jpg"
+                "https://example.com/salt.jpg",
+                tags
         );
 
         // Act
@@ -532,13 +618,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Sugar", "2 tbsp"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "Draft Recipe",
                 "Still working on it",
                 ingredients,
                 "Dessert",
-                ""
+                "",
+                tags
         );
 
         // Act
@@ -560,13 +649,16 @@ class PostRecipeInteractorTest {
         ingredients.add(new PostRecipeInputData.IngredientDTO("Rice", "200g"));
         ingredients.add(new PostRecipeInputData.IngredientDTO("Onion", "1 large"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "Multi-Ingredient Recipe",
                 "Complex dish",
                 ingredients,
                 "Main Course",
-                "https://example.com/dish.jpg"
+                "https://example.com/dish.jpg",
+                tags
         );
 
         // Act
@@ -588,13 +680,16 @@ class PostRecipeInteractorTest {
         List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
         ingredients.add(new PostRecipeInputData.IngredientDTO("Test", "1 unit"));
 
+        List<String> tags = new ArrayList<>();
+
         PostRecipeInputData inputData = new PostRecipeInputData(
                 "testUser",
                 "Test Recipe",
                 "Description",
                 ingredients,
                 "Test",
-                ""
+                "",
+                tags
         );
 
         // Act
