@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e43c00b6-75ef-40f2-94e8-7abd57be8463" name="Changes" comment="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/CompositeRecipeSearchDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/data_access/CompositeRecipeSearchDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/FirebaseRecipeDataAccessObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/data_access/FirebaseRecipeDataAccessObject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/post_recipe/PostRecipeInputData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/post_recipe/PostRecipeInputData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/PostRecipeView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/PostRecipeView.java" afterDir="false" />
-    </list>
+    <list default="true" id="e43c00b6-75ef-40f2-94e8-7abd57be8463" name="Changes" comment="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -68,7 +62,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "aggregate__recipes",
+    "git-widget-placeholder": "save-draft-functionality",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/oliverkwun-morfitt/csc207/team-project",
     "node.js.detected.package.eslint": "true",
