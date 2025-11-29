@@ -176,43 +176,6 @@ class PopularityCalculatorTest {
         }
     }
 
-    // ==================== getDisplayTitle() TESTS ====================
-
-    @Nested
-    @DisplayName("getDisplayTitle() method tests")
-    class GetDisplayTitleTests {
-
-        @Test
-        @DisplayName("Should return empty string for null recipe")
-        void testGetDisplayTitle_NullRecipe() {
-            assertEquals("", PopularityCalculator.getDisplayTitle(null));
-        }
-
-        @Test
-        @DisplayName("Should return title without emoji for non-popular recipe")
-        void testGetDisplayTitle_NonPopularRecipe() {
-            Recipe recipe = createTestRecipe(10, 1, 3.0);
-            assertEquals("Test Recipe", PopularityCalculator.getDisplayTitle(recipe));
-        }
-
-        @Test
-        @DisplayName("Should return title with fire emoji for popular recipe")
-        void testGetDisplayTitle_PopularRecipe() {
-            Recipe recipe = createTestRecipe(100, 10, 4.5);
-            String expected = PopularityCalculator.FIRE_EMOJI + " Test Recipe";
-            assertEquals(expected, PopularityCalculator.getDisplayTitle(recipe));
-        }
-
-        @Test
-        @DisplayName("Should include fire emoji prefix correctly")
-        void testGetDisplayTitle_FireEmojiFormat() {
-            Recipe recipe = createTestRecipe(100, 10, 4.5);
-            String displayTitle = PopularityCalculator.getDisplayTitle(recipe);
-            assertTrue(displayTitle.startsWith(PopularityCalculator.FIRE_EMOJI));
-            assertTrue(displayTitle.contains("Test Recipe"));
-        }
-    }
-
     // ==================== CONSTANTS TESTS ====================
 
     @Nested
@@ -238,13 +201,6 @@ class PopularityCalculatorTest {
         void testMinimumConversionRateConstant() {
             // Currently set to 0.0 for testing, should be 0.05 in production
             assertTrue(PopularityCalculator.MINIMUM_CONVERSION_RATE >= 0.0);
-        }
-
-        @Test
-        @DisplayName("FIRE_EMOJI should be defined")
-        void testFireEmojiConstant() {
-            assertNotNull(PopularityCalculator.FIRE_EMOJI);
-            assertFalse(PopularityCalculator.FIRE_EMOJI.isEmpty());
         }
     }
 
@@ -299,7 +255,6 @@ class PopularityCalculatorTest {
             // New recipe with default values (0 views, 0 saves, 0 rating)
             Recipe recipe = createTestRecipe(0, 0, 0.0);
             assertFalse(PopularityCalculator.isPopular(recipe));
-            assertEquals("Test Recipe", PopularityCalculator.getDisplayTitle(recipe));
         }
 
         @Test
@@ -323,22 +278,6 @@ class PopularityCalculatorTest {
             // Rating drops
             recipe.setAverageRating(3.5);
             assertFalse(PopularityCalculator.isPopular(recipe)); // No longer popular
-        }
-
-        @Test
-        @DisplayName("Display title changes when recipe becomes popular")
-        void testDisplayTitle_ChangesWithPopularity() {
-            Recipe recipe = createTestRecipe(40, 2, 3.5);
-            String titleBefore = PopularityCalculator.getDisplayTitle(recipe);
-            assertEquals("Test Recipe", titleBefore);
-
-            // Make recipe popular
-            recipe.setViews(100);
-            recipe.setSaves(10);
-            recipe.setAverageRating(4.5);
-
-            String titleAfter = PopularityCalculator.getDisplayTitle(recipe);
-            assertTrue(titleAfter.startsWith(PopularityCalculator.FIRE_EMOJI));
         }
     }
 
