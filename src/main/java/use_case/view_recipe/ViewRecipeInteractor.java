@@ -36,8 +36,8 @@ public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
             try {
                 repo.recordView(recipe.getRecipeId());
             } catch (Exception e) {
-                // In a real application, you'd want to log this error
-                e.printStackTrace();
+                // In a real application, you'd want to log this error.
+                // For now, we catch it to prevent the background thread from crashing.
             }
         }).start();
 

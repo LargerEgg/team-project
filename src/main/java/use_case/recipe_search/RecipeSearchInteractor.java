@@ -9,7 +9,8 @@ import java.util.concurrent.ExecutionException;
 public class RecipeSearchInteractor implements RecipeSearchInputBoundary {
     private final RecipeSearchRecipeDataAccessInterface dataAccess;
     private final RecipeSearchOutputBoundary presenter;
-    private SwingWorker<List<Recipe>, RecipeSearchOutputData> activeWorker; // Changed Void to RecipeSearchOutputData for progress
+    private SwingWorker<List<Recipe>, Recipe> activeWorker;
+    private boolean isTestMode = false;
 
     public RecipeSearchInteractor(RecipeSearchRecipeDataAccessInterface dataAccess,
                                     RecipeSearchOutputBoundary presenter) {
@@ -17,47 +18,76 @@ public class RecipeSearchInteractor implements RecipeSearchInputBoundary {
         this.presenter = presenter;
     }
 
+    public void setTestMode(boolean testMode) {
+        this.isTestMode = testMode;
+    }
+
     @Override
     public void execute(RecipeSearchInputData inputData) {
-        // If there's an active worker, cancel it
-        if (activeWorker != null && !activeWorker.isDone()) {
-            activeWorker.cancel(true);
-        }
-
-        // Create a new worker for the new search
-        activeWorker = new SwingWorker<List<Recipe>, RecipeSearchOutputData>() {
-            @Override
-            protected List<Recipe> doInBackground() throws Exception {
-                // Pass the presenter to the data access layer to report progress
-                return dataAccess.search(inputData.getName(), inputData.getCategory(), presenter);
+        if (isTestMode) {
+            // Synchronous execution for testing
+            try {
+                List<Recipe> recipes = dataAccess.search(inputData.getName(), inputData.getCategory());
+                RecipeSearchOutputData outputData = new RecipeSearchOutputData(recipes);
+                presenter.prepareSuccessView(outputData);
+            } catch (Exception e) {
+                presenter.prepareFailView("Error searching for recipes: " + e.getMessage());
+            }
+        } else {
+            // Asynchronous execution with SwingWorker
+            if (activeWorker != null && !activeWorker.isDone()) {
+                activeWorker.cancel(true);
             }
 
-            @Override
-            protected void process(List<RecipeSearchOutputData> chunks) {
-                // This method runs on the EDT and receives progress updates
-                for (RecipeSearchOutputData progressData : chunks) {
+            activeWorker = new SwingWorker<List<Recipe>, Recipe>() {
+                @Override
+                protected List<Recipe> doInBackground() throws Exception {
+                    List<Recipe> recipes = dataAccess.search(inputData.getName(), inputData.getCategory());
+                    for (Recipe recipe : recipes) {
+                        publish(recipe); // Publish each recipe for progress updates
+                    }
+                    return recipes;
+                }
+
+                @Override
+                protected void process(List<Recipe> chunks) {
+                    // This method is now reachable
+                    RecipeSearchOutputData progressData = new RecipeSearchOutputData(chunks);
                     presenter.prepareProgressView(progressData);
                 }
-            }
 
-            @Override
-            protected void done() {
-                // This runs on the EDT after the background task is finished
-                if (!isCancelled()) {
+                @Override
+                protected void done() {
+                    if (isCancelled()) {
+                        return;
+                    }
                     try {
-                        List<Recipe> recipes = get(); // Get the result from doInBackground
+                        List<Recipe> recipes = get();
                         RecipeSearchOutputData outputData = new RecipeSearchOutputData(recipes);
                         presenter.prepareSuccessView(outputData);
-                    } catch (InterruptedException | ExecutionException e) {
-                        // If an error occurred in the background, present the fail view
-                        presenter.prepareFailView(e.getCause().getMessage());
+                    } catch (Exception e) {
+                        Throwable cause = (e instanceof ExecutionException) ? e.getCause() : e;
+                        
+                        // Check for interruption anywhere in the cause chain
+                        boolean interrupted = false;
+                        Throwable current = cause;
+                        while (current != null) {
+                            if (current instanceof InterruptedException) {
+                                interrupted = true;
+                                break;
+                            }
+                            current = current.getCause();
+                        }
+
+                        if (interrupted) {
+                            presenter.prepareFailView("Error searching for recipes: The search was interrupted.");
+                        } else {
+                            presenter.prepareFailView("Error searching for recipes: " + (cause != null ? cause.getMessage() : "null"));
+                        }
                     }
                 }
-                // If the worker was cancelled, do nothing.
-            }
-        };
-
-        // Start the new worker
-        activeWorker.execute();
+            };
+            activeWorker.execute();
+        }
     }
 }

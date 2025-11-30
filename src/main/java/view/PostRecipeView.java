@@ -262,7 +262,7 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toList());
 
-        List<RecipeDraft.IngredientDTO> ingredients = parseDraftIngredients(ingredientsArea.getText());
+        List<entity.RecipeDraft.IngredientDTO> ingredients = parseDraftIngredients(ingredientsArea.getText());
 
         RecipeDraft draft = new RecipeDraft(
                 currentDraftId,
@@ -329,7 +329,7 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
 
         if (draft.getIngredients() != null) {
             StringBuilder ingredientsText = new StringBuilder();
-            for (RecipeDraft.IngredientDTO ingredient : draft.getIngredients()) {
+            for (entity.RecipeDraft.IngredientDTO ingredient : draft.getIngredients()) {
                 ingredientsText.append(ingredient.getName())
                         .append(",")
                         .append(ingredient.getQuantity())
@@ -344,8 +344,8 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
         messageLabel.setForeground(new Color(0, 100, 200));
     }
 
-    private List<RecipeDraft.IngredientDTO> parseDraftIngredients(String text) {
-        List<RecipeDraft.IngredientDTO> ingredients = new ArrayList<>();
+    private List<entity.RecipeDraft.IngredientDTO> parseDraftIngredients(String text) {
+        List<entity.RecipeDraft.IngredientDTO> ingredients = new ArrayList<>();
         String[] lines = text.split("\n");
 
         for (String line : lines) {
@@ -355,9 +355,9 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
                 if (parts.length == 2) {
                     String name = parts[0].trim();
                     String quantity = parts[1].trim();
-                    ingredients.add(new RecipeDraft.IngredientDTO(name, quantity));
+                    ingredients.add(new entity.RecipeDraft.IngredientDTO(name, quantity));
                 } else if (parts.length == 1) {
-                    ingredients.add(new RecipeDraft.IngredientDTO(parts[0].trim(), ""));
+                    ingredients.add(new entity.RecipeDraft.IngredientDTO(parts[0].trim(), ""));
                 }
             }
         }
