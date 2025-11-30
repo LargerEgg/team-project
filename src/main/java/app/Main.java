@@ -1,53 +1,24 @@
 package app;
 
-import interface_adapter.view_recipe.ViewRecipeController; // Import ViewRecipeController
 import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                AppBuilder appBuilder = new AppBuilder();
 
-                // Build the views and use cases
-                appBuilder
-                        .addLoginView()
-                        .addSignupView()
-                        .addViewRecipeView();
-                // Get the ViewRecipeController after its use case is built
-                ViewRecipeController viewRecipeController = appBuilder.addViewRecipeUseCase();
+        System.out.println("main running");
 
-                // Now add the RecipeSearchView, passing the initialized ViewRecipeController
-                appBuilder.addRecipeSearchView(viewRecipeController);
+        AppBuilder appBuilder = new AppBuilder();
+        JFrame application = appBuilder
+                .addRecipeSearchView()
+                .addLoginView(null) //Change later when Firestore working
+                .addSignupView(null) // same as above
+                .build();
 
-                // Needs to be added after
-                appBuilder.addPostRecipeView();
+        application.pack();
+        application.setLocationRelativeTo(null);
+        application.setVisible(true);
 
-                // Add the PostRecipeUseCase
-                appBuilder.addPostRecipeUseCase();
+        System.out.println("GUI visible");
 
-                appBuilder
-                        .addLoginUseCase()
-                        .addSignupUseCase();
-
-                JFrame application = appBuilder.build();
-
-                application.pack();
-                application.setSize(900, 700); // Set a reasonable default size
-                application.setLocationRelativeTo(null);
-                application.setVisible(true);
-
-                System.out.println("Application started successfully!");
-
-            } catch (Exception e) {
-                System.err.println("Failed to start application: " + e.getMessage());
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(null,
-                        "Failed to start application: " + e.getMessage(),
-                        "Startup Error",
-                        JOptionPane.ERROR_MESSAGE);
-                System.exit(1);
-            }
-        });
     }
 }

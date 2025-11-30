@@ -4,6 +4,4 @@ public interface RecipeSearchOutputBoundary {
     void prepareSuccessView(RecipeSearchOutputData recipeSearchOutputData);
 
     void prepareFailView(String error);
-
-    void prepareProgressView(RecipeSearchOutputData progressData);
 }
