@@ -10,13 +10,13 @@ package entity;
 public final class PopularityCalculator {
 
     /** Minimum number of views required (sample size threshold) */
-    public static final int MINIMUM_VIEWS = 5; // should be 50
+    public static final int MINIMUM_VIEWS = 50; // should be 50
 
     /** Minimum average rating required (quality baseline) */
-    public static final double MINIMUM_RATING = 0.0; // should be 4.0
+    public static final double MINIMUM_RATING = 4.0; // should be 4.0
 
     /** Minimum engagement conversion rate required (saves/views ratio) */
-    public static final double MINIMUM_CONVERSION_RATE = 0.0; // should be 0.05
+    public static final double MINIMUM_CONVERSION_RATE = 0.05; // should be 0.05
 
     /** Fire emoji for popular recipes */
     public static final String FIRE_EMOJI = "🔥";
@@ -43,13 +43,13 @@ public final class PopularityCalculator {
         }
 
         // 2. Check quality baseline (average rating > 4.0)
-        if (recipe.getAverageRating() < MINIMUM_RATING) { // should be <=
+        if (recipe.getAverageRating() <= MINIMUM_RATING) { // should be <=
             return false;
         }
 
         // 3. Check engagement conversion rate (saves/views > 5%)
         double engagementRate = getEngagementRate(recipe);
-        if (engagementRate < MINIMUM_CONVERSION_RATE) { // should be <=
+        if (engagementRate <= MINIMUM_CONVERSION_RATE) { // should be <=
             return false;
         }
 
@@ -67,22 +67,6 @@ public final class PopularityCalculator {
             return 0.0;
         }
         return (double) recipe.getSaves() / recipe.getViews();
-    }
-
-    /**
-     * Returns the display title with fire emoji prefix if the recipe is popular.
-     *
-     * @param recipe the recipe to get the display title for
-     * @return the title with fire emoji if popular, otherwise the original title
-     */
-    public static String getDisplayTitle(Recipe recipe) {
-        if (recipe == null) {
-            return "";
-        }
-        if (isPopular(recipe)) {
-            return FIRE_EMOJI + " " + recipe.getTitle();
-        }
-        return recipe.getTitle();
     }
 }
 
