@@ -365,7 +365,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             RecipeSearchState currentState = recipeSearchViewModel.getState();
             currentState.setCurrentUser(null);
             EditReviewState editReviewState = editReviewViewModel.getState();
-            editReviewState.setCurrentUser(null);
+            editReviewState.setCurrentUser("Anonymous");
             recipeSearchViewModel.firePropertyChange();
         } else if (evt.getSource() == postRecipeButton) { // Handle the new button's action
             viewManagerModel.setState("post recipe"); // Set the active view to "post recipe"

@@ -13,7 +13,7 @@ public class EditReviewState {
     private String errorMessage = "";
     private String successMessage;
 
-    private String currentUser;
+    private String currentUser = "Anonymous";
     private String currentRecipe;
 
     public String getReview() {

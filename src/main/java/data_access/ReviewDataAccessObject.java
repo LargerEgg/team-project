@@ -21,7 +21,7 @@ public class ReviewDataAccessObject implements EditReviewDataAccessInterface {
     }
 
     @Override
-    public Review get(String reviewId) {
+    public Review findById(String reviewId) {
         return null;
     }
 

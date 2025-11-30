@@ -101,7 +101,7 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
     }
 
     @Override
-    public Review get(String reviewId) {
+    public Review findById(String reviewId) {
         try {
             DocumentReference docref = reviewsCollection.document(reviewId);
             ApiFuture<DocumentSnapshot> future = docref.get();

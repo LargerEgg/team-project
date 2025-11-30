@@ -32,7 +32,7 @@ public interface EditReviewDataAccessInterface {
      * @param reviewId the username to look up
      * @return the review with the given reviewID
      */
-    Review get(String reviewId);
+    Review findById(String reviewId);
 
     User findUserByUsername(String username);
 

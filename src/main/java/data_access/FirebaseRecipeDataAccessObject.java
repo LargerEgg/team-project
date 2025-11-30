@@ -1,9 +1,11 @@
 package data_access;
 
 import com.google.api.core.ApiFuture;
+import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
 import entity.Ingredient;
 import entity.Recipe;
+import entity.Review;
 import use_case.post_recipe.PostRecipeDataAccessInterface;
 import use_case.view_recipe.ViewRecipeDataAccessInterface;
 
@@ -349,6 +351,28 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
         }
 
         @SuppressWarnings("unchecked")
+        List<HashMap<String, Object>> hashmap = (List<HashMap<String, Object>>) doc.get("reviews");
+        List<Review> reviews = new ArrayList<>();
+        if (hashmap == null || hashmap.isEmpty()) {
+
+        }
+        else {
+            for (HashMap<String, Object> map : hashmap) {
+                String reviewId = (String) map.get("reviewId");
+                String reviewRecipeId = (String) map.get("recipeId");
+                String authorId1 = (String) map.get("authorId");
+                Timestamp ts = (Timestamp) map.get("dateCreated");
+                Date dateCreated = ts.toDate();
+                String title1 = (String) map.get("title");
+                String description1 = (String) map.get("description");
+                Long ratingLong = (Long) map.get("rating");
+                int rating = ratingLong.intValue();
+                reviews.add(new Review(reviewId, reviewRecipeId, authorId1, dateCreated, title1, description1, rating));
+            }
+        }
+
+
+        @SuppressWarnings("unchecked")
         List<Map<String, String>> ingredientsData = (List<Map<String, String>>) doc.get("ingredients");
         List<Ingredient> ingredients = new ArrayList<>();
         if (ingredientsData != null) {
@@ -398,6 +422,7 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
 
         // Recalculate average rating based on reviews (if any)
         // This assumes reviews are fetched separately or handled elsewhere
+        recipe.setReviews(reviews);
         recipe.recalculateAverageRating();
 
         return recipe;
