@@ -157,11 +157,23 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
                 "https://www.themealdb.com/images/media/meals/wvpsxx1468256321.jpg", null
         );
 
+        Recipe mockRecipee = new Recipe(
+                "52672", "TheMealDB", "Teriyaki Beef Casserole", "A fake recipe",
+                new ArrayList<>(), "Beef", new ArrayList<>(),
+                Recipe.Status.PUBLISHED, new Date(), new Date(),
+                "https://www.themealdb.com/images/media/meals/wvpsxx1468256321.jpg", null
+        );
+
         User user = new User(username, "password123");
 
         // Use getSavedRecipes() to access the favorites list
         if (user.getSavedRecipes() != null) {
             user.saveRecipe(mockRecipe);
+        } else {
+            System.out.println("Warning: User saved recipes list is null. Please check User entity initialization.");
+        }
+        if (user.getSavedRecipes() != null) {
+            user.saveRecipe(mockRecipee);
         } else {
             System.out.println("Warning: User saved recipes list is null. Please check User entity initialization.");
         }
