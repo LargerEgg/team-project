@@ -5,10 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e43c00b6-75ef-40f2-94e8-7abd57be8463" name="Changes" comment="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907">
-      <change afterPath="$PROJECT_DIR$/src/main/java/entity/RecipeDraft.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/use_case/PostRecipeOutputDataTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/use_case/RecipeSearchOutputDataTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/PostRecipeView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/PostRecipeView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/recipe-app-29d1d-firebase-adminsdk-fbsvc-ad98bb22f1.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/recipe-app-29d1d-firebase-adminsdk-fbsvc-ad98bb22f1.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/CompositeRecipeSearchDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/data_access/CompositeRecipeSearchDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/RecipeDataAccessObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/data_access/RecipeDataAccessObject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/recipe_search/RecipeSearchInteractor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/recipe_search/RecipeSearchInteractor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/recipe_search/RecipeSearchRecipeDataAccessInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/use_case/recipe_search/RecipeSearchRecipeDataAccessInterface.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/use_case/RecipeSearchInteractorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/use_case/RecipeSearchInteractorTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/use_case/ViewRecipeInteractorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/use_case/ViewRecipeInteractorTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,8 +68,9 @@
     "Application.CheckFirebaseStatus.executor": "Run",
     "Application.FirestoreDataReader.executor": "Run",
     "Application.Main.executor": "Run",
-    "JUnit.All in TeamProject.executor": "Run",
+    "JUnit.All in TeamProject.executor": "Coverage",
     "JUnit.PostRecipeInteractorTest.executor": "Coverage",
+    "JUnit.java in TeamProject.executor": "Coverage",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
@@ -92,11 +98,19 @@
       <recent name="use_case" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="JUnit.java in TeamProject">
     <configuration name="All in TeamProject" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="TeamProject" />
       <option name="PACKAGE_NAME" value="" />
       <option name="TEST_OBJECT" value="package" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="java in TeamProject" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="TeamProject" />
+      <option name="TEST_OBJECT" value="directory" />
+      <dir value="$PROJECT_DIR$/src/test/java" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -114,6 +128,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.java in TeamProject" />
         <item itemvalue="JUnit.All in TeamProject" />
       </list>
     </recent_temporary>
@@ -148,6 +163,7 @@
       <workItem from="1764196649703" duration="1263000" />
       <workItem from="1764335145882" duration="2841000" />
       <workItem from="1764449834788" duration="1781000" />
+      <workItem from="1764545177985" duration="1713000" />
     </task>
     <task id="LOCAL-00001" summary="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907">
       <option name="closed" value="true" />
@@ -179,8 +195,10 @@
     <option name="LAST_COMMIT_MESSAGE" value="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/team_project$java_in_TeamProject.ic" NAME="java in TeamProject Coverage Results" MODIFIED="1764546721028" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
     <SUITE FILE_PATH="coverage/team_project$PostRecipeInteractorTest.ic" NAME="PostRecipeInteractorTest Coverage Results" MODIFIED="1764450179157" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>use_case.*</FILTER>
     </SUITE>
+    <SUITE FILE_PATH="coverage/team_project$All_in_TeamProject.ic" NAME="All in TeamProject Coverage Results" MODIFIED="1764546149593" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
   </component>
 </project>

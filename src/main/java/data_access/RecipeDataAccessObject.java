@@ -2,10 +2,8 @@ package data_access;
 
 import entity.Ingredient;
 import entity.Recipe;
-import use_case.recipe_search.RecipeSearchOutputBoundary;
 import use_case.recipe_search.RecipeSearchRecipeDataAccessInterface;
-import use_case.recipe_search.RecipeSearchOutputData;
-import use_case.view_recipe.ViewRecipeDataAccessInterface; // Import the new interface
+import use_case.view_recipe.ViewRecipeDataAccessInterface;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -22,7 +20,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInterface, ViewRecipeDataAccessInterface { // Implement ViewRecipeDataAccessInterface
+public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInterface, ViewRecipeDataAccessInterface {
     private static final int SUCCESS_CODE = 200;
     private final OkHttpClient client = new OkHttpClient().newBuilder().build();
 
@@ -48,22 +46,22 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
     }
 
     @Override
-    public List<Recipe> search(String name, String category, RecipeSearchOutputBoundary presenter) {
+    public List<Recipe> search(String name, String category) {
         if (category != null && !category.isEmpty()) {
-            return searchByCategoryAndName(category, name, presenter);
+            return searchByCategoryAndName(category, name);
         } else {
-            return searchByName(name, presenter);
+            return searchByName(name);
         }
     }
 
-    private List<Recipe> searchByName(String name, RecipeSearchOutputBoundary presenter) {
+    private List<Recipe> searchByName(String name) {
         Request request = new Request.Builder()
                 .url(String.format("https://www.themealdb.com/api/json/v1/1/search.php?s=%s", name))
                 .build();
-        return executeAndParse(request, presenter);
+        return executeAndParse(request);
     }
 
-    private List<Recipe> searchByCategoryAndName(String category, String name, RecipeSearchOutputBoundary presenter) {
+    private List<Recipe> searchByCategoryAndName(String category, String name) {
         Request request = new Request.Builder()
                 .url(String.format("https://www.themealdb.com/api/json/v1/1/filter.php?c=%s", category))
                 .build();
@@ -89,19 +87,11 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
             }
 
             List<Recipe> recipes = new ArrayList<>();
-            int currentImageCount = 0;
-            int totalImageCount = filteredMeals.size();
-
             for (JSONObject meal : filteredMeals) {
                 String mealId = meal.getString("idMeal");
-                // For search, we pass a dummy presenter to lookupById as it's not directly tied to search progress
-                List<Recipe> lookedUpRecipes = lookupById(mealId, null);
+                List<Recipe> lookedUpRecipes = lookupById(mealId);
                 if (!lookedUpRecipes.isEmpty()) {
-                    recipes.add(lookedUpRecipes.get(0)); // lookupById returns a list, but we expect one recipe
-                    currentImageCount++;
-                    if (presenter != null) { // Only update progress if a presenter is provided
-                        presenter.prepareProgressView(new RecipeSearchOutputData(currentImageCount, totalImageCount));
-                    }
+                    recipes.add(lookedUpRecipes.get(0));
                 }
             }
             return recipes;
@@ -110,17 +100,16 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         }
     }
 
-    // Modified lookupById to be public and return a single Recipe for ViewRecipe use case
-    private List<Recipe> lookupById(String id, RecipeSearchOutputBoundary presenter) {
+    private List<Recipe> lookupById(String id) {
         Request request = new Request.Builder()
                 .url(String.format("https://www.themealdb.com/api/json/v1/1/lookup.php?i=%s", id))
                 .build();
-        return executeAndParse(request, presenter);
+        return executeAndParse(request);
     }
 
     @Override
     public Recipe findById(String recipeId) {
-        List<Recipe> recipes = lookupById(recipeId, null); // Pass null for presenter as it's not needed here
+        List<Recipe> recipes = lookupById(recipeId);
         if (!recipes.isEmpty()) {
             return recipes.get(0);
         }
@@ -132,7 +121,7 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         // This DAO is read-only.
     }
 
-    private List<Recipe> executeAndParse(Request request, RecipeSearchOutputBoundary presenter) {
+    private List<Recipe> executeAndParse(Request request) {
         try {
             Response response = client.newCall(request).execute();
             if (response.code() != SUCCESS_CODE) throw new RuntimeException("API request failed");
@@ -143,12 +132,8 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
             }
             JSONArray meals = responseJson.getJSONArray("meals");
             List<Recipe> recipes = new ArrayList<>();
-            int currentImageCount = 0; // This will be updated by downloadImage
-            int totalImageCount = meals.length();
-
             for (int i = 0; i < meals.length(); i++) {
-                recipes.add(parseRecipe(meals.getJSONObject(i), presenter, currentImageCount, totalImageCount));
-                currentImageCount++; // Increment after parsing and downloading image
+                recipes.add(parseRecipe(meals.getJSONObject(i)));
             }
             return recipes;
         } catch (IOException | JSONException e) {
@@ -156,14 +141,9 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         }
     }
 
-    private Recipe parseRecipe(JSONObject recipeJson, RecipeSearchOutputBoundary presenter, int currentImageCount, int totalImageCount) {
+    private Recipe parseRecipe(JSONObject recipeJson) {
         String imageUrl = recipeJson.getString("strMealThumb");
-        BufferedImage image = downloadImage(imageUrl); // Image download happens here
-
-        // Report progress after image download
-        if (presenter != null) { // Only update progress if a presenter is provided
-            presenter.prepareProgressView(new RecipeSearchOutputData(currentImageCount + 1, totalImageCount));
-        }
+        BufferedImage image = downloadImage(imageUrl);
 
         List<Ingredient> ingredients = new ArrayList<>();
         for (int i = 1; i <= 20; i++) {
@@ -174,20 +154,19 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
             }
         }
 
-        // Handle tags: filter out empty or whitespace-only tags
         String tagsString = recipeJson.optString("strTags", "");
         List<String> tags = new ArrayList<>();
-        if (!tagsString.trim().isEmpty()) { // Check if the whole string is not empty or just whitespace
+        if (!tagsString.trim().isEmpty()) {
             tags = Arrays.stream(tagsString.split(","))
-                    .map(String::trim) // Trim each tag
-                    .filter(tag -> !tag.isEmpty()) // Filter out empty strings
+                    .map(String::trim)
+                    .filter(tag -> !tag.isEmpty())
                     .collect(Collectors.toList());
         }
 
         return new Recipe(
                 recipeJson.getString("idMeal"), "N/A", recipeJson.getString("strMeal"),
                 recipeJson.getString("strInstructions"), ingredients, recipeJson.getString("strCategory"),
-                tags, // Use the filtered tags list
+                tags,
                 Recipe.Status.PUBLISHED, new Date(), new Date(), imageUrl, image
         );
     }

@@ -9,8 +9,8 @@ import java.util.concurrent.ExecutionException;
 public class RecipeSearchInteractor implements RecipeSearchInputBoundary {
     private final RecipeSearchRecipeDataAccessInterface dataAccess;
     private final RecipeSearchOutputBoundary presenter;
-    private SwingWorker<List<Recipe>, RecipeSearchOutputData> activeWorker;
-    private boolean isTestMode = false; // New field for test mode
+    private SwingWorker<List<Recipe>, Recipe> activeWorker;
+    private boolean isTestMode = false;
 
     public RecipeSearchInteractor(RecipeSearchRecipeDataAccessInterface dataAccess,
                                     RecipeSearchOutputBoundary presenter) {
@@ -18,63 +18,71 @@ public class RecipeSearchInteractor implements RecipeSearchInputBoundary {
         this.presenter = presenter;
     }
 
-    // Setter for test mode
     public void setTestMode(boolean testMode) {
         this.isTestMode = testMode;
-        System.out.println("RecipeSearchInteractor: Test mode set to " + testMode);
     }
 
     @Override
     public void execute(RecipeSearchInputData inputData) {
-        System.out.println("RecipeSearchInteractor: execute called. isTestMode = " + isTestMode);
         if (isTestMode) {
-            System.out.println("RecipeSearchInteractor: Executing in test mode (synchronously).");
             // Synchronous execution for testing
             try {
-                List<Recipe> recipes = dataAccess.search(inputData.getName(), inputData.getCategory(), presenter);
+                List<Recipe> recipes = dataAccess.search(inputData.getName(), inputData.getCategory());
                 RecipeSearchOutputData outputData = new RecipeSearchOutputData(recipes);
                 presenter.prepareSuccessView(outputData);
-                System.out.println("RecipeSearchInteractor: prepareSuccessView called in test mode.");
             } catch (Exception e) {
-                // Prepend the error message for consistency with the test expectation
                 presenter.prepareFailView("Error searching for recipes: " + e.getMessage());
-                System.out.println("RecipeSearchInteractor: prepareFailView called in test mode with error: " + e.getMessage());
             }
         } else {
-            System.out.println("RecipeSearchInteractor: Executing in production mode (asynchronously with SwingWorker).");
-            // Asynchronous execution with SwingWorker for production
+            // Asynchronous execution with SwingWorker
             if (activeWorker != null && !activeWorker.isDone()) {
                 activeWorker.cancel(true);
             }
 
-            activeWorker = new SwingWorker<List<Recipe>, RecipeSearchOutputData>() {
+            activeWorker = new SwingWorker<List<Recipe>, Recipe>() {
                 @Override
                 protected List<Recipe> doInBackground() throws Exception {
-                    System.out.println("RecipeSearchInteractor: SwingWorker doInBackground called.");
-                    return dataAccess.search(inputData.getName(), inputData.getCategory(), presenter);
+                    List<Recipe> recipes = dataAccess.search(inputData.getName(), inputData.getCategory());
+                    for (Recipe recipe : recipes) {
+                        publish(recipe); // Publish each recipe for progress updates
+                    }
+                    return recipes;
                 }
 
                 @Override
-                protected void process(List<RecipeSearchOutputData> chunks) {
-                    System.out.println("RecipeSearchInteractor: SwingWorker process called.");
-                    for (RecipeSearchOutputData progressData : chunks) {
-                        presenter.prepareProgressView(progressData);
-                    }
+                protected void process(List<Recipe> chunks) {
+                    // This method is now reachable
+                    RecipeSearchOutputData progressData = new RecipeSearchOutputData(chunks);
+                    presenter.prepareProgressView(progressData);
                 }
 
                 @Override
                 protected void done() {
-                    System.out.println("RecipeSearchInteractor: SwingWorker done called.");
-                    if (!isCancelled()) {
-                        try {
-                            List<Recipe> recipes = get();
-                            RecipeSearchOutputData outputData = new RecipeSearchOutputData(recipes);
-                            presenter.prepareSuccessView(outputData);
-                            System.out.println("RecipeSearchInteractor: prepareSuccessView called by SwingWorker.");
-                        } catch (InterruptedException | ExecutionException e) {
-                            // Prepend the error message for consistency with the test expectation
-                            presenter.prepareFailView("Error searching for recipes: " + e.getCause().getMessage());
-                            System.out.println("RecipeSearchInteractor: prepareFailView called by SwingWorker with error: " + e.getCause().getMessage());
+                    if (isCancelled()) {
+                        return;
+                    }
+                    try {
+                        List<Recipe> recipes = get();
+                        RecipeSearchOutputData outputData = new RecipeSearchOutputData(recipes);
+                        presenter.prepareSuccessView(outputData);
+                    } catch (Exception e) {
+                        Throwable cause = (e instanceof ExecutionException) ? e.getCause() : e;
+                        
+                        // Check for interruption anywhere in the cause chain
+                        boolean interrupted = false;
+                        Throwable current = cause;
+                        while (current != null) {
+                            if (current instanceof InterruptedException) {
+                                interrupted = true;
+                                break;
+                            }
+                            current = current.getCause();
+                        }
+
+                        if (interrupted) {
+                            presenter.prepareFailView("Error searching for recipes: The search was interrupted.");
+                        } else {
+                            presenter.prepareFailView("Error searching for recipes: " + (cause != null ? cause.getMessage() : "null"));
                         }
                     }
                 }
