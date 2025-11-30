@@ -9,10 +9,14 @@ import java.beans.PropertyChangeSupport;
 public class ViewRecipeViewModel extends ViewModel {
     public static final String TITLE_LABEL = "View Recipe";
     private ViewRecipeState state = new ViewRecipeState();
+    private String currentUser;
 
     public ViewRecipeViewModel() {
         super("view recipe");
     }
+
+    public String getCurrentUser() {return currentUser;}
+    public void setCurrentUser(String currentUser) {this.currentUser = currentUser;}
 
     public void setState(ViewRecipeState state) {
         this.state = state;

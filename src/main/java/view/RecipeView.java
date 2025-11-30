@@ -5,6 +5,10 @@ import entity.Recipe;
 import entity.Review;
 import interface_adapter.ViewManagerModel;
 import entity.PopularityCalculator;
+import interface_adapter.save_recipe.SaveRecipeController;
+import interface_adapter.save_recipe.SaveRecipeState;
+import interface_adapter.save_recipe.SaveRecipeViewModel;
+import interface_adapter.unsave_recipe.UnsaveRecipeController;
 import interface_adapter.view_recipe.ViewRecipeState;
 import interface_adapter.view_recipe.ViewRecipeViewModel;
 
@@ -23,13 +27,20 @@ public class RecipeView extends JPanel implements ActionListener, PropertyChange
     public final String viewName = "view recipe";
     private final ViewRecipeViewModel viewRecipeViewModel;
     private final ViewManagerModel viewManagerModel;
+    private final SaveRecipeController saveRecipeController;
+    private final UnsaveRecipeController unsaveRecipeController;
+    private final SaveRecipeViewModel saveRecipeViewModel;
+    private String currentUser;
 
+    private JButton saveButton;
     private JLabel titleLabel;
     private JLabel authorLabel;
     private JLabel categoryLabel;
     private JLabel tagsLabel;
     private JLabel viewsSavesRatingLabel;
     private JLabel imageLabel;
+    private JLabel savedStarLabel;
+    private JLabel popularityLabel;
     private JTextArea descriptionArea; // Changed from JLabel to JTextArea
     private JScrollPane descriptionScrollPane; // New JScrollPane for description
     private JTextArea ingredientsArea;
@@ -40,10 +51,15 @@ public class RecipeView extends JPanel implements ActionListener, PropertyChange
 
     private JButton reviewButton;
 
-    public RecipeView(ViewRecipeViewModel viewRecipeViewModel, ViewManagerModel viewManagerModel) {
+    public RecipeView(ViewRecipeViewModel viewRecipeViewModel, ViewManagerModel viewManagerModel, SaveRecipeController saveRecipeController, SaveRecipeViewModel saveRecipeViewModel, UnsaveRecipeController unsaveRecipeController) {
         this.viewRecipeViewModel = viewRecipeViewModel;
         this.viewManagerModel = viewManagerModel;
+        this.saveRecipeController = saveRecipeController;
+        this.saveRecipeViewModel = saveRecipeViewModel;
+        this.unsaveRecipeController = unsaveRecipeController;
+
         this.viewRecipeViewModel.addPropertyChangeListener(this);
+        this.saveRecipeViewModel.addPropertyChangeListener(this);
 
         setLayout(new BorderLayout());
         setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -74,18 +90,39 @@ public class RecipeView extends JPanel implements ActionListener, PropertyChange
         gbc.insets = new Insets(5, 5, 5, 5); // Padding
 
         // Image (Top-Left)
+        JPanel imageContainer = new JPanel(null);
+        imageContainer.setPreferredSize(new Dimension(400, 300));
+        imageContainer.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
         imageLabel = new JLabel();
-        imageLabel.setPreferredSize(new Dimension(400, 300)); // Fixed size for image
-        imageLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        imageLabel.setBounds(0, 0, 400, 300);
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        savedStarLabel = new JLabel("⭐");
+        savedStarLabel.setFont(new Font("SansSerif", Font.BOLD, 30));
+        savedStarLabel.setForeground(Color.YELLOW);
+        savedStarLabel.setBounds(360, 10, 40, 40);
+        savedStarLabel.setVisible(false);
+
+        imageContainer.add(imageLabel);
+        imageContainer.add(savedStarLabel);
+
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridwidth = 1;
-        gbc.gridheight = 1;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = 0.5; // Give half width to image
-        gbc.weighty = 0.5; // Give some height to image area
-        contentPanel.add(imageLabel, gbc);
+        contentPanel.add(imageContainer, gbc);
+
+        //imageLabel = new JLabel();
+        //imageLabel.setPreferredSize(new Dimension(400, 300)); // Fixed size for image
+        //imageLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        //imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        //gbc.gridx = 0;
+        //gbc.gridy = 0;
+        //gbc.gridwidth = 1;
+        //gbc.gridheight = 1;
+        //gbc.fill = GridBagConstraints.BOTH;
+        //gbc.weightx = 0.5; // Give half width to image
+        //gbc.weighty = 0.5; // Give some height to image area
+        //contentPanel.add(imageLabel, gbc);
 
         // Top-Right Details Panel (Tags, Description, Ingredients)
         JPanel topRightDetailsPanel = new JPanel();
@@ -141,6 +178,10 @@ public class RecipeView extends JPanel implements ActionListener, PropertyChange
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         infoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+        saveButton = new JButton("Save Recipe");
+        saveButton.addActionListener(this);
+        infoPanel.add(saveButton);
+
         authorLabel = new JLabel("Author: ");
         authorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         infoPanel.add(authorLabel);
@@ -184,6 +225,18 @@ public class RecipeView extends JPanel implements ActionListener, PropertyChange
     }
 
     private void updateView(Recipe recipe) {
+
+        boolean isSaved = viewRecipeViewModel.getState().getIsSaved();
+        saveButton.setEnabled(true);
+
+        if (isSaved) {
+            saveButton.setText("Unsave Recipe");
+            savedStarLabel.setVisible(true);
+        } else {
+            saveButton.setText("Save Recipe");
+            savedStarLabel.setVisible(false);
+        }
+
         if (recipe != null) {
             // Use PopularityCalculator to add hot label for popular recipes
             String hotPrefix = PopularityCalculator.isPopular(recipe) 
@@ -247,6 +300,24 @@ public class RecipeView extends JPanel implements ActionListener, PropertyChange
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == saveButton) {
+            if (currentUser == null || currentUser.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "You must be logged in to save recipes.");
+                return;
+            }
+
+            Recipe recipe = viewRecipeViewModel.getState().getRecipe();
+            boolean isSaved = viewRecipeViewModel.getState().getIsSaved();
+
+            if (isSaved) {
+                unsaveRecipeController.execute(currentUser, recipe);
+            } else {
+                saveRecipeController.execute(currentUser, recipe);
+            }
+        }
+
+
+
         if (e.getSource() == backButton) {
             viewManagerModel.setState("recipe search");
             viewManagerModel.firePropertyChange();
@@ -259,12 +330,31 @@ public class RecipeView extends JPanel implements ActionListener, PropertyChange
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if ("state".equals(evt.getPropertyName())) {
+        if (evt.getSource() == viewRecipeViewModel && "state".equals(evt.getPropertyName())) {
             ViewRecipeState state = (ViewRecipeState) evt.getNewValue();
             if (state.getErrorMessage() != null && !state.getErrorMessage().isEmpty()) {
                 JOptionPane.showMessageDialog(this, state.getErrorMessage());
             } else {
+                currentUser = state.getCurrentUser();
                 updateView(state.getRecipe());
+            }
+        }
+
+        if (evt.getSource() == saveRecipeViewModel && "state".equals(evt.getPropertyName())) {
+            SaveRecipeState saveState = (SaveRecipeState) evt.getNewValue();
+            viewRecipeViewModel.getState().setIsSaved(saveState.isSaved());
+
+            if (saveState.isSaved()) {
+                saveButton.setText("Unsave Recipe");
+                savedStarLabel.setVisible(true);
+            } else {
+                saveButton.setText("Save Recipe");
+                savedStarLabel.setVisible(false);
+            }
+            saveButton.setEnabled(true);
+
+            if (saveState.getMessage() != null) {
+                JOptionPane.showMessageDialog(this, saveState.getMessage());
             }
         }
     }

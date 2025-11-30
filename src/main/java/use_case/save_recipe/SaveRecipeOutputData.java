@@ -1,19 +1,20 @@
 package use_case.save_recipe;
 
 public class SaveRecipeOutputData {
-    private final boolean success;
-    private final String message;
+    private final String recipeName;
+    private final boolean saved;
 
-    public SaveRecipeOutputData(boolean success, String message) {
-        this.success = success;
-        this.message = message;
+    public SaveRecipeOutputData(String recipeName, boolean saved) {
+        this.recipeName = recipeName;
+        this.saved = saved;
     }
 
-    public boolean isSuccess() {
-        return success;
+    public String getRecipeName() {
+        return recipeName;
     }
 
-    public String getMessage() {
-        return message;
+    public boolean isSaved() {
+        return saved;
     }
+
 }
