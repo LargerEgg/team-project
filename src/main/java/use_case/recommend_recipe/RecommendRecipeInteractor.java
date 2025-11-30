@@ -3,10 +3,7 @@ package use_case.recommend_recipe;
 import entity.Recipe;
 import entity.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
 
@@ -30,55 +27,53 @@ public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
         }
 
         List<Recipe> favorites = user.getSavedRecipes();
-        if (favorites == null) {
-            favorites = new ArrayList<>();
+
+        if (favorites == null || favorites.isEmpty()) {
+            userPresenter.prepareFailView("No favorites found. Please save some recipes first!");
+            return;
         }
 
         List<String> rankedCategories = getFavouriteCategoriesRanked(favorites);
 
         if (rankedCategories.isEmpty()) {
-            if (favorites.isEmpty()) {
-                userPresenter.prepareFailView(
-                        "No favorites found. Please save some recipes first!");
-            } else {
-                userPresenter.prepareFailView(
-                        "Could not determine favorite category.");
+            userPresenter.prepareFailView("Could not determine favorite category.");
+            return;
+        }
+
+        int categoriesToFetch = Math.min(3, rankedCategories.size());
+        List<Recipe> finalRecommendations = new ArrayList<>();
+
+        for (int i = 0; i < categoriesToFetch; i++) {
+            String category = rankedCategories.get(i);
+            List<Recipe> recipes = userDataAccessObject.getRecipesByCategory(category);
+            if (recipes != null) {
+                finalRecommendations.addAll(recipes);
             }
+        }
+
+        if (finalRecommendations.isEmpty()) {
+            userPresenter.prepareFailView("Sorry, no recommendations found.");
             return;
         }
 
-        String bestCategory = rankedCategories.get(0);
+        Collections.shuffle(finalRecommendations);
 
-        List<Recipe> recommendedRecipes = userDataAccessObject.getRecipesByCategory(bestCategory);
-
-        if (recommendedRecipes.isEmpty()) {
-            userPresenter.prepareFailView(
-                    "Sorry, no recommendations found for category: " + bestCategory);
-            return;
+        if (finalRecommendations.size() > 20) {
+            finalRecommendations = finalRecommendations.subList(0, 20);
         }
 
-        RecommendRecipeOutputData outputData =
-                new RecommendRecipeOutputData(recommendedRecipes, bestCategory);
+        RecommendRecipeOutputData outputData = new RecommendRecipeOutputData(finalRecommendations, "Mix of your Top Favorites");
         userPresenter.prepareSuccessView(outputData);
     }
 
     private List<String> getFavouriteCategoriesRanked(List<Recipe> favorites) {
+
         Map<String, Integer> categoryCounts = new HashMap<>();
-
         for (Recipe recipe : favorites) {
-            String category;
-            try {
-                category = recipe.getCategory();
-            } catch (Exception e) {
-                continue;
+            String category = recipe.getCategory();
+            if (category != null && !category.trim().isEmpty()) {
+                categoryCounts.put(category, categoryCounts.getOrDefault(category, 0) + 1);
             }
-
-            if (category == null || category.trim().isEmpty()) {
-                continue;
-            }
-
-            category = category.trim();
-            categoryCounts.put(category, categoryCounts.getOrDefault(category, 0) + 1);
         }
 
         List<Map.Entry<String, Integer>> entryList = new ArrayList<>(categoryCounts.entrySet());
