@@ -222,8 +222,8 @@ public class RecipeView extends JPanel implements ActionListener, PropertyChange
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             if (recipe.getReviews() != null && !recipe.getReviews().isEmpty()) {
                 reviewsArea.setText(recipe.getReviews().stream()
-                        .map(review -> String.format("Rating: %d/5 by %s on %s\nComment: %s",
-                                review.getRating(), review.getAuthorId(), dateFormat.format(review.getDateCreated()), review.getDescription()))
+                        .map(review -> String.format("%s - Rating: %d/5 by %s on %s\nComment: %s",
+                                review.getTitle(), review.getRating(), review.getAuthorId(), dateFormat.format(review.getDateCreated()), review.getDescription()))
                         .collect(Collectors.joining("\n\n")));
             } else {
                 reviewsArea.setText("No reviews yet.");

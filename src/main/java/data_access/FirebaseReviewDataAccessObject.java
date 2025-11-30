@@ -46,6 +46,7 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
             DocumentSnapshot doc = future.get();
 
             List<HashMap<String, Object>> hashmap = (List<HashMap<String, Object>>) doc.get("reviews");
+            List<Review> tempReviews = new ArrayList<>();
             List<Review> reviews = new ArrayList<>();
             if (hashmap == null || hashmap.isEmpty()) {
             } else {
@@ -59,16 +60,23 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
                     String description1 = (String) map.get("description");
                     Long ratingLong = (Long) map.get("rating");
                     int rating = ratingLong.intValue();
-                    reviews.add(new Review(reviewId, reviewRecipeId, authorId1, dateCreated, title1, description1, rating));
+                    tempReviews.add(new Review(reviewId, reviewRecipeId, authorId1, dateCreated, title1, description1, rating));
                 }
             }
-            for (Review review1 : reviews) {
-                if (review1.getReviewId().equals(review.getReviewId())) {
-                    reviews.remove(review1);
-                    reviews.add(review);
+
+            for (Review review1 : tempReviews) {
+                if (!(review1.getReviewId().equals(review.getReviewId()))) {
+                    reviews.add(review1);
                 }
             }
+            reviews.add(review);
+            double totalRating = 0.0;
+            for (Review review2 : reviews) {
+                totalRating += review2.getRating();
+            }
+            double averageRating = totalRating / tempReviews.size();
             recipeDocRef.update("reviews", reviews);
+            recipeDocRef.update("averageRating", averageRating);
         }
         catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Error editing review", e);
@@ -100,25 +108,37 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
     }
 
     public void recordReviewRecipe(String recipeId, Review review) {
-        DocumentReference recipeDocRef = recipesCollection.document(recipeId);
-
-        ApiFuture<Void> future = db.runTransaction(transaction -> {
-            DocumentSnapshot snapshot = transaction.get(recipeDocRef).get();
-            if (snapshot.exists()) {
-                ArrayList<Review> reviews = (ArrayList<Review>) snapshot.get("reviews");
-                reviews.add(review);
-                transaction.update(recipeDocRef, "reviews", reviews);
-            } else {
-                Map<String, Object> data = new HashMap<>();
-                ArrayList<Review> reviews = new ArrayList<>();
-                reviews.add(review);
-                data.put("reviews", reviews);
-                transaction.set(recipeDocRef, data);
-            }
-            return null;
-        });
         try {
-            future.get();
+            DocumentReference recipeDocRef = recipesCollection.document(recipeId);
+            ApiFuture<DocumentSnapshot> future = recipeDocRef.get();
+            DocumentSnapshot doc = future.get();
+
+            List<HashMap<String, Object>> hashmap = (List<HashMap<String, Object>>) doc.get("reviews");
+            List<Review> reviews = new ArrayList<>();
+            if (hashmap == null || hashmap.isEmpty()) {
+            } else {
+                for (HashMap<String, Object> map : hashmap) {
+                    String reviewId = (String) map.get("reviewId");
+                    String reviewRecipeId = (String) map.get("recipeId");
+                    String authorId1 = (String) map.get("authorId");
+                    Timestamp ts = (Timestamp) map.get("dateCreated");
+                    Date dateCreated = ts.toDate();
+                    String title1 = (String) map.get("title");
+                    String description1 = (String) map.get("description");
+                    Long ratingLong = (Long) map.get("rating");
+                    int rating = ratingLong.intValue();
+                    reviews.add(new Review(reviewId, reviewRecipeId, authorId1, dateCreated, title1, description1, rating));
+                }
+            }
+            reviews.add(review);
+            double totalRating = 0.0;
+            for (Review review2 : reviews) {
+                totalRating += review2.getRating();
+            }
+            double averageRating = totalRating / reviews.size();
+
+            recipeDocRef.update("reviews", reviews);
+            recipeDocRef.update("averageRating", averageRating);
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Error recording review", e);
         }
