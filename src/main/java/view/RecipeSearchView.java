@@ -9,6 +9,7 @@ import interface_adapter.edit_review.EditReviewViewModel;
 import interface_adapter.recipe_search.RecipeSearchController;
 import interface_adapter.recipe_search.RecipeSearchState;
 import interface_adapter.recipe_search.RecipeSearchViewModel;
+import interface_adapter.recommend_recipe.RecommendRecipeController;
 import interface_adapter.saved_recipes.ShowSavedRecipesController;
 import interface_adapter.view_recipe.ViewRecipeController; // Import the new controller
 
@@ -19,7 +20,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter; // Import MouseAdapter
 import java.awt.event.MouseEvent; // Import MouseEvent
-import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     private JProgressBar progressBar;
     private JLabel loadingLabel; // To hold the "Loading search results..." text
 
-    public RecipeSearchView(RecipeSearchViewModel recipeSearchViewModel, RecipeSearchController recipeSearchController, ViewManagerModel viewManagerModel, ViewRecipeController viewRecipeController, ShowSavedRecipesController showSavedRecipesController, EditReviewViewModel editReviewViewModel) {
+    public RecipeSearchView(RecipeSearchViewModel recipeSearchViewModel, RecipeSearchController recipeSearchController, ViewManagerModel viewManagerModel, ViewRecipeController viewRecipeController, ShowSavedRecipesController showSavedRecipesController, EditReviewViewModel editReviewViewModel, RecommendRecipeController recommendController) {
         this.recipeSearchViewModel = recipeSearchViewModel;
         this.recipeSearchController = recipeSearchController;
         this.viewManagerModel = viewManagerModel;

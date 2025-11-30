@@ -27,6 +27,9 @@ import interface_adapter.unsave_recipe.UnsaveRecipePresenter;
 import interface_adapter.view_recipe.ViewRecipeController;
 import interface_adapter.view_recipe.ViewRecipePresenter;
 import interface_adapter.view_recipe.ViewRecipeViewModel;
+import interface_adapter.recommend_recipe.RecommendRecipeController;
+import interface_adapter.recommend_recipe.RecommendRecipePresenter;
+import interface_adapter.recommend_recipe.RecommendRecipeViewModel;
 import interface_adapter.edit_review.EditReviewViewModel;
 import interface_adapter.edit_review.EditReviewController;
 import interface_adapter.edit_review.EditReviewPresenter;
@@ -41,6 +44,10 @@ import use_case.recipe_search.RecipeSearchInputBoundary;
 import use_case.recipe_search.RecipeSearchInteractor;
 import use_case.recipe_search.RecipeSearchOutputBoundary;
 import use_case.recipe_search.RecipeSearchRecipeDataAccessInterface;
+import use_case.recommend_recipe.RecommendRecipeDataAccessInterface;
+import use_case.recommend_recipe.RecommendRecipeInputBoundary;
+import use_case.recommend_recipe.RecommendRecipeInteractor;
+import use_case.recommend_recipe.RecommendRecipeOutputBoundary;
 import use_case.save_recipe.SaveRecipeDataAccessInterface;
 import use_case.save_recipe.SaveRecipeInputBoundary;
 import use_case.save_recipe.SaveRecipeInteractor;
@@ -78,8 +85,11 @@ public class AppBuilder {
     private final UserFactory userFactory = new UserFactory();
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
+
+    // 初始化基础 DAO
     private UserDataAccessObject userDataAccessObject = new UserDataAccessObject();
-    private RecipeDataAccessObject recipeDataAccessObject = new RecipeDataAccessObject();
+    // 注意：recipeDataAccessObject 现在被初始化为 API DAO
+    private RecipeDataAccessObject recipeDataAccessObject;
     private ReviewDataAccessObject reviewDataAccessObject = new ReviewDataAccessObject();
 
     private static final boolean USE_FIREBASE = true;
@@ -102,7 +112,10 @@ public class AppBuilder {
     // New fields for PostRecipe
     private PostRecipeViewModel postRecipeViewModel;
     private PostRecipeView postRecipeView;
-    private PostRecipeController postRecipeController; // Declare the controller here
+    private PostRecipeController postRecipeController;
+
+    private RecommendRecipeViewModel recommendRecipeViewModel;
+    private RecommendRecipeView recommendRecipeView;
 
     private EditReviewViewModel editReviewViewModel;
     private EditReviewController editReviewController;
@@ -111,7 +124,9 @@ public class AppBuilder {
 
         cardPanel.setLayout(cardLayout);
 
+        // 初始化 API DAO
         apiRecipeDataAccessObject = new RecipeDataAccessObject();
+        recipeDataAccessObject = apiRecipeDataAccessObject; // 默认指向 API DAO
 
         // Initialize Firebase if enabled
         if (USE_FIREBASE) {
@@ -191,7 +206,9 @@ public class AppBuilder {
     // Modified to accept ViewRecipeController
     public AppBuilder addRecipeSearchView(ViewRecipeController viewRecipeController) {
         recipeSearchViewModel = new RecipeSearchViewModel();
+
         RecipeSearchRecipeDataAccessInterface recipeDAO;
+        // 如果 Firebase 可用，使用混合 DAO；否则只用 API DAO
         if (USE_FIREBASE && firebaseRecipeDataAccessObject != null) {
             recipeDAO = new CompositeRecipeSearchDAO(apiRecipeDataAccessObject, firebaseRecipeDataAccessObject);
         } else {
@@ -204,9 +221,11 @@ public class AppBuilder {
         initialState.setCategories(categories);
         recipeSearchViewModel.setState(initialState);
 
+        // === 初始化 Show Saved Recipes 功能 ===
         ShowSavedRecipesOutputBoundary savedRecipesPresenter =
                 new SavedRecipesPresenter(recipeSearchViewModel);
 
+        // 注意：这里使用的是 FirebaseSaveRecipeDataAccessObject，它通常包装了 API DAO
         ShowSavedRecipesDataAccessInterface savedRecipesDAO =
                 new FirebaseSaveRecipeDataAccessObject(apiRecipeDataAccessObject);
 
@@ -215,12 +234,41 @@ public class AppBuilder {
 
         ShowSavedRecipesController showSavedRecipesController =
                 new ShowSavedRecipesController(savedRecipesInteractor);
+        // ====================================
 
+        // === 初始化 Recipe Search 功能 ===
         RecipeSearchOutputBoundary recipeSearchOutputBoundary = new RecipeSearchPresenter(viewManagerModel, recipeSearchViewModel);
         RecipeSearchInputBoundary recipeSearchInteractor = new RecipeSearchInteractor(recipeDAO, recipeSearchOutputBoundary);
         RecipeSearchController recipeSearchController = new RecipeSearchController(recipeSearchInteractor);
-        recipeSearchView = new RecipeSearchView(recipeSearchViewModel, recipeSearchController, viewManagerModel, viewRecipeController, showSavedRecipesController, editReviewViewModel);
+
+        // === 初始化 Recommend Recipe 功能 ===
+        recommendRecipeViewModel = new RecommendRecipeViewModel();
+        RecommendRecipeOutputBoundary recommendPresenter = new RecommendRecipePresenter(recommendRecipeViewModel, viewManagerModel);
+        // 推荐功能使用 API DAO (因为 RecommendRecipeDataAccessInterface 在那里实现)
+        RecommendRecipeInputBoundary recommendInteractor = new RecommendRecipeInteractor((RecommendRecipeDataAccessInterface) apiRecipeDataAccessObject, recommendPresenter);
+        RecommendRecipeController recommendController = new RecommendRecipeController(recommendInteractor);
+
+        // 创建 RecipeSearchView，传入所有需要的 Controller 和 ViewModel
+        recipeSearchView = new RecipeSearchView(
+                recipeSearchViewModel,
+                recipeSearchController,
+                viewManagerModel,
+                viewRecipeController,
+                showSavedRecipesController, // 传入 Saved Recipes Controller
+                editReviewViewModel,        // 传入 Edit Review ViewModel
+                recommendController         // 传入 Recommend Controller
+        );
+
         cardPanel.add(recipeSearchView, recipeSearchView.viewName);
+        return this;
+    }
+
+    public AppBuilder addRecommendRecipeView(ViewRecipeController viewRecipeController) {
+        if (recommendRecipeViewModel == null) {
+            recommendRecipeViewModel = new RecommendRecipeViewModel();
+        }
+        recommendRecipeView = new RecommendRecipeView(recommendRecipeViewModel, viewManagerModel, viewRecipeController);
+        cardPanel.add(recommendRecipeView, recommendRecipeView.viewName);
         return this;
     }
 
@@ -357,6 +405,28 @@ public class AppBuilder {
         public void recordView(String recipeId) {
             firebaseDAO.recordView(recipeId);
             apiDAO.recordView(recipeId);
+        }
+    }
+
+    // 如果需要 CompositeRecipeSearchDAO 也可以在这里定义内部类，或者在 data_access 包里已经有了
+    // 假设 data_access 包里没有，这里补一个简单的内部类实现
+    private static class CompositeRecipeSearchDAO implements RecipeSearchRecipeDataAccessInterface {
+        private final RecipeDataAccessObject apiDAO;
+        private final FirebaseRecipeDataAccessObject firebaseDAO;
+
+        public CompositeRecipeSearchDAO(RecipeDataAccessObject apiDAO, FirebaseRecipeDataAccessObject firebaseDAO) {
+            this.apiDAO = apiDAO;
+            this.firebaseDAO = firebaseDAO;
+        }
+
+        @Override
+        public List<String> getAllCategories() {
+            return apiDAO.getAllCategories();
+        }
+
+        @Override
+        public List<entity.Recipe> search(String name, String category, RecipeSearchOutputBoundary presenter) {
+            return apiDAO.search(name, category, presenter);
         }
     }
 }
