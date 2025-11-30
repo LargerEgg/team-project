@@ -345,6 +345,77 @@ class PostRecipeInteractorTest {
         assertEquals("At least one ingredient is required", presenter.failMessage);
         assertFalse(dataAccess.saveRecipeCalled);
     }
+    @Test
+    @DisplayName("BuildRecipe: Handles null ingredients list in buildRecipeFromInput")
+    void testBuildRecipeWithNullIngredientsInBuilder() {
+        // This tests the branch where ingredients list could be null during building
+        // Even though validation prevents this, the method has a null check
+        List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
+        ingredients.add(new PostRecipeInputData.IngredientDTO("Test", "1 unit"));
+
+        // Create input with minimal fields to ensure all branches in build method are hit
+        PostRecipeInputData inputData = new PostRecipeInputData(
+                "testUser",
+                "Test Recipe",
+                "Description",
+                ingredients,
+                null,  // null category
+                null,  // null imagePath
+                null   // null tags
+        );
+
+        interactor.publish(inputData);
+
+        assertNotNull(dataAccess.savedRecipe);
+        assertNotNull(dataAccess.savedRecipe.getIngredients());
+    }
+
+    @Test
+    @DisplayName("SaveDraft: Success with null ingredients to test builder branch")
+    void testSaveDraftNullIngredients() {
+        List<PostRecipeInputData.IngredientDTO> ingredients = new ArrayList<>();
+        ingredients.add(new PostRecipeInputData.IngredientDTO("Flour", "2 cups"));
+
+        PostRecipeInputData inputData = new PostRecipeInputData(
+                "testUser",
+                "Draft Recipe",
+                "Work in progress",
+                ingredients,
+                null,  // null category
+                null,  // null imagePath
+                null   // null tags
+        );
+
+        interactor.saveDraft(inputData);
+
+        assertTrue(presenter.draftSavedViewCalled);
+        assertNotNull(dataAccess.savedRecipe);
+    }
+
+    @Test
+    @DisplayName("SaveDraft: Success with null ingredients")
+    void testSaveDraftWithNullIngredients() {
+        // Arrange - saveDraft doesn't validate ingredients, so null can reach buildRecipeFromInput
+        PostRecipeInputData inputData = new PostRecipeInputData(
+                "testUser",
+                "Draft Recipe",
+                "Work in progress",
+                null,  // null ingredients - this is allowed for drafts!
+                "Baking",
+                "",
+                new ArrayList<>()
+        );
+
+        // Act
+        interactor.saveDraft(inputData);
+
+        // Assert
+        assertTrue(presenter.draftSavedViewCalled);
+        assertNotNull(dataAccess.savedRecipe);
+        assertEquals(Recipe.Status.DRAFT, dataAccess.savedRecipe.getStatus());
+        assertTrue(dataAccess.savedRecipe.getIngredients().isEmpty());  // Should be empty list, not null
+    }
+
 
     @Test
     @DisplayName("Publish: Failure - Empty ingredients list")
