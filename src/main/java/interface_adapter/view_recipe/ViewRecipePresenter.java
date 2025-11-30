@@ -1,23 +1,29 @@
 package interface_adapter.view_recipe;
 
 import interface_adapter.ViewManagerModel;
-import kotlin.jvm.internal.StringCompanionObject;
+import interface_adapter.edit_review.EditReviewState;
+import interface_adapter.edit_review.EditReviewViewModel;
 import use_case.view_recipe.ViewRecipeOutputBoundary;
 import use_case.view_recipe.ViewRecipeOutputData;
 
 public class ViewRecipePresenter implements ViewRecipeOutputBoundary {
     private final ViewRecipeViewModel viewRecipeViewModel;
     private final ViewManagerModel viewManagerModel;
-    private final String currentUser;
+    private final EditReviewViewModel editReviewViewModel;
 
-    public ViewRecipePresenter(ViewRecipeViewModel viewRecipeViewModel, ViewManagerModel viewManagerModel, String  currentUser) {
+    public ViewRecipePresenter(ViewRecipeViewModel viewRecipeViewModel, ViewManagerModel viewManagerModel, EditReviewViewModel editReviewViewModel) {
         this.viewRecipeViewModel = viewRecipeViewModel;
         this.viewManagerModel = viewManagerModel;
-        this.currentUser = currentUser;
+        this.editReviewViewModel = editReviewViewModel;
     }
 
     @Override
     public void prepareSuccessView(ViewRecipeOutputData outputData) {
+
+        final EditReviewState loggedInReviewState = editReviewViewModel.getState();
+        loggedInReviewState.setCurrentRecipe(outputData.getRecipe().getRecipeId());
+        this.editReviewViewModel.firePropertyChange();
+
         ViewRecipeState viewRecipeState = viewRecipeViewModel.getState();
         viewRecipeState.setRecipe(outputData.getRecipe());
         viewRecipeState.setIsSaved(outputData.isSaved());

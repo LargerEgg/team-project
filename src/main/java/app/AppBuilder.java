@@ -27,6 +27,9 @@ import interface_adapter.unsave_recipe.UnsaveRecipePresenter;
 import interface_adapter.view_recipe.ViewRecipeController;
 import interface_adapter.view_recipe.ViewRecipePresenter;
 import interface_adapter.view_recipe.ViewRecipeViewModel;
+import interface_adapter.edit_review.EditReviewViewModel;
+import interface_adapter.edit_review.EditReviewController;
+import interface_adapter.edit_review.EditReviewPresenter;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
@@ -58,6 +61,10 @@ import use_case.view_recipe.ViewRecipeDataAccessInterface;
 import use_case.view_recipe.ViewRecipeInputBoundary;
 import use_case.view_recipe.ViewRecipeInteractor;
 import use_case.view_recipe.ViewRecipeOutputBoundary;
+import use_case.edit_review.EditReviewOutputBoundary;
+import use_case.edit_review.EditReviewDataAccessInterface;
+import use_case.edit_review.EditReviewInputBoundary;
+import use_case.edit_review.EditReviewInteractor;
 import view.*;
 
 import javax.swing.*;
@@ -73,11 +80,13 @@ public class AppBuilder {
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
     private UserDataAccessObject userDataAccessObject = new UserDataAccessObject();
     private RecipeDataAccessObject recipeDataAccessObject = new RecipeDataAccessObject();
+    private ReviewDataAccessObject reviewDataAccessObject = new ReviewDataAccessObject();
 
     private static final boolean USE_FIREBASE = true;
     private FirebaseUserDataAccessObject firebaseUserDataAccessObject;
     private FirebaseRecipeDataAccessObject firebaseRecipeDataAccessObject;
     private RecipeDataAccessObject apiRecipeDataAccessObject; // For MealDB API
+    private FirebaseReviewDataAccessObject firebaseReviewDataAccessObject;
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -85,6 +94,7 @@ public class AppBuilder {
     private LoginViewModel loginViewModel;
     private RecipeSearchViewModel recipeSearchViewModel;
     private RecipeSearchView recipeSearchView;
+    private EditReviewView editReviewView;
 
     private ViewRecipeViewModel viewRecipeViewModel;
     private RecipeView recipeView;
@@ -93,6 +103,9 @@ public class AppBuilder {
     private PostRecipeViewModel postRecipeViewModel;
     private PostRecipeView postRecipeView;
     private PostRecipeController postRecipeController; // Declare the controller here
+
+    private EditReviewViewModel editReviewViewModel;
+    private EditReviewController editReviewController;
 
     public AppBuilder() {
 
@@ -106,6 +119,7 @@ public class AppBuilder {
                 FirebaseInitializer.initialize();
                 firebaseUserDataAccessObject = new FirebaseUserDataAccessObject(userFactory);
                 firebaseRecipeDataAccessObject = new FirebaseRecipeDataAccessObject();
+                firebaseReviewDataAccessObject = new FirebaseReviewDataAccessObject();
                 System.out.println("Firebase data access objects initialized successfully!");
             } catch (IOException | IllegalStateException e) {
                 System.err.println("Failed to initialize Firebase: " + e.getMessage());
@@ -165,7 +179,7 @@ public class AppBuilder {
         }
 
         final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
-                recipeSearchViewModel, loginViewModel);
+                recipeSearchViewModel, loginViewModel, editReviewViewModel);
         final LoginInputBoundary loginInteractor = new LoginInteractor(
                 userDAO, loginOutputBoundary);
 
@@ -205,7 +219,7 @@ public class AppBuilder {
         RecipeSearchOutputBoundary recipeSearchOutputBoundary = new RecipeSearchPresenter(viewManagerModel, recipeSearchViewModel);
         RecipeSearchInputBoundary recipeSearchInteractor = new RecipeSearchInteractor(recipeDAO, recipeSearchOutputBoundary);
         RecipeSearchController recipeSearchController = new RecipeSearchController(recipeSearchInteractor);
-        recipeSearchView = new RecipeSearchView(recipeSearchViewModel, recipeSearchController, viewManagerModel, viewRecipeController, showSavedRecipesController);
+        recipeSearchView = new RecipeSearchView(recipeSearchViewModel, recipeSearchController, viewManagerModel, viewRecipeController, showSavedRecipesController, editReviewViewModel);
         cardPanel.add(recipeSearchView, recipeSearchView.viewName);
         return this;
     }
@@ -236,9 +250,16 @@ public class AppBuilder {
         return this;
     }
 
+    public AppBuilder addEditReviewView() {
+        editReviewViewModel = new EditReviewViewModel();
+        editReviewView = new EditReviewView(editReviewViewModel, viewManagerModel);
+        cardPanel.add(editReviewView, editReviewView.getViewName());
+        return this;
+    }
+
     // Modified to return ViewRecipeController
     public ViewRecipeController addViewRecipeUseCase() {
-        ViewRecipeOutputBoundary viewRecipeOutputBoundary = new ViewRecipePresenter(viewRecipeViewModel, viewManagerModel, "NAME");
+        ViewRecipeOutputBoundary viewRecipeOutputBoundary = new ViewRecipePresenter(viewRecipeViewModel, viewManagerModel, editReviewViewModel);
 
         ViewRecipeDataAccessInterface viewRecipeDataAccessObject;
         if (USE_FIREBASE && firebaseRecipeDataAccessObject != null) {
@@ -275,6 +296,21 @@ public class AppBuilder {
         PostRecipeInputBoundary postRecipeInteractor = new PostRecipeInteractor(postRecipeDataAccess, postRecipeOutputBoundary);
         postRecipeController = new PostRecipeController(postRecipeInteractor);
         postRecipeView.setPostRecipeController(postRecipeController);
+        return this;
+    }
+
+    public AppBuilder addEditReviewUseCase() {
+        EditReviewOutputBoundary editReviewOutputBoundary = new EditReviewPresenter(viewManagerModel, editReviewViewModel);
+
+        // Use Firebase for posting reviews if available, otherwise use in-memory
+        EditReviewDataAccessInterface editReviewDataAccess = USE_FIREBASE && firebaseReviewDataAccessObject != null
+                ? firebaseReviewDataAccessObject
+                : new ReviewDataAccessObject();
+
+
+        EditReviewInputBoundary editReviewInteractor = new EditReviewInteractor(editReviewDataAccess, editReviewOutputBoundary);
+        editReviewController = new EditReviewController(editReviewInteractor);
+        editReviewView.setEditReviewController(editReviewController);
         return this;
     }
 

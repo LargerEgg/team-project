@@ -13,7 +13,10 @@ public class Main {
                 appBuilder
                         .addLoginView()
                         .addSignupView()
-                        .addViewRecipeView();
+                        .addViewRecipeView()
+                        .addPostRecipeView()
+                        .addEditReviewView();
+
                 // Get the ViewRecipeController after its use case is built
                 ViewRecipeController viewRecipeController = appBuilder.addViewRecipeUseCase();
 
@@ -29,6 +32,8 @@ public class Main {
                 appBuilder
                         .addLoginUseCase()
                         .addSignupUseCase();
+
+                appBuilder.addEditReviewUseCase();
 
                 JFrame application = appBuilder.build();
 
