@@ -16,8 +16,23 @@ public class SaveRecipePresenter implements SaveRecipeOutputBoundary {
     @Override
     public void prepareSuccess(SaveRecipeOutputData outputData) {
         SaveRecipeState state = new SaveRecipeState();
-        state.setSaved(true);
-        state.setMessage("Saved: " + outputData.getRecipeName());
+        state.setSaved(outputData.isSaved());
+
+        if (outputData.isSaved()) {
+            state.setMessage("Saved" + outputData.getRecipeName());
+        } else {
+            state.setMessage("Unsaved" + outputData.getRecipeName());
+        }
+
+        viewModel.setState(state);
+        viewModel.firePropertyChange();
+    }
+
+    @Override
+    public void prepareUnsave(SaveRecipeOutputData outputData) {
+        SaveRecipeState state = new SaveRecipeState();
+        state.setSaved(false);
+        state.setMessage("Unsaved: " + outputData.getRecipeName());
 
         viewModel.setState(state);
         viewModel.firePropertyChange();

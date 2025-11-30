@@ -11,8 +11,8 @@ public class ViewRecipeController {
         this.viewRecipeInteractor = viewRecipeInteractor;
     }
 
-    public void execute(Recipe recipe) {
-        ViewRecipeInputData viewRecipeInputData = new ViewRecipeInputData(recipe);
+    public void execute(Recipe recipe, String username) {
+        ViewRecipeInputData viewRecipeInputData = new ViewRecipeInputData(recipe, username);
         viewRecipeInteractor.execute(viewRecipeInputData);
     }
 }
