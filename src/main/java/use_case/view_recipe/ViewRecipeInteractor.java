@@ -1,21 +1,26 @@
 package use_case.view_recipe;
 
+import data_access.FirebaseSaveRecipeDataAccessObject;
 import entity.Recipe;
+import use_case.save_recipe.SaveRecipeDataAccessInterface;
 
 public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
 
     private final ViewRecipeDataAccessInterface repo;
     private final ViewRecipeOutputBoundary presenter;
+    private final SaveRecipeDataAccessInterface saveRecipeDAO;
 
     public ViewRecipeInteractor(ViewRecipeDataAccessInterface repo,
-                                ViewRecipeOutputBoundary presenter) {
+                                ViewRecipeOutputBoundary presenter,
+                                SaveRecipeDataAccessInterface saveRecipeDAO) {
         this.repo = repo;
         this.presenter = presenter;
+        this.saveRecipeDAO = saveRecipeDAO;
     }
 
     @Override
     public void execute(ViewRecipeInputData input) {
-
+        String username = input.getUsername();
         Recipe recipe = input.getRecipe();
 
         if (recipe == null) {
@@ -36,8 +41,13 @@ public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
             }
         }).start();
 
+        boolean saved = false;
+        if (username != null && !username.isEmpty()) {
+            saved = saveRecipeDAO.isRecipeSaved(username, recipe.getRecipeId());
+        }
+
         // Prepare the success view immediately, without waiting for the database
-        ViewRecipeOutputData outputData = new ViewRecipeOutputData(recipe);
+        ViewRecipeOutputData outputData = new ViewRecipeOutputData(recipe, username, saved);
         presenter.prepareSuccessView(outputData);
     }
 }

@@ -1,47 +1,42 @@
 package use_case.save_recipe;
 
 import entity.Recipe;
-import entity.User;
 
 public class SaveRecipeInteractor implements SaveRecipeInputBoundary {
 
-    private final SaveRecipeDataAccessInterface dataAccessObject;
+    private final SaveRecipeDataAccessInterface recipeDao;
     private final SaveRecipeOutputBoundary presenter;
 
-    public SaveRecipeInteractor(SaveRecipeDataAccessInterface dataAccessObject,
-                                SaveRecipeOutputBoundary presenter) {
-        this.dataAccessObject = dataAccessObject;
+    public SaveRecipeInteractor(SaveRecipeDataAccessInterface recipeDao, SaveRecipeOutputBoundary presenter) {
+        this.recipeDao = recipeDao;
         this.presenter = presenter;
     }
 
     @Override
-    public void execute(SaveRecipeInputData input) {
-        String username = input.getUsername();
-        String recipeId = input.getRecipeId();
+    public void execute(SaveRecipeInputData inputData) {
+        String username = inputData.getUsername();
+        Recipe recipe = inputData.getRecipe();
 
-        User user = dataAccessObject.findUserByUsername(username);
-        Recipe recipe = dataAccessObject.findRecipeById(recipeId);
+        try {
 
-        if (user == null) {
-            presenter.prepareFailView("User not found: " + username);
-            return;
+            boolean alreadySaved = recipeDao.isRecipeSaved(username, recipe.getRecipeId());
+
+            if (alreadySaved) {
+                recipeDao.unsaveRecipe(username, recipe.getRecipeId());
+
+                SaveRecipeOutputData output = new SaveRecipeOutputData(recipe.getTitle(), recipeDao.isRecipeSaved(username, recipe.getRecipeId()));
+                presenter.prepareUnsave(output);
+            } else {
+                recipeDao.saveRecipe(username, recipe.getRecipeId());
+
+                SaveRecipeOutputData output = new SaveRecipeOutputData(recipe.getTitle(), recipeDao.isRecipeSaved(username, recipe.getRecipeId()));
+                presenter.prepareSuccess(output);
+            }
+
+        } catch (Exception e) {
+            presenter.prepareFailure("Failed to save recipe: " + e.getMessage());
         }
-        if (recipe == null) {
-            presenter.prepareFailView("Recipe not found: " + recipeId);
-            return;
-        }
 
-        if (dataAccessObject.isRecipeSavedByUser(username, recipeId)) {
-            presenter.prepareFailView("You have already saved this recipe.");
-            return;
-        }
-
-        user.saveRecipe(recipe);
-        recipe.incrementSaves();
-        dataAccessObject.saveUser(user);
-        dataAccessObject.saveRecipe(recipe);
-
-        SaveRecipeOutputData outputData = new SaveRecipeOutputData(true, "Recipe saved successfully.");
-        presenter.prepareSuccessView(outputData);
     }
+
 }

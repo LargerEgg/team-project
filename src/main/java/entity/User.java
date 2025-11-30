@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Collections;
 
 public class User
 {
@@ -24,12 +23,9 @@ public class User
         }
         this.username = name;
         this.password = password;
-        this.savedRecipes = new ArrayList<>();
-        this.publishedRecipes = new ArrayList<>();
-        this.reviews = new ArrayList<>();
     }
 
-    public String getUsername() {
+    public String getName() {
         return username;
     }
 
@@ -37,9 +33,6 @@ public class User
         return password;
     }
 
-    public List<Recipe> getSavedRecipes() {
-        return Collections.unmodifiableList(savedRecipes);
-    }
 
     public void saveRecipe(Recipe recipe) {
         if (recipe != null && !this.savedRecipes.contains(recipe)) {
@@ -66,14 +59,48 @@ public class User
     }
 
     public List<Review> getReviews() {
-        return Collections.unmodifiableList(reviews);
+        return this.reviews;
     }
 
-    public String getUserid() {
-        return userid;
-    }
+    public List<String> getFavouriteCategoriesRanked() {
+        if (this.savedRecipes == null || this.savedRecipes.isEmpty()) {
+            return new ArrayList<>();
+        }
 
-    public List<Recipe> getPublishedRecipes() {
-        return publishedRecipes;
+        Map<String, Integer> categoryCounts = new HashMap<>();
+        for (Recipe recipe : this.savedRecipes) {
+            if (recipe == null) {
+                continue;
+            }
+
+            String category;
+            try {
+                category = recipe.getCategory();
+            } catch (Exception e) {
+                continue;
+            }
+
+            if (category == null || category.trim().isEmpty()) {
+                continue;
+            }
+
+            category = category.trim();
+            categoryCounts.put(category, categoryCounts.getOrDefault(category, 0) + 1);
+        }
+
+        if (categoryCounts.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Map.Entry<String, Integer>> entryList = new ArrayList<>(categoryCounts.entrySet());
+
+        entryList.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
+
+        List<String> rankedCategories = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : entryList) {
+            rankedCategories.add(entry.getKey());
+        }
+
+        return rankedCategories;
     }
 }

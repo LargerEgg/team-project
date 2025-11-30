@@ -1,5 +1,5 @@
 package use_case.save_recipe;
 
 public interface SaveRecipeInputBoundary {
-    void execute(SaveRecipeInputData input);
+    void execute(SaveRecipeInputData saveRecipeInputData);
 }
