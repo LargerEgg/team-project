@@ -1,32 +1,34 @@
 package interface_adapter.saved_recipes;
 
+import interface_adapter.recipe_search.RecipeSearchState;
+import interface_adapter.recipe_search.RecipeSearchViewModel;
 import use_case.saved_recipes.ShowSavedRecipesOutputBoundary;
 import use_case.saved_recipes.ShowSavedRecipesOutputData;
 
 public class SavedRecipesPresenter implements ShowSavedRecipesOutputBoundary {
 
-    private final SavedRecipesViewModel viewModel;
+    private final RecipeSearchViewModel recipeSearchViewModel;
 
-    public SavedRecipesPresenter(SavedRecipesViewModel viewModel) {
-        this.viewModel = viewModel;
+    public SavedRecipesPresenter(RecipeSearchViewModel recipeSearchViewModel) {
+        this.recipeSearchViewModel = recipeSearchViewModel;
     }
 
     @Override
     public void prepareSuccess(ShowSavedRecipesOutputData data) {
-        SavedRecipesState state = new SavedRecipesState();
-        state.setRecipes(data.getSaved_recipes());
-        state.setError(null);
+        RecipeSearchState state = recipeSearchViewModel.getState();
+        state.setRecipeList(data.getSaved_recipes());
+        state.setSearchError(null);
 
-        viewModel.setState(state);
-        viewModel.firePropertyChanged();
+        recipeSearchViewModel.setState(state);
+        recipeSearchViewModel.firePropertyChange();
     }
 
     @Override
     public void prepareFailure(String message) {
-        SavedRecipesState state = new SavedRecipesState();
-        state.setError(message);
+        RecipeSearchState state = recipeSearchViewModel.getState();
+        state.setSearchError(message);
 
-        viewModel.setState(state);
-        viewModel.firePropertyChanged();
+        recipeSearchViewModel.setState(state);
+        recipeSearchViewModel.firePropertyChange();
     }
 }

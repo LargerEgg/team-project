@@ -19,17 +19,17 @@ public class SaveRecipeInteractor implements SaveRecipeInputBoundary {
 
         try {
 
-            boolean alreadySaved = recipeDao.isRecipeSaved(username, recipe);
+            boolean alreadySaved = recipeDao.isRecipeSaved(username, recipe.getRecipeId());
 
             if (alreadySaved) {
-                recipeDao.unsaveRecipe(username, recipe);
+                recipeDao.unsaveRecipe(username, recipe.getRecipeId());
 
-                SaveRecipeOutputData output = new SaveRecipeOutputData(recipe.getTitle());
-                presenter.prepareSuccess(output);
+                SaveRecipeOutputData output = new SaveRecipeOutputData(recipe.getTitle(), recipeDao.isRecipeSaved(username, recipe.getRecipeId()));
+                presenter.prepareUnsave(output);
             } else {
-                recipeDao.saveRecipe(username, recipe);
+                recipeDao.saveRecipe(username, recipe.getRecipeId());
 
-                SaveRecipeOutputData output = new SaveRecipeOutputData(recipe.getTitle());
+                SaveRecipeOutputData output = new SaveRecipeOutputData(recipe.getTitle(), recipeDao.isRecipeSaved(username, recipe.getRecipeId()));
                 presenter.prepareSuccess(output);
             }
 
