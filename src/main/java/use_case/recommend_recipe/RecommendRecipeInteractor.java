@@ -26,7 +26,6 @@ public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
             return;
         }
 
-        // 使用 getSavedRecipes() 获取收藏
         List<Recipe> favorites = user.getSavedRecipes();
 
         if (favorites == null || favorites.isEmpty()) {
@@ -34,7 +33,6 @@ public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
             return;
         }
 
-        // 1. 获取分类排名列表
         List<String> rankedCategories = getFavouriteCategoriesRanked(favorites);
 
         if (rankedCategories.isEmpty()) {
@@ -42,11 +40,9 @@ public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
             return;
         }
 
-        // 2. 改进逻辑：获取前 3 名分类（如果不足 3 个则全取）
         int categoriesToFetch = Math.min(3, rankedCategories.size());
         List<Recipe> finalRecommendations = new ArrayList<>();
 
-        // 3. 循环抓取每个分类的食谱
         for (int i = 0; i < categoriesToFetch; i++) {
             String category = rankedCategories.get(i);
             List<Recipe> recipes = userDataAccessObject.getRecipesByCategory(category);
@@ -60,29 +56,24 @@ public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
             return;
         }
 
-        // 4. 随机打乱列表，实现“混合”效果
         Collections.shuffle(finalRecommendations);
 
-        // 可选：限制推荐总数（比如只展示随机后的前 20 个，防止列表过长）
         if (finalRecommendations.size() > 20) {
             finalRecommendations = finalRecommendations.subList(0, 20);
         }
 
-        // 5. 返回结果
-        // 这里的 categoryName 可以改成一个通用的标题，比如 "Mix of your favorites"
         RecommendRecipeOutputData outputData = new RecommendRecipeOutputData(finalRecommendations, "Mix of your Top Favorites");
         userPresenter.prepareSuccessView(outputData);
     }
 
     private List<String> getFavouriteCategoriesRanked(List<Recipe> favorites) {
-        if (favorites == null || favorites.isEmpty()) {
-            return new ArrayList<>();
-        }
+        // [修复] 移除了 favorites == null || favorites.isEmpty() 的检查 (由 execute 保证)
+        // [修复] 移除了 recipe == null 的检查 (由 User 类保证)
 
         Map<String, Integer> categoryCounts = new HashMap<>();
         for (Recipe recipe : favorites) {
-            if (recipe == null) continue;
             String category = recipe.getCategory();
+            // 这里的判断现在很干净：只检查 category 是否有效
             if (category != null && !category.trim().isEmpty()) {
                 categoryCounts.put(category, categoryCounts.getOrDefault(category, 0) + 1);
             }
@@ -90,7 +81,6 @@ public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
 
         List<Map.Entry<String, Integer>> entryList = new ArrayList<>(categoryCounts.entrySet());
 
-        // 按收藏数量降序排列
         entryList.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
 
         List<String> rankedCategories = new ArrayList<>();
