@@ -179,7 +179,11 @@ public class Recipe {
         if (reviews.isEmpty()) {
             this.averageRating = 0.0;
         } else {
-            this.averageRating = reviews.stream().mapToDouble(Review::getRating).average().orElse(0.0);
+            double totalRating = 0.0;
+            for (Review review : reviews) {
+                totalRating += review.getRating();
+            }
+            this.averageRating = totalRating / reviews.size();
         }
         touchUpdateDate();
     }

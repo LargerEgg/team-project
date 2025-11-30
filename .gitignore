@@ -9,9 +9,12 @@ target/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/*
+.idea/misc.xml
 *.iws
 *.iml
 *.ipr
+.idea/workspace.xml
 
 ### Eclipse ###
 .apt_generated
@@ -38,4 +41,4 @@ build/
 ### Mac OS ###
 .DS_Store
 
-src/main/resources/recipe-app-29d1d-firebase-adminsdk-fbsvc-ad98bb22f1.json
+.src/main/resources/recipe-app-29d1d-firebase-adminsdk-fbsvc-ad98bb22f1.json

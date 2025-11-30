@@ -38,6 +38,8 @@ public class RecipeView extends JPanel implements ActionListener, PropertyChange
     private JScrollPane reviewsScrollPane;
     private JButton backButton;
 
+    private JButton reviewButton;
+
     public RecipeView(ViewRecipeViewModel viewRecipeViewModel, ViewManagerModel viewManagerModel) {
         this.viewRecipeViewModel = viewRecipeViewModel;
         this.viewManagerModel = viewManagerModel;
@@ -54,8 +56,13 @@ public class RecipeView extends JPanel implements ActionListener, PropertyChange
 
         backButton = new JButton("Back");
         backButton.addActionListener(this);
+
+        reviewButton = new JButton("Review");
+        reviewButton.addActionListener(this);
+
         JPanel backButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         backButtonPanel.add(backButton);
+        backButtonPanel.add(reviewButton);
         headerPanel.add(backButtonPanel, BorderLayout.WEST);
 
         add(headerPanel, BorderLayout.NORTH);
@@ -215,8 +222,8 @@ public class RecipeView extends JPanel implements ActionListener, PropertyChange
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             if (recipe.getReviews() != null && !recipe.getReviews().isEmpty()) {
                 reviewsArea.setText(recipe.getReviews().stream()
-                        .map(review -> String.format("Rating: %d/5 by %s on %s\nComment: %s",
-                                review.getRating(), review.getAuthorId(), dateFormat.format(review.getDateCreated()), review.getDescription()))
+                        .map(review -> String.format("%s - Rating: %d/5 by %s on %s\nComment: %s",
+                                review.getTitle(), review.getRating(), review.getAuthorId(), dateFormat.format(review.getDateCreated()), review.getDescription()))
                         .collect(Collectors.joining("\n\n")));
             } else {
                 reviewsArea.setText("No reviews yet.");
@@ -242,6 +249,10 @@ public class RecipeView extends JPanel implements ActionListener, PropertyChange
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == backButton) {
             viewManagerModel.setState("recipe search");
+            viewManagerModel.firePropertyChange();
+        }
+        if (e.getSource() == reviewButton) {
+            viewManagerModel.setState("edit review");
             viewManagerModel.firePropertyChange();
         }
     }
