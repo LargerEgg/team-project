@@ -30,18 +30,20 @@ public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
         }
 
         List<Recipe> favorites = user.getSavedRecipes();
-
-        if (favorites == null || favorites.isEmpty()) {
-            userPresenter.prepareFailView(
-                    "No favorites found. Please save some recipes first!");
-            return;
+        if (favorites == null) {
+            favorites = new ArrayList<>();
         }
 
         List<String> rankedCategories = getFavouriteCategoriesRanked(favorites);
 
         if (rankedCategories.isEmpty()) {
-            userPresenter.prepareFailView(
-                    "Could not determine favorite category.");
+            if (favorites.isEmpty()) {
+                userPresenter.prepareFailView(
+                        "No favorites found. Please save some recipes first!");
+            } else {
+                userPresenter.prepareFailView(
+                        "Could not determine favorite category.");
+            }
             return;
         }
 
@@ -61,16 +63,9 @@ public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
     }
 
     private List<String> getFavouriteCategoriesRanked(List<Recipe> favorites) {
-        if (favorites == null || favorites.isEmpty()) {
-            return new ArrayList<>();
-        }
-
         Map<String, Integer> categoryCounts = new HashMap<>();
-        for (Recipe recipe : favorites) {
-            if (recipe == null) {
-                continue;
-            }
 
+        for (Recipe recipe : favorites) {
             String category;
             try {
                 category = recipe.getCategory();
@@ -84,10 +79,6 @@ public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
 
             category = category.trim();
             categoryCounts.put(category, categoryCounts.getOrDefault(category, 0) + 1);
-        }
-
-        if (categoryCounts.isEmpty()) {
-            return new ArrayList<>();
         }
 
         List<Map.Entry<String, Integer>> entryList = new ArrayList<>(categoryCounts.entrySet());
