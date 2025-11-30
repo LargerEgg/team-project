@@ -38,4 +38,5 @@ public interface EditReviewDataAccessInterface {
 
     void recordReviewRecipe(String recipeId, Review review);
 
+    Review findByAuthor(String authorId);
 }

@@ -27,7 +27,7 @@ public class EditReviewPresenter implements EditReviewOutputBoundary {
 
         clearForm(state);
 
-        viewManagerModel.firePropertyChange("success");
+        editReviewViewModel.firePropertyChange("success");
     }
 
     @Override

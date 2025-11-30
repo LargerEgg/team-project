@@ -40,13 +40,26 @@ public class EditReviewInteractor implements EditReviewInputBoundary {
         final Review review = new Review(reviewId, inputData.getRecipeId(), inputData.getAuthorId(),
                 new Date(), inputData.getReview(), inputData.getDescription(), inputData.getRating());
 
-        try {
-            reviewDataAccessObject.saveReview(review);
-            reviewDataAccessObject.recordReviewRecipe(inputData.getRecipeId(), review);
-            EditReviewOutputData outputData = new EditReviewOutputData(reviewId,"Review published.");
-            reviewPresenter.prepareSuccessView(outputData);
-        } catch (RuntimeException e) {
-            reviewPresenter.prepareFailView("Failed to publish review: " + e.getMessage(), inputData);
+        Review previousReview = reviewDataAccessObject.findByAuthor(inputData.getAuthorId());
+        if (previousReview != null && !(previousReview.getAuthorId().equals("Anonymous"))) {
+            review.setReviewId(previousReview.getReviewId());
+            try {
+                reviewDataAccessObject.changeReview(review);
+                EditReviewOutputData outputData = new EditReviewOutputData(reviewId,"Review edited successfully: ");
+                reviewPresenter.prepareSuccessView(outputData);
+            } catch (RuntimeException e) {
+                reviewPresenter.prepareFailView("Failed to publish review: " + e.getMessage(), inputData);
+            }
+        }
+        else {
+            try {
+                reviewDataAccessObject.saveReview(review);
+                reviewDataAccessObject.recordReviewRecipe(inputData.getRecipeId(), review);
+                EditReviewOutputData outputData = new EditReviewOutputData(reviewId,"Review published successfully: ");
+                reviewPresenter.prepareSuccessView(outputData);
+            } catch (RuntimeException e) {
+                reviewPresenter.prepareFailView("Failed to publish review: " + e.getMessage(), inputData);
+            }
         }
     }
 }

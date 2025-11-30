@@ -76,4 +76,12 @@ public class Review {
     public int getRating() {
         return rating;
     }
+
+    public void setReviewId(String reviewId) {
+        this.reviewId = reviewId;
+    }
+
+    public void setRecipeId(String recipeId) {
+        this.recipeId = recipeId;
+    }
 }
