@@ -67,13 +67,10 @@ public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
     }
 
     private List<String> getFavouriteCategoriesRanked(List<Recipe> favorites) {
-        // [修复] 移除了 favorites == null || favorites.isEmpty() 的检查 (由 execute 保证)
-        // [修复] 移除了 recipe == null 的检查 (由 User 类保证)
 
         Map<String, Integer> categoryCounts = new HashMap<>();
         for (Recipe recipe : favorites) {
             String category = recipe.getCategory();
-            // 这里的判断现在很干净：只检查 category 是否有效
             if (category != null && !category.trim().isEmpty()) {
                 categoryCounts.put(category, categoryCounts.getOrDefault(category, 0) + 1);
             }
