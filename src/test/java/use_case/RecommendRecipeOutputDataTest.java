@@ -1,7 +1,8 @@
-package use_case.recommend_recipe;
+package use_case;
 
 import entity.Recipe;
 import org.junit.jupiter.api.Test;
+import use_case.recommend_recipe.RecommendRecipeOutputData;
 
 import java.util.ArrayList;
 import java.util.List;
