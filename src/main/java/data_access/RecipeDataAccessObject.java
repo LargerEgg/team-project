@@ -26,7 +26,7 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
     private final OkHttpClient client = new OkHttpClient().newBuilder().build();
 
     // =================================================================================
-    // PART 1: Categories + Search
+    // PART 1: Categories + Search.
     // =================================================================================
 
     @Override

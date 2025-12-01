@@ -28,7 +28,7 @@ public class CompositeRecommendRecipeDAO implements RecommendRecipeDataAccessInt
      * Get the user's saved recipes from Firebase.
      *
      * @param username the username of the current user
-     * @return the list of saved recipes for the user
+     * @return the list of saved recipes for the user.
      */
     @Override
     public List<Recipe> getSavedRecipes(String username) {

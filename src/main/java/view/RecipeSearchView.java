@@ -27,6 +27,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/*
+N.
+ */
 public class RecipeSearchView extends JPanel implements ActionListener, PropertyChangeListener {
     public final String viewName = "recipe search";
 
