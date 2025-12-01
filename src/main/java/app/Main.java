@@ -9,36 +9,39 @@ public class Main {
             try {
                 AppBuilder appBuilder = new AppBuilder();
 
-                // Build the views and use cases
+                // 1. Build basic views (Login, Signup, etc.)
                 appBuilder
                         .addLoginView()
                         .addSignupView()
                         .addViewRecipeView()
                         .addPostRecipeView()
-                        .addEditReviewView();
+                        .addEditReviewView(); // Assuming this exists based on your code
 
-                // Get the ViewRecipeController after its use case is built
+                // 2. Build Use Cases and get Controllers
+                // Get the ViewRecipeController first as it's needed by other views
                 ViewRecipeController viewRecipeController = appBuilder.addViewRecipeUseCase();
 
-                // Now add the RecipeSearchView, passing the initialized ViewRecipeController
+                // 3. Add Recipe Search View (This also initializes Recommend Controller internally)
                 appBuilder.addRecipeSearchView(viewRecipeController);
 
-                // Needs to be added after
-                appBuilder.addPostRecipeView();
+                // 4. ★★★ Crucial Step: Add Recommend Recipe View ★★★
+                // This connects the recommend view to the app
+                appBuilder.addRecommendRecipeView(viewRecipeController);
 
-                // Add the PostRecipeUseCase
+                // 5. Add Post Recipe Use Case
                 appBuilder.addPostRecipeUseCase();
 
+                // 6. Add remaining Use Cases
                 appBuilder
                         .addLoginUseCase()
-                        .addSignupUseCase();
+                        .addSignupUseCase()
+                        .addEditReviewUseCase(); // Assuming this exists
 
-                appBuilder.addEditReviewUseCase();
-
+                // 7. Build and show the application
                 JFrame application = appBuilder.build();
 
                 application.pack();
-                application.setSize(900, 700); // Set a reasonable default size
+                application.setSize(900, 700);
                 application.setLocationRelativeTo(null);
                 application.setVisible(true);
 
