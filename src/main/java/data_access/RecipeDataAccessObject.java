@@ -140,6 +140,19 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
     // PART 3: Helper Methods (Network Requests & Parsing)
     // =================================================================================
 
+    public Recipe findById(String recipeId) {
+        List<Recipe> recipes = lookupById(recipeId);
+        if (!recipes.isEmpty()) {
+            return recipes.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public void recordView(String recipeId) {
+        // This DAO is read-only.
+    }
+
     private List<Recipe> executeAndParse(Request request) {
         try {
             Response response = client.newCall(request).execute();
@@ -149,8 +162,7 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
             if (json.isNull("meals")) {
                 return new ArrayList<>();
             }
-
-            JSONArray meals = json.getJSONArray("meals");
+            JSONArray meals = responseJson.getJSONArray("meals");
             List<Recipe> recipes = new ArrayList<>();
             for (int i = 0; i < meals.length(); i++) {
                 recipes.add(parseRecipe(meals.getJSONObject(i)));

@@ -28,9 +28,6 @@ import interface_adapter.unsave_recipe.UnsaveRecipePresenter;
 import interface_adapter.view_recipe.ViewRecipeController;
 import interface_adapter.view_recipe.ViewRecipePresenter;
 import interface_adapter.view_recipe.ViewRecipeViewModel;
-import interface_adapter.recommend_recipe.RecommendRecipeController;
-import interface_adapter.recommend_recipe.RecommendRecipePresenter;
-import interface_adapter.recommend_recipe.RecommendRecipeViewModel;
 import interface_adapter.edit_review.EditReviewViewModel;
 import interface_adapter.edit_review.EditReviewController;
 import interface_adapter.edit_review.EditReviewPresenter;
@@ -45,10 +42,6 @@ import use_case.recipe_search.RecipeSearchInputBoundary;
 import use_case.recipe_search.RecipeSearchInteractor;
 import use_case.recipe_search.RecipeSearchOutputBoundary;
 import use_case.recipe_search.RecipeSearchRecipeDataAccessInterface;
-import use_case.recommend_recipe.RecommendRecipeDataAccessInterface;
-import use_case.recommend_recipe.RecommendRecipeInputBoundary;
-import use_case.recommend_recipe.RecommendRecipeInteractor;
-import use_case.recommend_recipe.RecommendRecipeOutputBoundary;
 import use_case.save_recipe.SaveRecipeDataAccessInterface;
 import use_case.save_recipe.SaveRecipeInputBoundary;
 import use_case.save_recipe.SaveRecipeInteractor;
@@ -86,9 +79,8 @@ public class AppBuilder {
     private final UserFactory userFactory = new UserFactory();
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
-
     private UserDataAccessObject userDataAccessObject = new UserDataAccessObject();
-    private RecipeDataAccessObject recipeDataAccessObject;
+    private RecipeDataAccessObject recipeDataAccessObject = new RecipeDataAccessObject();
     private ReviewDataAccessObject reviewDataAccessObject = new ReviewDataAccessObject();
 
     private static final boolean USE_FIREBASE = true;
@@ -111,10 +103,7 @@ public class AppBuilder {
     // New fields for PostRecipe
     private PostRecipeViewModel postRecipeViewModel;
     private PostRecipeView postRecipeView;
-    private PostRecipeController postRecipeController;
-
-    private RecommendRecipeViewModel recommendRecipeViewModel;
-    private RecommendRecipeView recommendRecipeView;
+    private PostRecipeController postRecipeController; // Declare the controller here
 
     private EditReviewViewModel editReviewViewModel;
     private EditReviewController editReviewController;
@@ -124,7 +113,6 @@ public class AppBuilder {
         cardPanel.setLayout(cardLayout);
 
         apiRecipeDataAccessObject = new RecipeDataAccessObject();
-        recipeDataAccessObject = apiRecipeDataAccessObject;
 
         // Initialize Firebase if enabled
         if (USE_FIREBASE) {
@@ -204,7 +192,6 @@ public class AppBuilder {
     // Modified to accept ViewRecipeController
     public AppBuilder addRecipeSearchView(ViewRecipeController viewRecipeController) {
         recipeSearchViewModel = new RecipeSearchViewModel();
-
         RecipeSearchRecipeDataAccessInterface recipeDAO;
         if (USE_FIREBASE && firebaseRecipeDataAccessObject != null) {
             recipeDAO = new CompositeRecipeSearchDAO(apiRecipeDataAccessObject, firebaseRecipeDataAccessObject);
@@ -233,36 +220,8 @@ public class AppBuilder {
         RecipeSearchOutputBoundary recipeSearchOutputBoundary = new RecipeSearchPresenter(viewManagerModel, recipeSearchViewModel);
         RecipeSearchInputBoundary recipeSearchInteractor = new RecipeSearchInteractor(recipeDAO, recipeSearchOutputBoundary);
         RecipeSearchController recipeSearchController = new RecipeSearchController(recipeSearchInteractor);
-
-        recommendRecipeViewModel = new RecommendRecipeViewModel();
-        RecommendRecipeOutputBoundary recommendPresenter = new RecommendRecipePresenter(recommendRecipeViewModel, viewManagerModel);
-        RecommendRecipeDataAccessInterface recommendDAO = new CompositeRecommendRecipeDAO(
-                savedRecipesDAO,
-                new RecommendRecipeDataAccessObject()
-        );
-        RecommendRecipeInputBoundary recommendInteractor = new RecommendRecipeInteractor(recommendDAO, recommendPresenter);
-        RecommendRecipeController recommendController = new RecommendRecipeController(recommendInteractor);
-
-        recipeSearchView = new RecipeSearchView(
-                        recipeSearchViewModel,
-                        recipeSearchController,
-                        viewManagerModel,
-                        viewRecipeController,
-                recommendController,
-                showSavedRecipesController,
-                editReviewViewModel
-                );
-
+        recipeSearchView = new RecipeSearchView(recipeSearchViewModel, recipeSearchController, viewManagerModel, viewRecipeController, showSavedRecipesController, editReviewViewModel);
         cardPanel.add(recipeSearchView, recipeSearchView.viewName);
-        return this;
-    }
-
-    public AppBuilder addRecommendRecipeView(ViewRecipeController viewRecipeController) {
-        if (recommendRecipeViewModel == null) {
-            recommendRecipeViewModel = new RecommendRecipeViewModel();
-        }
-        recommendRecipeView = new RecommendRecipeView(recommendRecipeViewModel, viewManagerModel, viewRecipeController);
-        cardPanel.add(recommendRecipeView, recommendRecipeView.viewName);
         return this;
     }
 
