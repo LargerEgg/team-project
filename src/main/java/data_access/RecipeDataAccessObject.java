@@ -3,7 +3,6 @@ package data_access;
 import entity.Ingredient;
 import entity.Recipe;
 import use_case.recipe_search.RecipeSearchRecipeDataAccessInterface;
-import use_case.recipe_search.RecipeSearchOutputData;
 import use_case.view_recipe.ViewRecipeDataAccessInterface;
 
 import javax.imageio.ImageIO;
@@ -24,10 +23,6 @@ import org.json.JSONObject;
 public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInterface, ViewRecipeDataAccessInterface {
     private static final int SUCCESS_CODE = 200;
     private final OkHttpClient client = new OkHttpClient().newBuilder().build();
-
-    // =================================================================================
-    // PART 1: Basic Data Access (Categories, Search)
-    // =================================================================================
 
     @Override
     public List<String> getAllCategories() {
@@ -94,13 +89,9 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
             List<Recipe> recipes = new ArrayList<>();
             for (JSONObject meal : filteredMeals) {
                 String mealId = meal.getString("idMeal");
-                List<Recipe> lookedUpRecipes = lookupById(mealId, null);
+                List<Recipe> lookedUpRecipes = lookupById(mealId);
                 if (!lookedUpRecipes.isEmpty()) {
                     recipes.add(lookedUpRecipes.get(0));
-                    currentImageCount++;
-                    if (presenter != null) {
-                        presenter.prepareProgressView(new RecipeSearchOutputData(currentImageCount, totalImageCount));
-                    }
                 }
             }
             return recipes;
@@ -109,11 +100,7 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         }
     }
 
-    // =================================================================================
-    // PART 2: View Recipe Details
-    // =================================================================================
-
-    private List<Recipe> lookupById(String id, RecipeSearchOutputBoundary presenter) {
+    private List<Recipe> lookupById(String id) {
         Request request = new Request.Builder()
                 .url(String.format("https://www.themealdb.com/api/json/v1/1/lookup.php?i=%s", id))
                 .build();
@@ -122,7 +109,7 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
 
     @Override
     public Recipe findById(String recipeId) {
-        List<Recipe> recipes = lookupById(recipeId, null);
+        List<Recipe> recipes = lookupById(recipeId);
         if (!recipes.isEmpty()) {
             return recipes.get(0);
         }
@@ -131,18 +118,10 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
 
     @Override
     public void recordView(String recipeId) {
-
+        // This DAO is read-only.
     }
 
-    public void save(Recipe recipe) {
-        System.out.println("Recipe saved (not really, this DAO is read-only): " + recipe.getTitle());
-    }
-
-    // =================================================================================
-    // PART 3: Helper Methods
-    // =================================================================================
-
-    private List<Recipe> executeAndParse(Request request, RecipeSearchOutputBoundary presenter) {
+    private List<Recipe> executeAndParse(Request request) {
         try {
             Response response = client.newCall(request).execute();
             if (response.code() != SUCCESS_CODE) throw new RuntimeException("API request failed");
@@ -153,12 +132,8 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
             }
             JSONArray meals = responseJson.getJSONArray("meals");
             List<Recipe> recipes = new ArrayList<>();
-            int currentImageCount = 0;
-            int totalImageCount = meals.length();
-
             for (int i = 0; i < meals.length(); i++) {
-                recipes.add(parseRecipe(meals.getJSONObject(i), presenter, currentImageCount, totalImageCount));
-                currentImageCount++;
+                recipes.add(parseRecipe(meals.getJSONObject(i)));
             }
             return recipes;
         } catch (IOException | JSONException e) {
@@ -169,10 +144,6 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
     private Recipe parseRecipe(JSONObject recipeJson) {
         String imageUrl = recipeJson.getString("strMealThumb");
         BufferedImage image = downloadImage(imageUrl);
-
-        if (presenter != null) {
-            presenter.prepareProgressView(new RecipeSearchOutputData(currentImageCount + 1, totalImageCount));
-        }
 
         List<Ingredient> ingredients = new ArrayList<>();
         for (int i = 1; i <= 20; i++) {

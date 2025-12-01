@@ -1,6 +1,7 @@
 package use_case;
 
 import entity.Recipe;
+import entity.User;
 import use_case.recommend_recipe.*;
 
 import org.junit.jupiter.api.Test;
@@ -84,8 +85,8 @@ class RecommendRecipeInteractorTest {
      */
     static class DataAccessStub implements RecommendRecipeDataAccessInterface {
         @Override
-        public List<Recipe> getSavedRecipes(String username) {
-            return new ArrayList<>(); // Default behavior: empty saved recipes
+        public User getUser(String username) {
+            return null; // Default behavior
         }
 
         @Override
@@ -122,6 +123,7 @@ class RecommendRecipeInteractorTest {
 
     /**
      * Test the "Happy Path":
+     * - User exists.
      * - User has saved recipes.
      * - A clear favorite category exists.
      * - Recommendations exist for that category.
@@ -134,13 +136,14 @@ class RecommendRecipeInteractorTest {
 
         RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
             @Override
-            public List<Recipe> getSavedRecipes(String name) {
+            public User getUser(String name) {
+                User user = new User(name, "pass");
                 // User likes Italian food mostly
-                List<Recipe> savedRecipes = new ArrayList<>();
-                savedRecipes.add(new TestRecipe("Italian"));
-                savedRecipes.add(new TestRecipe("Italian"));
-                savedRecipes.add(new TestRecipe("French"));
-                return savedRecipes;
+                // Updated method call to match User.java: saveRecipe()
+                user.saveRecipe(new TestRecipe("Italian"));
+                user.saveRecipe(new TestRecipe("Italian"));
+                user.saveRecipe(new TestRecipe("French"));
+                return user;
             }
 
             @Override
@@ -160,25 +163,24 @@ class RecommendRecipeInteractorTest {
         interactor.execute(new RecommendRecipeInputData(username));
 
         // Assert
-        // Note: The new interactor returns "Mix of your Top Favorites" instead of single category
-        assertNotNull(presenter.successCategory);
+        assertEquals("Italian", presenter.successCategory, "The algorithm should identify Italian as the favorite.");
         assertNotNull(presenter.successRecipes);
-        assertFalse(presenter.successRecipes.isEmpty());
+        assertEquals(1, presenter.successRecipes.size());
         assertNull(presenter.failMessage, "Fail view should not be triggered.");
     }
 
     /**
-     * Edge Case: No Saved Recipes (null returned).
-     * Verifies the fail view logic when DAO returns null for saved recipes.
+     * Edge Case: User Not Found.
+     * Verifies the fail view logic when DAO returns null for the user.
      */
     @Test
-    void testExecute_NullSavedRecipes() {
+    void testExecute_UserNotFound() {
         // Arrange
         TestPresenter presenter = new TestPresenter();
         RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
             @Override
-            public List<Recipe> getSavedRecipes(String name) {
-                return null; // Simulate no saved recipes
+            public User getUser(String name) {
+                return null; // Simulate user not found
             }
         };
         RecommendRecipeInteractor interactor = new RecommendRecipeInteractor(dao, presenter);
@@ -187,13 +189,13 @@ class RecommendRecipeInteractorTest {
         interactor.execute(new RecommendRecipeInputData("GhostUser"));
 
         // Assert
-        assertEquals("No favorites found. Please save some recipes first!", presenter.failMessage);
+        assertEquals("User not found: GhostUser", presenter.failMessage);
         assertNull(presenter.successCategory);
     }
 
     /**
      * Edge Case: No Favorites (Empty List).
-     * Verifies logic when saved recipes list is empty.
+     * Verifies logic when user exists but saved recipes list is empty.
      */
     @Test
     void testExecute_NoFavorites_EmptyList() {
@@ -201,9 +203,9 @@ class RecommendRecipeInteractorTest {
         TestPresenter presenter = new TestPresenter();
         RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
             @Override
-            public List<Recipe> getSavedRecipes(String name) {
-                // Empty saved recipes
-                return new ArrayList<>();
+            public User getUser(String name) {
+                // User with empty saved recipes
+                return new User(name, "pass");
             }
         };
         RecommendRecipeInteractor interactor = new RecommendRecipeInteractor(dao, presenter);
@@ -216,8 +218,8 @@ class RecommendRecipeInteractorTest {
     }
 
     /**
-     * Edge Case: No Favorites (Null List from DAO).
-     * Verifies robustness when DAO returns null instead of an empty list.
+     * Edge Case: No Favorites (Null List).
+     * Verifies robustness when User object returns null instead of an empty list.
      * This covers the "favorites == null" check in the Interactor.
      */
     @Test
@@ -226,8 +228,15 @@ class RecommendRecipeInteractorTest {
         TestPresenter presenter = new TestPresenter();
         RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
             @Override
-            public List<Recipe> getSavedRecipes(String name) {
-                return null; // Force null return
+            public User getUser(String name) {
+                // Create a generic user, assuming getSavedRecipes() might default to null
+                // depending on implementation, or we simulate it here:
+                return new User(name, "pass") {
+                    @Override
+                    public List<Recipe> getSavedRecipes() {
+                        return null; // Force null return
+                    }
+                };
             }
         };
         RecommendRecipeInteractor interactor = new RecommendRecipeInteractor(dao, presenter);
@@ -243,9 +252,10 @@ class RecommendRecipeInteractorTest {
      * Complex Edge Case: Dirty Data Handling.
      * This tests the loop inside 'getFavouriteCategoriesRanked'.
      * We inject:
-     * 1. A recipe with a null category.
-     * 2. A recipe with an empty/whitespace category.
-     * 3. A recipe that throws an exception when accessed.
+     * 1. A null recipe.
+     * 2. A recipe with a null category.
+     * 3. A recipe with an empty/whitespace category.
+     * 4. A recipe that throws an exception when accessed.
      * * The system should ignore these and fail gracefully if no valid category remains.
      */
     @Test
@@ -254,12 +264,14 @@ class RecommendRecipeInteractorTest {
         TestPresenter presenter = new TestPresenter();
         RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
             @Override
-            public List<Recipe> getSavedRecipes(String name) {
-                List<Recipe> savedRecipes = new ArrayList<>();
-                savedRecipes.add(new TestRecipe((String) null)); // Null category
-                savedRecipes.add(new TestRecipe("   ")); // Whitespace category
-                savedRecipes.add(new TestRecipe(true)); // Throws Exception
-                return savedRecipes;
+            public User getUser(String name) {
+                User user = new User(name, "pass");
+                // Updated to use saveRecipe
+                user.saveRecipe(null); // Null recipe
+                user.saveRecipe(new TestRecipe((String) null)); // Null category
+                user.saveRecipe(new TestRecipe("   ")); // Whitespace category
+                user.saveRecipe(new TestRecipe(true)); // Throws Exception
+                return user;
             }
         };
         RecommendRecipeInteractor interactor = new RecommendRecipeInteractor(dao, presenter);
@@ -282,14 +294,15 @@ class RecommendRecipeInteractorTest {
         TestPresenter presenter = new TestPresenter();
         RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
             @Override
-            public List<Recipe> getSavedRecipes(String name) {
-                List<Recipe> savedRecipes = new ArrayList<>();
-                savedRecipes.add(new TestRecipe(" Italian ")); // Should be trimmed
-                return savedRecipes;
+            public User getUser(String name) {
+                User user = new User(name, "pass");
+                // Updated to use saveRecipe
+                user.saveRecipe(new TestRecipe(" Italian ")); // Should be trimmed
+                return user;
             }
             @Override
             public List<Recipe> getRecipesByCategory(String category) {
-                if (" Italian ".equals(category)) {
+                if ("Italian".equals(category)) {
                     List<Recipe> list = new ArrayList<>();
                     list.add(new TestRecipe("Pasta"));
                     return list;
@@ -303,8 +316,7 @@ class RecommendRecipeInteractorTest {
         interactor.execute(new RecommendRecipeInputData("TrimUser"));
 
         // Assert
-        // Note: The interactor now returns "Mix of your Top Favorites"
-        assertNotNull(presenter.successCategory);
+        assertEquals("Italian", presenter.successCategory, "Category should be trimmed before processing.");
         assertNull(presenter.failMessage);
     }
 
@@ -318,10 +330,11 @@ class RecommendRecipeInteractorTest {
         TestPresenter presenter = new TestPresenter();
         RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
             @Override
-            public List<Recipe> getSavedRecipes(String name) {
-                List<Recipe> savedRecipes = new ArrayList<>();
-                savedRecipes.add(new TestRecipe("RareCuisine"));
-                return savedRecipes;
+            public User getUser(String name) {
+                User user = new User(name, "pass");
+                // Updated to use saveRecipe
+                user.saveRecipe(new TestRecipe("RareCuisine"));
+                return user;
             }
 
             @Override
@@ -335,8 +348,7 @@ class RecommendRecipeInteractorTest {
         interactor.execute(new RecommendRecipeInputData("GourmetUser"));
 
         // Assert
-        // Note: The new interactor message is "Sorry, no recommendations found."
-        assertEquals("Sorry, no recommendations found.", presenter.failMessage);
+        assertEquals("Sorry, no recommendations found for category: RareCuisine", presenter.failMessage);
     }
 
     /**
@@ -350,12 +362,13 @@ class RecommendRecipeInteractorTest {
         TestPresenter presenter = new TestPresenter();
         RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
             @Override
-            public List<Recipe> getSavedRecipes(String name) {
-                List<Recipe> savedRecipes = new ArrayList<>();
-                savedRecipes.add(new TestRecipe("Mexican"));
-                savedRecipes.add(new TestRecipe("Chinese"));
+            public User getUser(String name) {
+                User user = new User(name, "pass");
+                // Updated to use saveRecipe
+                user.saveRecipe(new TestRecipe("Mexican"));
+                user.saveRecipe(new TestRecipe("Chinese"));
                 // Count is 1 vs 1.
-                return savedRecipes;
+                return user;
             }
 
             @Override
@@ -372,9 +385,9 @@ class RecommendRecipeInteractorTest {
         interactor.execute(new RecommendRecipeInputData("IndecisiveUser"));
 
         // Assert
-        // We just want to ensure it succeeded
+        // We just want to ensure it succeeded and picked ONE of them.
         assertNotNull(presenter.successCategory);
-        assertNotNull(presenter.successRecipes);
+        assertTrue(presenter.successCategory.equals("Mexican") || presenter.successCategory.equals("Chinese"));
         assertNull(presenter.failMessage);
     }
 }
