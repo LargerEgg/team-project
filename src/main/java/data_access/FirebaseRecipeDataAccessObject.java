@@ -353,13 +353,9 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
         @SuppressWarnings("unchecked")
         List<HashMap<String, Object>> hashmap = (List<HashMap<String, Object>>) doc.get("reviews");
         List<Review> reviews = new ArrayList<>();
-        if (hashmap == null || hashmap.isEmpty()) {
-
-        }
-        else {
+        if (hashmap != null && !hashmap.isEmpty()) {
             for (HashMap<String, Object> map : hashmap) {
                 String reviewId = (String) map.get("reviewId");
-                String reviewRecipeId = (String) map.get("recipeId");
                 String authorId1 = (String) map.get("authorId");
                 Timestamp ts = (Timestamp) map.get("dateCreated");
                 Date dateCreated = ts.toDate();
@@ -367,7 +363,7 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
                 String description1 = (String) map.get("description");
                 Long ratingLong = (Long) map.get("rating");
                 int rating = ratingLong.intValue();
-                reviews.add(new Review(reviewId, reviewRecipeId, authorId1, dateCreated, title1, description1, rating));
+                reviews.add(new Review(reviewId, recipeId, authorId1, dateCreated, title1, description1, rating));
             }
         }
 

@@ -176,7 +176,7 @@ public class Recipe {
     public void setAverageRating(double averageRating) { this.averageRating = averageRating; touchUpdateDate(); }
 
     public void recalculateAverageRating() {
-        if (reviews.isEmpty()) {
+        if (reviews == null || reviews.isEmpty()) {
             this.averageRating = 0.0;
         } else {
             double totalRating = 0.0;

@@ -278,7 +278,10 @@ public class AppBuilder {
         }
 
         SaveRecipeDataAccessInterface saveRecipeDAO = new FirebaseSaveRecipeDataAccessObject(apiRecipeDataAccessObject);
-        ViewRecipeInputBoundary viewRecipeInteractor = new ViewRecipeInteractor(viewRecipeDataAccessObject, viewRecipeOutputBoundary, saveRecipeDAO);
+        EditReviewDataAccessInterface editReviewDAO = USE_FIREBASE && firebaseReviewDataAccessObject != null
+                ? firebaseReviewDataAccessObject
+                : new ReviewDataAccessObject();
+        ViewRecipeInputBoundary viewRecipeInteractor = new ViewRecipeInteractor(viewRecipeDataAccessObject, viewRecipeOutputBoundary, saveRecipeDAO, editReviewDAO);
         return new ViewRecipeController(viewRecipeInteractor);
     }
 
