@@ -8,6 +8,8 @@ import interface_adapter.recipe_search.RecipeSearchViewModel;
 import use_case.login.LoginOutputBoundary;
 import use_case.login.LoginOutputData;
 
+import javax.swing.*; // Import JOptionPane
+
 public class LoginPresenter implements LoginOutputBoundary {
 
     private final LoginViewModel loginViewModel;
@@ -49,5 +51,8 @@ public class LoginPresenter implements LoginOutputBoundary {
         final LoginState loginState = loginViewModel.getState();
         loginState.setLoginError(error);
         loginViewModel.firePropertyChange();
+
+        // Display a popup message for the error
+        JOptionPane.showMessageDialog(null, error, "Login Error", JOptionPane.ERROR_MESSAGE);
     }
 }

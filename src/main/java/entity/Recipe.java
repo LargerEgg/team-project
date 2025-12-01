@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Objects; // Import Objects for equals and hashCode
 
 public class Recipe {
 
@@ -186,5 +187,18 @@ public class Recipe {
             this.averageRating = totalRating / reviews.size();
         }
         touchUpdateDate();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Recipe recipe = (Recipe) o;
+        return Objects.equals(recipeId, recipe.recipeId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(recipeId);
     }
 }

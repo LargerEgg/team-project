@@ -81,6 +81,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AppBuilder {
     private final JPanel cardPanel = new JPanel();
@@ -192,7 +194,7 @@ public class AppBuilder {
 
         RecipeSearchRecipeDataAccessInterface recipeDAO;
         if (USE_FIREBASE && firebaseRecipeDataAccessObject != null) {
-            recipeDAO = new CompositeRecipeSearchDAO(apiRecipeDataAccessObject, firebaseRecipeDataAccessObject);
+            recipeDAO = new AppBuilderCompositeRecipeSearchDAO(apiRecipeDataAccessObject, firebaseRecipeDataAccessObject);
         } else {
             recipeDAO = apiRecipeDataAccessObject;
         }
@@ -382,54 +384,76 @@ public class AppBuilder {
     }
 
     // -------------------------------------------------------------------------
-    // CompositeRecipeSearchDAO
-    // Responsible for Search. Ensures that the result list contains
-    // real view counts fetched from Firebase.
+    // AppBuilderCompositeRecipeSearchDAO
+    // Responsible for Search. Combines results from API and Firebase.
     // -------------------------------------------------------------------------
-    private static class CompositeRecipeSearchDAO implements RecipeSearchRecipeDataAccessInterface {
+    private static class AppBuilderCompositeRecipeSearchDAO implements RecipeSearchRecipeDataAccessInterface {
         private final RecipeDataAccessObject apiDAO;
         private final FirebaseRecipeDataAccessObject firebaseDAO;
 
-        public CompositeRecipeSearchDAO(RecipeDataAccessObject apiDAO, FirebaseRecipeDataAccessObject firebaseDAO) {
+        public AppBuilderCompositeRecipeSearchDAO(RecipeDataAccessObject apiDAO, FirebaseRecipeDataAccessObject firebaseDAO) {
             this.apiDAO = apiDAO;
             this.firebaseDAO = firebaseDAO;
         }
 
         @Override
         public List<Recipe> search(String name, String category) {
-            // 1. Get raw results from API (views = 0 at this point)
-            List<Recipe> recipes = apiDAO.search(name, category);
+            // 1. Get recipes from the API
+            List<Recipe> apiRecipes = apiDAO.search(name, category);
 
-            // 2. Fetch real view counts from Firebase in parallel
-            if (firebaseDAO != null && !recipes.isEmpty()) {
-                List<CompletableFuture<Void>> futures = new ArrayList<>();
-
-                for (Recipe recipe : recipes) {
-                    CompletableFuture<Void> future = firebaseDAO.getViewCount(recipe.getRecipeId())
-                            .thenAccept(views -> {
-                                recipe.setViews(views);
-                            })
-                            .exceptionally(e -> {
-                                System.err.println("Failed to fetch views for " + recipe.getRecipeId());
-                                return null;
-                            });
-                    futures.add(future);
+            // 2. Get recipes from Firebase
+            List<Recipe> firebaseRecipes;
+            if (firebaseDAO != null) {
+                if (category != null && !category.isEmpty()) {
+                    firebaseRecipes = firebaseDAO.findByCategory(category, name);
+                } else {
+                    firebaseRecipes = firebaseDAO.search(name, null);
                 }
-
-                // Wait for all async tasks to complete
-                try {
-                    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-                } catch (Exception e) {
-                    System.err.println("Error fetching view counts: " + e.getMessage());
-                }
+            } else {
+                firebaseRecipes = new ArrayList<>();
             }
 
-            return recipes;
+
+            // 3. Combine and remove duplicates
+            List<Recipe> combinedRecipes = Stream.concat(apiRecipes.stream(), firebaseRecipes.stream())
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            // 4. Asynchronously fetch popularity data (views, saves, averageRating) from Firebase
+            if (firebaseDAO != null && combinedRecipes != null && !combinedRecipes.isEmpty()) {
+                List<CompletableFuture<Void>> futures = combinedRecipes.stream()
+                        .flatMap(recipe -> {
+                            String recipeId = recipe.getRecipeId();
+                            // Create futures for views, saves, and averageRating
+                            CompletableFuture<Void> viewsFuture = firebaseDAO.getViewCount(recipeId)
+                                    .thenAccept(recipe::setViews);
+                            CompletableFuture<Void> savesFuture = firebaseDAO.getSaveCount(recipeId)
+                                    .thenAccept(recipe::setSaves);
+                            CompletableFuture<Void> ratingFuture = firebaseDAO.getAverageRating(recipeId)
+                                    .thenAccept(recipe::setAverageRating);
+                            return java.util.stream.Stream.of(viewsFuture, savesFuture, ratingFuture);
+                        })
+                        .collect(Collectors.toList());
+
+                // 5. Wait for all the fetches to complete
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+            }
+
+            return combinedRecipes;
         }
 
         @Override
         public List<String> getAllCategories() {
-            return apiDAO.getAllCategories();
+            List<String> apiCategories = apiDAO.getAllCategories();
+            List<String> firebaseCategories = new ArrayList<>();
+            if (firebaseDAO != null) {
+                firebaseCategories = firebaseDAO.getAllCategories();
+            }
+
+
+            return Stream.concat(apiCategories.stream(), firebaseCategories.stream())
+                    .distinct()
+                    .collect(Collectors.toList());
         }
     }
 }
