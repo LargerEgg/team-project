@@ -245,19 +245,19 @@ public class AppBuilder {
         recommendRecipeViewModel = new RecommendRecipeViewModel();
         RecommendRecipeOutputBoundary recommendPresenter = new RecommendRecipePresenter(recommendRecipeViewModel, viewManagerModel);
         // 推荐功能使用 API DAO (因为 RecommendRecipeDataAccessInterface 在那里实现)
-        RecommendRecipeInputBoundary recommendInteractor = new RecommendRecipeInteractor((RecommendRecipeDataAccessInterface) apiRecipeDataAccessObject, recommendPresenter);
+        RecommendRecipeInputBoundary recommendInteractor = new RecommendRecipeInteractor(apiRecipeDataAccessObject, recommendPresenter);
         RecommendRecipeController recommendController = new RecommendRecipeController(recommendInteractor);
 
         // 创建 RecipeSearchView，传入所有需要的 Controller 和 ViewModel
         recipeSearchView = new RecipeSearchView(
-                recipeSearchViewModel,
-                recipeSearchController,
-                viewManagerModel,
-                viewRecipeController,
-                showSavedRecipesController, // 传入 Saved Recipes Controller
-                editReviewViewModel,        // 传入 Edit Review ViewModel
-                recommendController         // 传入 Recommend Controller
-        );
+                        recipeSearchViewModel,
+                        recipeSearchController,
+                        viewManagerModel,
+                        viewRecipeController,
+                recommendController, // 传入 Saved Recipes Controller
+                showSavedRecipesController,        // 传入 Edit Review ViewModel
+                editReviewViewModel         // 传入 Recommend Controller
+                );
 
         cardPanel.add(recipeSearchView, recipeSearchView.viewName);
         return this;
