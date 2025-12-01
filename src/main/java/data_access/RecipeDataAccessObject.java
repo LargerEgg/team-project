@@ -3,7 +3,6 @@ package data_access;
 import entity.Ingredient;
 import entity.Recipe;
 import use_case.recipe_search.RecipeSearchRecipeDataAccessInterface;
-import use_case.recipe_search.RecipeSearchOutputData;
 import use_case.view_recipe.ViewRecipeDataAccessInterface;
 
 import javax.imageio.ImageIO;
@@ -22,11 +21,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInterface, ViewRecipeDataAccessInterface {
+
     private static final int SUCCESS_CODE = 200;
     private final OkHttpClient client = new OkHttpClient().newBuilder().build();
 
     // =================================================================================
-    // PART 1: Basic Data Access (Categories, Search)
+    // PART 1: Categories + Search
     // =================================================================================
 
     @Override
@@ -36,15 +36,19 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
                 .build();
         try {
             Response response = client.newCall(request).execute();
-            if (response.code() != SUCCESS_CODE) throw new RuntimeException("API request failed");
+            if (response.code() != SUCCESS_CODE)
+                throw new RuntimeException("API request failed");
 
-            JSONObject responseJson = new JSONObject(response.body().string());
-            JSONArray categoriesArray = responseJson.getJSONArray("categories");
+            JSONObject json = new JSONObject(response.body().string());
+            JSONArray arr = json.getJSONArray("categories");
+
             List<String> categories = new ArrayList<>();
-            for (int i = 0; i < categoriesArray.length(); i++) {
-                categories.add(categoriesArray.getJSONObject(i).getString("strCategory"));
+            for (int i = 0; i < arr.length(); i++) {
+                categories.add(arr.getJSONObject(i).getString("strCategory"));
             }
+
             return categories;
+
         } catch (IOException | JSONException e) {
             throw new RuntimeException(e);
         }
@@ -63,6 +67,7 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         Request request = new Request.Builder()
                 .url(String.format("https://www.themealdb.com/api/json/v1/1/search.php?s=%s", name))
                 .build();
+
         return executeAndParse(request);
     }
 
@@ -70,133 +75,148 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         Request request = new Request.Builder()
                 .url(String.format("https://www.themealdb.com/api/json/v1/1/filter.php?c=%s", category))
                 .build();
+
         try {
             Response response = client.newCall(request).execute();
-            if (response.code() != SUCCESS_CODE) throw new RuntimeException("API request failed");
+            if (response.code() != SUCCESS_CODE)
+                throw new RuntimeException("API request failed");
 
-            JSONObject responseJson = new JSONObject(response.body().string());
-            if (responseJson.isNull("meals")) {
+            JSONObject json = new JSONObject(response.body().string());
+            if (json.isNull("meals")) {
                 return new ArrayList<>();
             }
-            JSONArray meals = responseJson.getJSONArray("meals");
-            List<JSONObject> filteredMeals = new ArrayList<>();
+
+            JSONArray meals = json.getJSONArray("meals");
+            List<JSONObject> filtered = new ArrayList<>();
+
             for (int i = 0; i < meals.length(); i++) {
-                filteredMeals.add(meals.getJSONObject(i));
+                filtered.add(meals.getJSONObject(i));
             }
 
+            // name filter
             if (name != null && !name.isEmpty()) {
-                String lowerCaseName = name.toLowerCase();
-                filteredMeals = filteredMeals.stream()
-                        .filter(meal -> meal.getString("strMeal").toLowerCase().contains(lowerCaseName))
+                String lower = name.toLowerCase();
+                filtered = filtered.stream()
+                        .filter(m -> m.getString("strMeal").toLowerCase().contains(lower))
                         .collect(Collectors.toList());
             }
 
+            // now lookup full detail via ID
             List<Recipe> recipes = new ArrayList<>();
-            for (JSONObject meal : filteredMeals) {
-                String mealId = meal.getString("idMeal");
-                List<Recipe> lookedUpRecipes = lookupById(mealId, null);
-                if (!lookedUpRecipes.isEmpty()) {
-                    recipes.add(lookedUpRecipes.get(0));
-                    currentImageCount++;
-                    if (presenter != null) {
-                        presenter.prepareProgressView(new RecipeSearchOutputData(currentImageCount, totalImageCount));
-                    }
+            for (JSONObject meal : filtered) {
+                List<Recipe> lookedUp = lookupById(meal.getString("idMeal"));
+                if (!lookedUp.isEmpty()) {
+                    recipes.add(lookedUp.get(0));
                 }
             }
+
             return recipes;
+
         } catch (IOException | JSONException e) {
             throw new RuntimeException(e);
         }
     }
 
     // =================================================================================
-    // PART 2: View Recipe Details
+    // PART 2: View Recipe Detail
     // =================================================================================
 
-    private List<Recipe> lookupById(String id, RecipeSearchOutputBoundary presenter) {
+    private List<Recipe> lookupById(String id) {
         Request request = new Request.Builder()
                 .url(String.format("https://www.themealdb.com/api/json/v1/1/lookup.php?i=%s", id))
                 .build();
+
         return executeAndParse(request);
     }
 
     @Override
     public Recipe findById(String recipeId) {
-        List<Recipe> recipes = lookupById(recipeId, null);
-        if (!recipes.isEmpty()) {
-            return recipes.get(0);
-        }
+        List<Recipe> list = lookupById(recipeId);
+        if (!list.isEmpty()) return list.get(0);
         return null;
     }
 
     @Override
     public void recordView(String recipeId) {
-
+        // no-op, since this DAO is read-only
     }
 
     public void save(Recipe recipe) {
-        System.out.println("Recipe saved (not really, this DAO is read-only): " + recipe.getTitle());
+        System.out.println("Recipe saved (not really, read-only DAO): " + recipe.getTitle());
     }
 
     // =================================================================================
-    // PART 3: Helper Methods
+    // PART 3: Core Fetch + Parse
     // =================================================================================
 
-    private List<Recipe> executeAndParse(Request request, RecipeSearchOutputBoundary presenter) {
+    private List<Recipe> executeAndParse(Request request) {
         try {
             Response response = client.newCall(request).execute();
-            if (response.code() != SUCCESS_CODE) throw new RuntimeException("API request failed");
+            if (response.code() != SUCCESS_CODE)
+                throw new RuntimeException("API request failed");
 
-            JSONObject responseJson = new JSONObject(response.body().string());
-            if (responseJson.isNull("meals")) {
+            JSONObject json = new JSONObject(response.body().string());
+            if (json.isNull("meals")) {
                 return new ArrayList<>();
             }
-            JSONArray meals = responseJson.getJSONArray("meals");
+
+            JSONArray meals = json.getJSONArray("meals");
             List<Recipe> recipes = new ArrayList<>();
-            int currentImageCount = 0;
-            int totalImageCount = meals.length();
 
             for (int i = 0; i < meals.length(); i++) {
-                recipes.add(parseRecipe(meals.getJSONObject(i), presenter, currentImageCount, totalImageCount));
-                currentImageCount++;
+                recipes.add(parseRecipe(meals.getJSONObject(i)));
             }
+
             return recipes;
+
         } catch (IOException | JSONException e) {
             throw new RuntimeException(e);
         }
     }
 
     private Recipe parseRecipe(JSONObject recipeJson) {
-        String imageUrl = recipeJson.getString("strMealThumb");
-        BufferedImage image = downloadImage(imageUrl);
 
-        if (presenter != null) {
-            presenter.prepareProgressView(new RecipeSearchOutputData(currentImageCount + 1, totalImageCount));
+        // --------- image ----------
+        String imageUrl = recipeJson.optString("strMealThumb", null);
+        BufferedImage image = null;
+        if (imageUrl != null) {
+            image = downloadImage(imageUrl);
         }
 
+        // --------- ingredients ----------
         List<Ingredient> ingredients = new ArrayList<>();
         for (int i = 1; i <= 20; i++) {
-            String ingredientName = recipeJson.optString("strIngredient" + i);
+            String ing = recipeJson.optString("strIngredient" + i);
             String measure = recipeJson.optString("strMeasure" + i);
-            if (ingredientName != null && !ingredientName.isEmpty()) {
-                ingredients.add(new Ingredient(ingredientName, measure));
+
+            if (ing != null && !ing.trim().isEmpty()) {
+                ingredients.add(new Ingredient(ing.trim(), measure));
             }
         }
 
-        String tagsString = recipeJson.optString("strTags", "");
+        // --------- tags ----------
+        String tagStr = recipeJson.optString("strTags", "");
         List<String> tags = new ArrayList<>();
-        if (!tagsString.trim().isEmpty()) {
-            tags = Arrays.stream(tagsString.split(","))
+        if (!tagStr.isBlank()) {
+            tags = Arrays.stream(tagStr.split(","))
                     .map(String::trim)
-                    .filter(tag -> !tag.isEmpty())
+                    .filter(s -> !s.isEmpty())
                     .collect(Collectors.toList());
         }
 
         return new Recipe(
-                recipeJson.getString("idMeal"), "N/A", recipeJson.getString("strMeal"),
-                recipeJson.getString("strInstructions"), ingredients, recipeJson.getString("strCategory"),
+                recipeJson.getString("idMeal"),
+                "N/A",
+                recipeJson.getString("strMeal"),
+                recipeJson.getString("strInstructions"),
+                ingredients,
+                recipeJson.getString("strCategory"),
                 tags,
-                Recipe.Status.PUBLISHED, new Date(), new Date(), imageUrl, image
+                Recipe.Status.PUBLISHED,
+                new Date(),
+                new Date(),
+                imageUrl,
+                image
         );
     }
 
@@ -204,8 +224,7 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         try {
             return ImageIO.read(new URL(imageUrl));
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            return null; // fail silently
         }
     }
 }

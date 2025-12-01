@@ -1,6 +1,7 @@
 package app;
 
 import data_access.*;
+import entity.Recipe;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.login.LoginController;
@@ -411,13 +412,17 @@ public class AppBuilder {
         }
 
         @Override
+        public List<Recipe> search(String name, String category) {
+            return List.of();
+        }
+
+        @Override
         public List<String> getAllCategories() {
             return apiDAO.getAllCategories();
         }
 
-        @Override
         public List<entity.Recipe> search(String name, String category, RecipeSearchOutputBoundary presenter) {
-            return apiDAO.search(name, category, presenter);
+            return apiDAO.search(name, category);
         }
     }
 }
