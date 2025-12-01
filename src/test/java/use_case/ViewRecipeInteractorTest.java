@@ -1,6 +1,5 @@
 package use_case;
 
-import entity.Ingredient;
 import entity.Recipe;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

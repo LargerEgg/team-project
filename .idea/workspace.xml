@@ -6,12 +6,131 @@
   <component name="ChangeListManager">
     <list default="true" id="e43c00b6-75ef-40f2-94e8-7abd57be8463" name="Changes" comment="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/FirebaseRecipeDataAccessObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/data_access/FirebaseRecipeDataAccessObject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/save_recipe/SaveRecipePresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/save_recipe/SaveRecipePresenter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/EditReviewView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/EditReviewView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/app/AppBuilder.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/app/CheckFirebaseStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/app/FirestoreDataReader.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/app/Main.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/DraftManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/FileUserDataAccessObject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/FirebaseInitializer.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/FirebaseRecipeDataAccessObject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/FirebaseReviewDataAccessObject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/FirebaseSaveRecipeDataAccessObject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/FirebaseUserDataAccessObject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/InMemoryUserDataAccessObject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/PostRecipeDataAccessObject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/RecipeDataAccessObject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/RecommendRecipeDataAccessObject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/ReviewDataAccessObject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/UserDataAccessObject.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entity/Ingredient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entity/PopularityCalculator.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entity/RecipeDraft.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entity/Review.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entity/SharedRecipe.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entity/User.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/entity/UserFactory.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/edit_review/EditReviewController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/edit_review/EditReviewPresenter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/edit_review/EditReviewState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/edit_review/EditReviewViewModel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/login/LoginController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/login/LoginPresenter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/login/LoginState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/login/LoginViewModel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/post_recipe/PostRecipeController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/post_recipe/PostRecipePresenter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/post_recipe/PostRecipeState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/post_recipe/PostRecipeViewModel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/recommend_recipe/RecommendRecipeController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/recommend_recipe/RecommendRecipePresenter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/recommend_recipe/RecommendRecipeState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/recommend_recipe/RecommendRecipeViewModel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/save_recipe/SaveRecipeController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/save_recipe/SaveRecipePresenter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/save_recipe/SaveRecipeState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/save_recipe/SaveRecipeViewModel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/saved_recipes/SavedRecipesPresenter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/saved_recipes/SavedRecipesState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/saved_recipes/SavedRecipesViewModel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/saved_recipes/ShowSavedRecipesController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/signup/SignupController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/signup/SignupPresenter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/signup/SignupState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/signup/SignupViewModel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/unsave_recipe/UnsaveRecipeController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/unsave_recipe/UnsaveRecipePresenter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/view_recipe/ViewRecipeController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/view_recipe/ViewRecipePresenter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/view_recipe/ViewRecipeState.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/view_recipe/ViewRecipeViewModel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/edit_review/EditReviewDataAccessInterface.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/edit_review/EditReviewInputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/edit_review/EditReviewInputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/edit_review/EditReviewInteractor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/edit_review/EditReviewOutputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/edit_review/EditReviewOutputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/login/LoginInputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/login/LoginInputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/login/LoginInteractor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/login/LoginOutputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/login/LoginOutputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/login/LoginUserDataAccessInterface.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/post_recipe/PostRecipeDataAccessInterface.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/post_recipe/PostRecipeInputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/post_recipe/PostRecipeInputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/post_recipe/PostRecipeInteractor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/post_recipe/PostRecipeOutputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/post_recipe/PostRecipeOutputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/recommend_recipe/RecommendRecipeDataAccessInterface.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/recommend_recipe/RecommendRecipeInputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/recommend_recipe/RecommendRecipeInputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/recommend_recipe/RecommendRecipeInteractor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/recommend_recipe/RecommendRecipeOutputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/recommend_recipe/RecommendRecipeOutputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/save_recipe/SaveRecipeDataAccessInterface.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/save_recipe/SaveRecipeInputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/save_recipe/SaveRecipeInputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/save_recipe/SaveRecipeInteractor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/save_recipe/SaveRecipeOutputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/save_recipe/SaveRecipeOutputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/saved_recipes/ShowSavedRecipesDataAccessInterface.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/saved_recipes/ShowSavedRecipesInputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/saved_recipes/ShowSavedRecipesInputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/saved_recipes/ShowSavedRecipesInteractor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/saved_recipes/ShowSavedRecipesOutputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/saved_recipes/ShowSavedRecipesOutputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/signup/SignupInputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/signup/SignupInputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/signup/SignupInteractor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/signup/SignupOutputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/signup/SignupOutputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/signup/SignupUserDataAccessInterface.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/unsave_recipe/UnsaveRecipeDataAccessInterface.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/unsave_recipe/UnsaveRecipeInputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/unsave_recipe/UnsaveRecipeInteractor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/unsave_recipe/UnsaveRecipeOutputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/view_recipe/RecipeViewDataAccessInterface.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/view_recipe/ViewRecipeDataAccessInterface.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/view_recipe/ViewRecipeInputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/view_recipe/ViewRecipeInputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/view_recipe/ViewRecipeInteractor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/view_recipe/ViewRecipeOutputBoundary.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/use_case/view_recipe/ViewRecipeOutputData.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/DraftsDialog.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/EditReviewView.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/LabelTextPanel.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/LoginView.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/PostRecipeView.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/view/RecipeSearchView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/RecipeSearchView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/SavedRecipesView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/SavedRecipesView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/RecipeView.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/SavedRecipesView.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/SignupView.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/ViewManager.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/recipe-app-29d1d-firebase-adminsdk-fbsvc-ad98bb22f1.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/recipe-app-29d1d-firebase-adminsdk-fbsvc-ad98bb22f1.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/use_case/RecipeSearchInteractorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/use_case/RecipeSearchInteractorTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/use_case/RecommendInteractorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/use_case/RecommendInteractorTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/use_case/ViewRecipeInteractorTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/use_case/ViewRecipeInteractorTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,7 +192,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "fix__ui",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/oliverkwun-morfitt/csc207/team-project",
     "node.js.detected.package.eslint": "true",
@@ -81,7 +200,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "Runtime.Targets.Configurable",
+    "settings.editor.selected.configurable": "reference.settings.ide.settings.uml",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -96,7 +215,7 @@
       <recent name="use_case" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="JUnit.All in TeamProject">
     <configuration name="All in TeamProject" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="TeamProject" />
       <option name="PACKAGE_NAME" value="" />
@@ -162,7 +281,8 @@
       <workItem from="1764335145882" duration="2841000" />
       <workItem from="1764449834788" duration="1781000" />
       <workItem from="1764545177985" duration="1713000" />
-      <workItem from="1764554621932" duration="1682000" />
+      <workItem from="1764554621932" duration="2084000" />
+      <workItem from="1764593510655" duration="640000" />
     </task>
     <task id="LOCAL-00001" summary="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907">
       <option name="closed" value="true" />
@@ -192,6 +312,10 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907" />
     <option name="LAST_COMMIT_MESSAGE" value="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/team_project$java_in_TeamProject.ic" NAME="java in TeamProject Coverage Results" MODIFIED="1764547090485" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />

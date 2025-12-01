@@ -1,7 +1,6 @@
 package use_case;
 
 import entity.Recipe;
-import entity.User;
 import use_case.recommend_recipe.*;
 
 import org.junit.jupiter.api.Test;
