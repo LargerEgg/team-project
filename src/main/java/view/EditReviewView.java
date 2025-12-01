@@ -103,7 +103,8 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
 
         gbc.gridx = 1;
         gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 0.1;
         gbc.anchor = GridBagConstraints.WEST;
         ratingField = new JSpinner(ratingModel);
         ratingField.setMinimumSize(new Dimension(100, 20));
