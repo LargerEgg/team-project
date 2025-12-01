@@ -1,7 +1,6 @@
 package data_access;
 
 import entity.Recipe;
-import use_case.recipe_search.RecipeSearchOutputBoundary;
 import use_case.recipe_search.RecipeSearchRecipeDataAccessInterface;
 
 import java.util.List;
@@ -30,9 +29,9 @@ public class CompositeRecipeSearchDAO implements RecipeSearchRecipeDataAccessInt
     }
 
     @Override
-    public List<Recipe> search(String name, String category, RecipeSearchOutputBoundary presenter) {
+    public List<Recipe> search(String name, String category) {
         // 1. Get recipes from the API
-        List<Recipe> apiRecipes = apiDAO.search(name, category, presenter);
+        List<Recipe> apiRecipes = apiDAO.search(name, category);
 
         // 2. Get recipes from Firebase
         List<Recipe> firebaseRecipes;
