@@ -155,13 +155,12 @@ public class AppBuilder {
         SignupUserDataAccessInterface userDAO;
 
         if (USE_FIREBASE && firebaseUserDataAccessObject != null) {
-            System.out.println("✅ Using Firebase for user signup");
+            System.out.println("Using Firebase for user signup");
             userDAO = firebaseUserDataAccessObject;
         } else {
-            System.out.println("⚠️  Using in-memory storage for user signup");
+            System.out.println("Using in-memory storage for user signup");
             userDAO = new InMemoryUserDataAccessObject();
         }
-
 
         final SignupOutputBoundary signupOutputBoundary = new SignupPresenter(viewManagerModel,
                 signupViewModel, loginViewModel);
@@ -184,10 +183,10 @@ public class AppBuilder {
         use_case.login.LoginUserDataAccessInterface userDAO;
 
         if (USE_FIREBASE && firebaseUserDataAccessObject != null) {
-            System.out.println("✅ Using Firebase for user login");
+            System.out.println("Using Firebase for user login");
             userDAO = firebaseUserDataAccessObject;
         } else {
-            System.out.println("⚠️  Using in-memory storage for user login");
+            System.out.println("Using in-memory storage for user login");
             userDAO = new InMemoryUserDataAccessObject();
         }
 
@@ -349,7 +348,6 @@ public class AppBuilder {
                 ? firebaseReviewDataAccessObject
                 : new ReviewDataAccessObject();
 
-
         EditReviewInputBoundary editReviewInteractor = new EditReviewInteractor(editReviewDataAccess, editReviewOutputBoundary);
         editReviewController = new EditReviewController(editReviewInteractor);
         editReviewView.setEditReviewController(editReviewController);
@@ -413,16 +411,13 @@ public class AppBuilder {
 
         @Override
         public List<Recipe> search(String name, String category) {
-            return List.of();
+            // FIX: Correctly delegate to the API DAO
+            return apiDAO.search(name, category);
         }
 
         @Override
         public List<String> getAllCategories() {
             return apiDAO.getAllCategories();
-        }
-
-        public List<entity.Recipe> search(String name, String category, RecipeSearchOutputBoundary presenter) {
-            return apiDAO.search(name, category);
         }
     }
 }
