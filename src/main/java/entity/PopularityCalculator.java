@@ -18,9 +18,6 @@ public final class PopularityCalculator {
     /** Minimum engagement conversion rate required (saves/views ratio) */
     public static final double MINIMUM_CONVERSION_RATE = 0.05; // should be 0.05
 
-    /** Fire emoji for popular recipes */
-    public static final String FIRE_EMOJI = "🔥";
-
     // Private constructor to prevent instantiation
     private PopularityCalculator() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
