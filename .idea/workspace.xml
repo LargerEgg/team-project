@@ -6,11 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="e43c00b6-75ef-40f2-94e8-7abd57be8463" name="Changes" comment="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/data_access/FirebaseRecipeDataAccessObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/data_access/FirebaseRecipeDataAccessObject.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/interface_adapter/save_recipe/SaveRecipePresenter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/interface_adapter/save_recipe/SaveRecipePresenter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/EditReviewView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/EditReviewView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/RecipeSearchView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/RecipeSearchView.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/view/SavedRecipesView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/SavedRecipesView.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/view/PostRecipeView.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/view/PostRecipeView.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/recipe-app-29d1d-firebase-adminsdk-fbsvc-ad98bb22f1.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/recipe-app-29d1d-firebase-adminsdk-fbsvc-ad98bb22f1.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -96,10 +92,11 @@
       <recent name="use_case" />
     </key>
   </component>
-  <component name="RunManager">
-    <configuration name="All in TeamProject" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="TeamProject" />
+  <component name="RunManager" selected="JUnit.java in TeamProject">
+    <configuration name="&lt;default&gt;" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <option name="PACKAGE_NAME" value="" />
+      <option name="MAIN_CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
       <option name="TEST_OBJECT" value="package" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -127,7 +124,7 @@
     <recent_temporary>
       <list>
         <item itemvalue="JUnit.java in TeamProject" />
-        <item itemvalue="JUnit.All in TeamProject" />
+        <item itemvalue="JUnit.&lt;default&gt;" />
       </list>
     </recent_temporary>
   </component>
@@ -163,6 +160,7 @@
       <workItem from="1764449834788" duration="1781000" />
       <workItem from="1764545177985" duration="1713000" />
       <workItem from="1764554621932" duration="1682000" />
+      <workItem from="1764603750112" duration="4487000" />
     </task>
     <task id="LOCAL-00001" summary="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907">
       <option name="closed" value="true" />
@@ -194,10 +192,10 @@
     <option name="LAST_COMMIT_MESSAGE" value="Revert &quot;firebase test&quot;&#10;&#10;This reverts commit dac3f907" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/team_project$java_in_TeamProject.ic" NAME="java in TeamProject Coverage Results" MODIFIED="1764547090485" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+    <SUITE FILE_PATH="coverage/team_project$All_in_TeamProject.ic" NAME="All in TeamProject Coverage Results" MODIFIED="1764546149593" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
     <SUITE FILE_PATH="coverage/team_project$PostRecipeInteractorTest.ic" NAME="PostRecipeInteractorTest Coverage Results" MODIFIED="1764450179157" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>use_case.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/team_project$All_in_TeamProject.ic" NAME="All in TeamProject Coverage Results" MODIFIED="1764546149593" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
+    <SUITE FILE_PATH="coverage/team_project$java_in_TeamProject.ic" NAME="java in TeamProject Coverage Results" MODIFIED="1764610790866" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true" />
   </component>
 </project>

@@ -248,9 +248,7 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
             return;
         }
 
-        if (currentDraftId == null) {
-            currentDraftId = UUID.randomUUID().toString();
-        }
+        String draftId = UUID.randomUUID().toString();
 
         String title = titleField.getText().trim();
         String description = descriptionArea.getText().trim();
@@ -265,7 +263,7 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
         List<entity.RecipeDraft.IngredientDTO> ingredients = parseDraftIngredients(ingredientsArea.getText());
 
         RecipeDraft draft = new RecipeDraft(
-                currentDraftId,
+                draftId,
                 authorId,
                 title,
                 description,
