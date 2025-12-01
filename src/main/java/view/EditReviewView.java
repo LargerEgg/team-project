@@ -103,12 +103,12 @@ public class EditReviewView extends JPanel implements ActionListener, PropertyCh
 
         gbc.gridx = 1;
         gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weighty = 0.1;
+        gbc.fill = GridBagConstraints.NONE; // Changed from BOTH to NONE to prevent vertical stretching
+        gbc.weighty = 0; // Changed from 0.1 to 0 to prevent vertical expansion
         gbc.anchor = GridBagConstraints.WEST;
         ratingField = new JSpinner(ratingModel);
-        ratingField.setMinimumSize(new Dimension(100, 20));
-        ( (JSpinner.DefaultEditor) ratingField.getEditor()).getTextField().setEnabled(false);
+        ratingField.setPreferredSize(new Dimension(60, 25)); // Set a preferred size for a compact look
+        ((JSpinner.DefaultEditor) ratingField.getEditor()).getTextField().setEnabled(false);
         panel.add(ratingField, gbc);
 
         row++;

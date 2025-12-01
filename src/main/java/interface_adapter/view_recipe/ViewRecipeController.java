@@ -15,4 +15,10 @@ public class ViewRecipeController {
         ViewRecipeInputData viewRecipeInputData = new ViewRecipeInputData(recipe, username);
         viewRecipeInteractor.execute(viewRecipeInputData);
     }
+
+    // Overloaded execute method to accept recipeId and username
+    public void execute(String recipeId, String username) {
+        ViewRecipeInputData viewRecipeInputData = new ViewRecipeInputData(recipeId, username);
+        viewRecipeInteractor.execute(viewRecipeInputData);
+    }
 }
