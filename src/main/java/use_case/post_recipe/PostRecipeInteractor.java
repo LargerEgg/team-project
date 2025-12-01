@@ -20,6 +20,12 @@ public class PostRecipeInteractor implements PostRecipeInputBoundary {
 
     @Override
     public void publish(PostRecipeInputData inputData) {
+        // Validate author is provided
+        if (inputData.getAuthorId() == null || inputData.getAuthorId().isBlank()) {
+            presenter.prepareFailedView("You must be logged in to publish a recipe", inputData);
+            return;
+        }
+
         if (inputData.getTitle() == null || inputData.getTitle().isBlank()){
             presenter.prepareFailedView("Title is required", inputData);
             return;
@@ -29,7 +35,7 @@ public class PostRecipeInteractor implements PostRecipeInputBoundary {
             return;
         }
         if (inputData.getIngredients() == null || inputData.getIngredients().isEmpty()){
-            presenter.prepareFailedView("Ingredients is required", inputData);
+            presenter.prepareFailedView("At least one ingredient is required", inputData);
             return;
         }
 
@@ -40,24 +46,39 @@ public class PostRecipeInteractor implements PostRecipeInputBoundary {
 
         try {
             Recipe saved = recipeDataAccess.saveRecipe(recipe);
-            PostRecipeOutputData outputData = new PostRecipeOutputData(saved.getRecipeId(), "Recipe published");
+            PostRecipeOutputData outputData = new PostRecipeOutputData(
+                    saved.getRecipeId(),
+                    "Recipe published successfully!"
+            );
             presenter.prepareSuccessView(outputData);
         } catch (RuntimeException e) {
-            presenter.prepareFailedView("Failed to publish recipe", inputData);
-        }
+            presenter.prepareFailedView("Failed to publish recipe: " + e.getMessage(), inputData);        }
     }
 
     @Override
     public void saveDraft(PostRecipeInputData inputData) {
+        // Validate author is provided
+        if (inputData.getAuthorId() == null || inputData.getAuthorId().isBlank()) {
+            presenter.prepareFailedView("You must be logged in to save a draft", inputData);
+            return;
+        }
+
         Recipe draft = buildRecipeFromInput(inputData, Recipe.Status.DRAFT);
 
-        Recipe saved = recipeDataAccess.saveRecipe(draft);
-        PostRecipeOutputData outputData = new PostRecipeOutputData(saved.getRecipeId(), "Recipe saved");
-        presenter.prepareDraftSavedView(outputData);
+        try {
+            Recipe saved = recipeDataAccess.saveRecipe(draft);
+            PostRecipeOutputData outputData = new PostRecipeOutputData(
+                    saved.getRecipeId(),
+                    "Draft saved successfully!"
+            );
+            presenter.prepareDraftSavedView(outputData);
+        } catch (RuntimeException e) {
+            presenter.prepareFailedView("Failed to save draft: " + e.getMessage(), inputData);
+        }
     }
 
     private Recipe buildRecipeFromInput(PostRecipeInputData inputData, Recipe.Status status) {
-        // We will change this to firebase
+        // Generate a unique recipe ID
         String recipeId = UUID.randomUUID().toString();
         Date now = new Date();
 

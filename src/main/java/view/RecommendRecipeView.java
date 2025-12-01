@@ -122,7 +122,7 @@ public class RecommendRecipeView extends JPanel implements ActionListener, Prope
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 1) {
-                    viewRecipeController.execute(recipe.getRecipeId());
+                    viewRecipeController.execute(recipe, recipe.getRecipeId());
                 }
             }
             @Override

@@ -1,6 +1,7 @@
 package app;
 
 import data_access.*;
+import entity.Recipe;
 import entity.UserFactory;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.login.LoginController;
@@ -13,15 +14,26 @@ import interface_adapter.recipe_search.RecipeSearchController;
 import interface_adapter.recipe_search.RecipeSearchPresenter;
 import interface_adapter.recipe_search.RecipeSearchState;
 import interface_adapter.recipe_search.RecipeSearchViewModel;
+import interface_adapter.save_recipe.SaveRecipeController;
+import interface_adapter.save_recipe.SaveRecipePresenter;
+import interface_adapter.save_recipe.SaveRecipeViewModel;
+import interface_adapter.saved_recipes.SavedRecipesPresenter;
+import interface_adapter.saved_recipes.SavedRecipesViewModel;
+import interface_adapter.saved_recipes.ShowSavedRecipesController;
 import interface_adapter.signup.SignupController;
 import interface_adapter.signup.SignupPresenter;
 import interface_adapter.signup.SignupViewModel;
+import interface_adapter.unsave_recipe.UnsaveRecipeController;
+import interface_adapter.unsave_recipe.UnsaveRecipePresenter;
 import interface_adapter.view_recipe.ViewRecipeController;
 import interface_adapter.view_recipe.ViewRecipePresenter;
 import interface_adapter.view_recipe.ViewRecipeViewModel;
 import interface_adapter.recommend_recipe.RecommendRecipeController;
 import interface_adapter.recommend_recipe.RecommendRecipePresenter;
 import interface_adapter.recommend_recipe.RecommendRecipeViewModel;
+import interface_adapter.edit_review.EditReviewViewModel;
+import interface_adapter.edit_review.EditReviewController;
+import interface_adapter.edit_review.EditReviewPresenter;
 import use_case.login.LoginInputBoundary;
 import use_case.login.LoginInteractor;
 import use_case.login.LoginOutputBoundary;
@@ -33,24 +45,35 @@ import use_case.recipe_search.RecipeSearchInputBoundary;
 import use_case.recipe_search.RecipeSearchInteractor;
 import use_case.recipe_search.RecipeSearchOutputBoundary;
 import use_case.recipe_search.RecipeSearchRecipeDataAccessInterface;
+import use_case.recommend_recipe.RecommendRecipeDataAccessInterface;
 import use_case.recommend_recipe.RecommendRecipeInputBoundary;
 import use_case.recommend_recipe.RecommendRecipeInteractor;
 import use_case.recommend_recipe.RecommendRecipeOutputBoundary;
+import use_case.save_recipe.SaveRecipeDataAccessInterface;
+import use_case.save_recipe.SaveRecipeInputBoundary;
+import use_case.save_recipe.SaveRecipeInteractor;
+import use_case.save_recipe.SaveRecipeOutputBoundary;
+import use_case.saved_recipes.ShowSavedRecipesDataAccessInterface;
+import use_case.saved_recipes.ShowSavedRecipesInputBoundary;
+import use_case.saved_recipes.ShowSavedRecipesInteractor;
+import use_case.saved_recipes.ShowSavedRecipesOutputBoundary;
 import use_case.signup.SignupInputBoundary;
 import use_case.signup.SignupInteractor;
 import use_case.signup.SignupOutputBoundary;
 import use_case.signup.SignupUserDataAccessInterface;
+import use_case.unsave_recipe.UnsaveRecipeDataAccessInterface;
+import use_case.unsave_recipe.UnsaveRecipeInputBoundary;
+import use_case.unsave_recipe.UnsaveRecipeInteractor;
+import use_case.unsave_recipe.UnsaveRecipeOutputBoundary;
 import use_case.view_recipe.ViewRecipeDataAccessInterface;
 import use_case.view_recipe.ViewRecipeInputBoundary;
 import use_case.view_recipe.ViewRecipeInteractor;
 import use_case.view_recipe.ViewRecipeOutputBoundary;
-import view.LoginView;
-import view.PostRecipeView;
-import view.RecipeSearchView;
-import view.RecipeView;
-import view.RecommendRecipeView;
-import view.SignupView;
-import view.ViewManager;
+import use_case.edit_review.EditReviewOutputBoundary;
+import use_case.edit_review.EditReviewDataAccessInterface;
+import use_case.edit_review.EditReviewInputBoundary;
+import use_case.edit_review.EditReviewInteractor;
+import view.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -63,13 +86,16 @@ public class AppBuilder {
     private final UserFactory userFactory = new UserFactory();
     final ViewManagerModel viewManagerModel = new ViewManagerModel();
     ViewManager viewManager = new ViewManager(cardPanel, cardLayout, viewManagerModel);
+
     private UserDataAccessObject userDataAccessObject = new UserDataAccessObject();
-    private RecipeDataAccessObject recipeDataAccessObject = new RecipeDataAccessObject();
+    private RecipeDataAccessObject recipeDataAccessObject;
+    private ReviewDataAccessObject reviewDataAccessObject = new ReviewDataAccessObject();
 
     private static final boolean USE_FIREBASE = true;
     private FirebaseUserDataAccessObject firebaseUserDataAccessObject;
     private FirebaseRecipeDataAccessObject firebaseRecipeDataAccessObject;
     private RecipeDataAccessObject apiRecipeDataAccessObject; // For MealDB API
+    private FirebaseReviewDataAccessObject firebaseReviewDataAccessObject;
 
     private SignupView signupView;
     private SignupViewModel signupViewModel;
@@ -77,6 +103,7 @@ public class AppBuilder {
     private LoginViewModel loginViewModel;
     private RecipeSearchViewModel recipeSearchViewModel;
     private RecipeSearchView recipeSearchView;
+    private EditReviewView editReviewView;
 
     private ViewRecipeViewModel viewRecipeViewModel;
     private RecipeView recipeView;
@@ -89,9 +116,15 @@ public class AppBuilder {
     private RecommendRecipeViewModel recommendRecipeViewModel;
     private RecommendRecipeView recommendRecipeView;
 
+    private EditReviewViewModel editReviewViewModel;
+    private EditReviewController editReviewController;
+
     public AppBuilder() {
 
         cardPanel.setLayout(cardLayout);
+
+        apiRecipeDataAccessObject = new RecipeDataAccessObject();
+        recipeDataAccessObject = apiRecipeDataAccessObject;
 
         // Initialize Firebase if enabled
         if (USE_FIREBASE) {
@@ -99,6 +132,7 @@ public class AppBuilder {
                 FirebaseInitializer.initialize();
                 firebaseUserDataAccessObject = new FirebaseUserDataAccessObject(userFactory);
                 firebaseRecipeDataAccessObject = new FirebaseRecipeDataAccessObject();
+                firebaseReviewDataAccessObject = new FirebaseReviewDataAccessObject();
                 System.out.println("Firebase data access objects initialized successfully!");
             } catch (IOException | IllegalStateException e) {
                 System.err.println("Failed to initialize Firebase: " + e.getMessage());
@@ -108,9 +142,6 @@ public class AppBuilder {
                 firebaseRecipeDataAccessObject = null;
             }
         }
-
-        // Always initialize API DAO for searching external recipes
-        apiRecipeDataAccessObject = new RecipeDataAccessObject();
     }
 
     public AppBuilder addSignupView() {
@@ -161,7 +192,7 @@ public class AppBuilder {
         }
 
         final LoginOutputBoundary loginOutputBoundary = new LoginPresenter(viewManagerModel,
-                recipeSearchViewModel, loginViewModel);
+                recipeSearchViewModel, loginViewModel, editReviewViewModel);
         final LoginInputBoundary loginInteractor = new LoginInteractor(
                 userDAO, loginOutputBoundary);
 
@@ -173,7 +204,13 @@ public class AppBuilder {
     // Modified to accept ViewRecipeController
     public AppBuilder addRecipeSearchView(ViewRecipeController viewRecipeController) {
         recipeSearchViewModel = new RecipeSearchViewModel();
-        RecipeSearchRecipeDataAccessInterface recipeDAO = apiRecipeDataAccessObject;
+
+        RecipeSearchRecipeDataAccessInterface recipeDAO;
+        if (USE_FIREBASE && firebaseRecipeDataAccessObject != null) {
+            recipeDAO = new CompositeRecipeSearchDAO(apiRecipeDataAccessObject, firebaseRecipeDataAccessObject);
+        } else {
+            recipeDAO = apiRecipeDataAccessObject;
+        }
 
         // Pre-fetch categories and set them in the state
         List<String> categories = recipeDAO.getAllCategories();
@@ -181,26 +218,49 @@ public class AppBuilder {
         initialState.setCategories(categories);
         recipeSearchViewModel.setState(initialState);
 
+        ShowSavedRecipesOutputBoundary savedRecipesPresenter =
+                new SavedRecipesPresenter(recipeSearchViewModel);
+
+        ShowSavedRecipesDataAccessInterface savedRecipesDAO =
+                new FirebaseSaveRecipeDataAccessObject(apiRecipeDataAccessObject);
+
+        ShowSavedRecipesInputBoundary savedRecipesInteractor =
+                new ShowSavedRecipesInteractor(savedRecipesDAO, savedRecipesPresenter);
+
+        ShowSavedRecipesController showSavedRecipesController =
+                new ShowSavedRecipesController(savedRecipesInteractor);
+
         RecipeSearchOutputBoundary recipeSearchOutputBoundary = new RecipeSearchPresenter(viewManagerModel, recipeSearchViewModel);
         RecipeSearchInputBoundary recipeSearchInteractor = new RecipeSearchInteractor(recipeDAO, recipeSearchOutputBoundary);
         RecipeSearchController recipeSearchController = new RecipeSearchController(recipeSearchInteractor);
 
         recommendRecipeViewModel = new RecommendRecipeViewModel();
         RecommendRecipeOutputBoundary recommendPresenter = new RecommendRecipePresenter(recommendRecipeViewModel, viewManagerModel);
-        RecommendRecipeInputBoundary recommendInteractor = new RecommendRecipeInteractor(apiRecipeDataAccessObject, recommendPresenter);
-        RecommendRecipeController recommendController = new RecommendRecipeController(recommendInteractor);
-        recipeSearchView = new RecipeSearchView(
-                recipeSearchViewModel,
-                recipeSearchController,
-                viewManagerModel,
-                viewRecipeController,
-                recommendController
+        RecommendRecipeDataAccessInterface recommendDAO = new CompositeRecommendRecipeDAO(
+                savedRecipesDAO,
+                new RecommendRecipeDataAccessObject()
         );
+        RecommendRecipeInputBoundary recommendInteractor = new RecommendRecipeInteractor(recommendDAO, recommendPresenter);
+        RecommendRecipeController recommendController = new RecommendRecipeController(recommendInteractor);
+
+        recipeSearchView = new RecipeSearchView(
+                        recipeSearchViewModel,
+                        recipeSearchController,
+                        viewManagerModel,
+                        viewRecipeController,
+                recommendController,
+                showSavedRecipesController,
+                editReviewViewModel
+                );
+
         cardPanel.add(recipeSearchView, recipeSearchView.viewName);
         return this;
     }
 
     public AppBuilder addRecommendRecipeView(ViewRecipeController viewRecipeController) {
+        if (recommendRecipeViewModel == null) {
+            recommendRecipeViewModel = new RecommendRecipeViewModel();
+        }
         recommendRecipeView = new RecommendRecipeView(recommendRecipeViewModel, viewManagerModel, viewRecipeController);
         cardPanel.add(recommendRecipeView, recommendRecipeView.viewName);
         return this;
@@ -208,14 +268,40 @@ public class AppBuilder {
 
     public AppBuilder addViewRecipeView() {
         viewRecipeViewModel = new ViewRecipeViewModel();
-        recipeView = new RecipeView(viewRecipeViewModel, viewManagerModel);
+
+        SaveRecipeViewModel saveRecipeViewModel = new SaveRecipeViewModel();
+
+        SaveRecipeOutputBoundary saveRecipePresenter =
+                new SaveRecipePresenter(saveRecipeViewModel);
+
+        SaveRecipeDataAccessInterface saveRecipeDAO =
+                new FirebaseSaveRecipeDataAccessObject(apiRecipeDataAccessObject);
+
+        SaveRecipeInputBoundary saveRecipeInteractor =
+                new SaveRecipeInteractor(saveRecipeDAO, saveRecipePresenter);
+
+        SaveRecipeController saveRecipeController =
+                new SaveRecipeController(saveRecipeInteractor);
+
+        UnsaveRecipeOutputBoundary unsaveRecipeOutputBoundary = new UnsaveRecipePresenter(saveRecipeViewModel);
+        UnsaveRecipeInputBoundary unsaveRecipeInteractor = new UnsaveRecipeInteractor((UnsaveRecipeDataAccessInterface) saveRecipeDAO, unsaveRecipeOutputBoundary);
+        UnsaveRecipeController unsaveRecipeController = new UnsaveRecipeController(unsaveRecipeInteractor);
+
+        recipeView = new RecipeView(viewRecipeViewModel, viewManagerModel, saveRecipeController, saveRecipeViewModel, unsaveRecipeController);
         cardPanel.add(recipeView, recipeView.viewName);
+        return this;
+    }
+
+    public AppBuilder addEditReviewView() {
+        editReviewViewModel = new EditReviewViewModel();
+        editReviewView = new EditReviewView(editReviewViewModel, viewManagerModel);
+        cardPanel.add(editReviewView, editReviewView.getViewName());
         return this;
     }
 
     // Modified to return ViewRecipeController
     public ViewRecipeController addViewRecipeUseCase() {
-        ViewRecipeOutputBoundary viewRecipeOutputBoundary = new ViewRecipePresenter(viewRecipeViewModel, viewManagerModel);
+        ViewRecipeOutputBoundary viewRecipeOutputBoundary = new ViewRecipePresenter(viewRecipeViewModel, viewManagerModel, editReviewViewModel);
 
         ViewRecipeDataAccessInterface viewRecipeDataAccessObject;
         if (USE_FIREBASE && firebaseRecipeDataAccessObject != null) {
@@ -227,14 +313,15 @@ public class AppBuilder {
             viewRecipeDataAccessObject = apiRecipeDataAccessObject;
         }
 
-        ViewRecipeInputBoundary viewRecipeInteractor = new ViewRecipeInteractor(viewRecipeDataAccessObject, viewRecipeOutputBoundary);
+        SaveRecipeDataAccessInterface saveRecipeDAO = new FirebaseSaveRecipeDataAccessObject(apiRecipeDataAccessObject);
+        ViewRecipeInputBoundary viewRecipeInteractor = new ViewRecipeInteractor(viewRecipeDataAccessObject, viewRecipeOutputBoundary, saveRecipeDAO);
         return new ViewRecipeController(viewRecipeInteractor);
     }
 
     // New method to add PostRecipeView
     public AppBuilder addPostRecipeView() {
         postRecipeViewModel = new PostRecipeViewModel();
-        postRecipeView = new PostRecipeView(postRecipeViewModel, viewManagerModel);
+        postRecipeView = new PostRecipeView(postRecipeViewModel, recipeSearchViewModel, viewManagerModel);
         cardPanel.add(postRecipeView, postRecipeView.viewName);
         return this;
     }
@@ -251,6 +338,21 @@ public class AppBuilder {
         PostRecipeInputBoundary postRecipeInteractor = new PostRecipeInteractor(postRecipeDataAccess, postRecipeOutputBoundary);
         postRecipeController = new PostRecipeController(postRecipeInteractor);
         postRecipeView.setPostRecipeController(postRecipeController);
+        return this;
+    }
+
+    public AppBuilder addEditReviewUseCase() {
+        EditReviewOutputBoundary editReviewOutputBoundary = new EditReviewPresenter(viewManagerModel, editReviewViewModel);
+
+        // Use Firebase for posting reviews if available, otherwise use in-memory
+        EditReviewDataAccessInterface editReviewDataAccess = USE_FIREBASE && firebaseReviewDataAccessObject != null
+                ? firebaseReviewDataAccessObject
+                : new ReviewDataAccessObject();
+
+
+        EditReviewInputBoundary editReviewInteractor = new EditReviewInteractor(editReviewDataAccess, editReviewOutputBoundary);
+        editReviewController = new EditReviewController(editReviewInteractor);
+        editReviewView.setEditReviewController(editReviewController);
         return this;
     }
 
@@ -294,9 +396,33 @@ public class AppBuilder {
         }
 
         @Override
-        public void save(entity.Recipe recipe) {
-            // Always save to Firebase
-            firebaseDAO.save(recipe);
+        public void recordView(String recipeId) {
+            firebaseDAO.recordView(recipeId);
+            apiDAO.recordView(recipeId);
+        }
+    }
+
+    private static class CompositeRecipeSearchDAO implements RecipeSearchRecipeDataAccessInterface {
+        private final RecipeDataAccessObject apiDAO;
+        private final FirebaseRecipeDataAccessObject firebaseDAO;
+
+        public CompositeRecipeSearchDAO(RecipeDataAccessObject apiDAO, FirebaseRecipeDataAccessObject firebaseDAO) {
+            this.apiDAO = apiDAO;
+            this.firebaseDAO = firebaseDAO;
+        }
+
+        @Override
+        public List<Recipe> search(String name, String category) {
+            return List.of();
+        }
+
+        @Override
+        public List<String> getAllCategories() {
+            return apiDAO.getAllCategories();
+        }
+
+        public List<entity.Recipe> search(String name, String category, RecipeSearchOutputBoundary presenter) {
+            return apiDAO.search(name, category);
         }
     }
 }

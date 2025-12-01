@@ -5,11 +5,21 @@ import entity.Recipe;
 public class ViewRecipeState {
     private Recipe recipe;
     private String errorMessage = null;
+    private boolean isSaved;
+    private String currentUser;
 
     public ViewRecipeState(ViewRecipeState copy) {
         this.recipe = copy.recipe;
         this.errorMessage = copy.errorMessage;
+        this.isSaved = copy.isSaved;
+        this.currentUser = copy.currentUser;
     }
+
+    public Boolean getIsSaved() {return isSaved;}
+    public void setIsSaved(Boolean isSaved) {this.isSaved = isSaved;}
+
+    public String getCurrentUser() {return currentUser;}
+    public void setCurrentUser(String currentUser) {this.currentUser = currentUser;}
 
     public ViewRecipeState() {}
 

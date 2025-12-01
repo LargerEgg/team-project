@@ -1,23 +1,23 @@
 package interface_adapter.save_recipe;
 
 public class SaveRecipeState {
-    private String successMessage = "";
-    private String errorMessage = "";
+    private boolean isSaved;
+    private String message;
 
-    public String getSuccessMessage() {
-        return successMessage;
+    public boolean isSaved() {
+        return isSaved;
     }
 
-    public void setSuccessMessage(String successMessage) {
-        this.successMessage = successMessage;
+    public void setSaved(boolean saved) {
+        isSaved = saved;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public String getMessage() {
+        return message;
     }
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
+    public void setMessage(String message) {
+        this.message = message;
     }
+
 }
-

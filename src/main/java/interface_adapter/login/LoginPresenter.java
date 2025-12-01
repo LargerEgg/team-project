@@ -1,6 +1,8 @@
 package interface_adapter.login;
 
 import interface_adapter.ViewManagerModel;
+import interface_adapter.edit_review.EditReviewState;
+import interface_adapter.edit_review.EditReviewViewModel;
 import interface_adapter.recipe_search.RecipeSearchState;
 import interface_adapter.recipe_search.RecipeSearchViewModel;
 import use_case.login.LoginOutputBoundary;
@@ -11,13 +13,16 @@ public class LoginPresenter implements LoginOutputBoundary {
     private final LoginViewModel loginViewModel;
     private final RecipeSearchViewModel recipeSearchViewModel;
     private final ViewManagerModel viewManagerModel;
+    private final EditReviewViewModel editReviewViewModel;
 
     public LoginPresenter(ViewManagerModel viewManagerModel,
                           RecipeSearchViewModel recipeSearchViewModel,
-                          LoginViewModel loginViewModel) {
+                          LoginViewModel loginViewModel,
+                          EditReviewViewModel editReviewViewModel) {
         this.viewManagerModel = viewManagerModel;
         this.recipeSearchViewModel = recipeSearchViewModel;
         this.loginViewModel = loginViewModel;
+        this.editReviewViewModel = editReviewViewModel;
     }
 
     @Override
@@ -26,6 +31,10 @@ public class LoginPresenter implements LoginOutputBoundary {
         final RecipeSearchState loggedInState = recipeSearchViewModel.getState();
         loggedInState.setCurrentUser(response.getUsername());
         this.recipeSearchViewModel.firePropertyChange();
+
+        final EditReviewState loggedInReviewState = editReviewViewModel.getState();
+        loggedInReviewState.setCurrentUser(response.getUsername());
+        this.editReviewViewModel.firePropertyChange();
 
         // and clear everything from the LoginViewModel's state
         loginViewModel.setState(new LoginState());

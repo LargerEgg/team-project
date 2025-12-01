@@ -173,12 +173,17 @@ public class Recipe {
     public void setStatus(Status status) { this.status = status; touchUpdateDate(); }
 
     public double getAverageRating() { return averageRating; }
+    public void setAverageRating(double averageRating) { this.averageRating = averageRating; touchUpdateDate(); }
 
     public void recalculateAverageRating() {
         if (reviews.isEmpty()) {
             this.averageRating = 0.0;
         } else {
-            this.averageRating = reviews.stream().mapToDouble(Review::getRating).average().orElse(0.0);
+            double totalRating = 0.0;
+            for (Review review : reviews) {
+                totalRating += review.getRating();
+            }
+            this.averageRating = totalRating / reviews.size();
         }
         touchUpdateDate();
     }

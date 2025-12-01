@@ -1,12 +1,13 @@
 package entity;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * A simple entity representing a review. reviews have a username and password.
  */
 public class Review {
-    private int reviewId;
-    private int recipeId;
+    private String reviewId;
+    private String recipeId;
     private String authorId; // Changed to String to match usage in RecipeView
     private Date dateCreated;
     private String title;
@@ -24,7 +25,7 @@ public class Review {
      * @param rating the rating of the recipe (1-5)
      * @throws IllegalArgumentException if the title or description are empty, or rating is out of range
      */
-    public Review(int reviewId, int recipeId, String authorId, Date dateCreated, String title, String description, int rating) {
+    public Review(String reviewId, String recipeId, String authorId, Date dateCreated, String title, String description, int rating) {
         if ("".equals(title)) {
             throw new IllegalArgumentException("Title cannot be empty");
         }
@@ -45,14 +46,14 @@ public class Review {
 
     // Overloaded constructor for backward compatibility or simpler creation if some fields are not immediately available
     public Review(String title, String description, int rating) {
-        this(0, 0, "anonymous", new Date(), title, description, rating); // Default values for new fields
+        this(UUID.randomUUID().toString(), UUID.randomUUID().toString(), "anonymous", new Date(), title, description, rating); // Default values for new fields
     }
 
-    public int getReviewId() {
+    public String getReviewId() {
         return reviewId;
     }
 
-    public int getRecipeId() {
+    public String getRecipeId() {
         return recipeId;
     }
 
@@ -74,5 +75,13 @@ public class Review {
 
     public int getRating() {
         return rating;
+    }
+
+    public void setReviewId(String reviewId) {
+        this.reviewId = reviewId;
+    }
+
+    public void setRecipeId(String recipeId) {
+        this.recipeId = recipeId;
     }
 }

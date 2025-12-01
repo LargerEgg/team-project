@@ -1,9 +1,12 @@
 package view;
 
+import data_access.DraftManager;
+import entity.RecipeDraft;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.post_recipe.PostRecipeController;
 import interface_adapter.post_recipe.PostRecipeState;
 import interface_adapter.post_recipe.PostRecipeViewModel;
+import interface_adapter.recipe_search.RecipeSearchViewModel;
 import use_case.post_recipe.PostRecipeInputData;
 
 import javax.swing.*;
@@ -13,15 +16,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PostRecipeView extends JPanel implements ActionListener, PropertyChangeListener {
     public final String viewName = "post recipe";
     private final PostRecipeViewModel postRecipeViewModel;
     private PostRecipeController postRecipeController;
     private final ViewManagerModel viewManagerModel;
+    private final RecipeSearchViewModel recipeSearchViewModel;
+    private final DraftManager draftManager;
 
     private JTextField titleField;
     private JTextArea descriptionArea;
@@ -33,12 +38,16 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
     private JButton saveDraftButton;
     private JButton cancelButton;
     private JLabel messageLabel;
+    private JButton loadDraftsButton;
 
-    public PostRecipeView(PostRecipeViewModel postRecipeViewModel, ViewManagerModel viewManagerModel) {
+    private String currentDraftId = null;
+
+    public PostRecipeView(PostRecipeViewModel postRecipeViewModel, RecipeSearchViewModel recipeSearchViewModel, ViewManagerModel viewManagerModel) {
         this.postRecipeViewModel = postRecipeViewModel;
+        this.recipeSearchViewModel = recipeSearchViewModel;
         this.postRecipeViewModel.addPropertyChangeListener(this);
         this.viewManagerModel = viewManagerModel;
-
+        this.draftManager = DraftManager.getInstance();
 
         setLayout(new BorderLayout());
         setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -177,15 +186,17 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
-
         publishButton = new JButton("Publish");
         saveDraftButton = new JButton("Save Draft");
         cancelButton = new JButton("Cancel");
+        loadDraftsButton = new JButton("Load Draft");
 
         publishButton.addActionListener(this);
         saveDraftButton.addActionListener(this);
         cancelButton.addActionListener(this);
+        loadDraftsButton.addActionListener(this);
 
+        panel.add(loadDraftsButton);
         panel.add(publishButton);
         panel.add(saveDraftButton);
         panel.add(cancelButton);
@@ -197,14 +208,26 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == publishButton) {
             PostRecipeInputData inputData = createInputDataFromForm();
+            if (inputData == null) {
+                return; // Error already shown
+            }
             if (postRecipeController != null) {
                 postRecipeController.publish(inputData);
+                if (currentDraftId != null) {
+                    draftManager.deleteDraft(currentDraftId);
+                    currentDraftId = null;
+                }
             }
         } else if (e.getSource() == saveDraftButton) {
             PostRecipeInputData inputData = createInputDataFromForm();
-            if (postRecipeController != null) {
-                postRecipeController.saveDraft(inputData);
+            if (inputData == null) {
+                return; // Error already shown
             }
+            if (postRecipeController != null) {
+                saveDraft();
+            }
+        } else if (e.getSource() == loadDraftsButton) {
+            loadDraftsDialog();
         } else if (e.getSource() == cancelButton) {
             clearForm();
             viewManagerModel.setState("recipe search");
@@ -212,16 +235,163 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
         }
     }
 
-    private PostRecipeInputData createInputDataFromForm() {
-        String authorId = "current-user-id"; // TODO: Get from logged-in user
+    private void saveDraft() {
+        String authorId = recipeSearchViewModel.getState().getCurrentUser();
+
+        if (authorId == null || authorId.isEmpty()) {
+            messageLabel.setText("Error: You must be logged in to save a draft");
+            messageLabel.setForeground(Color.RED);
+            JOptionPane.showMessageDialog(this,
+                    "You must be logged in to save a draft",
+                    "Not Logged In",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (currentDraftId == null) {
+            currentDraftId = UUID.randomUUID().toString();
+        }
+
         String title = titleField.getText().trim();
         String description = descriptionArea.getText().trim();
         String category = categoryField.getText().trim();
         String imagePath = imagePathField.getText().trim();
+        String tagsText = tagsField.getText().trim();
+        List<String> tags = Arrays.stream(tagsText.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+
+        List<entity.RecipeDraft.IngredientDTO> ingredients = parseDraftIngredients(ingredientsArea.getText());
+
+        RecipeDraft draft = new RecipeDraft(
+                currentDraftId,
+                authorId,
+                title,
+                description,
+                ingredients,
+                category,
+                tags,
+                imagePath,
+                new Date()
+        );
+
+        try {
+            draftManager.saveDraft(draft);
+            messageLabel.setText("Draft saved successfully!");
+            messageLabel.setForeground(new Color(0, 100, 200));
+            JOptionPane.showMessageDialog(this,
+                    "Draft saved successfully!",
+                    "Draft Saved",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } catch (RuntimeException ex) {
+            messageLabel.setText("Failed to save draft: " + ex.getMessage());
+            messageLabel.setForeground(Color.RED);
+            JOptionPane.showMessageDialog(this,
+                    "Failed to save draft: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void loadDraftsDialog() {
+        String authorId = recipeSearchViewModel.getState().getCurrentUser();
+
+        if (authorId == null || authorId.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "You must be logged in to load drafts",
+                    "Not Logged In",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        DraftsDialog dialog = new DraftsDialog((Frame) SwingUtilities.getWindowAncestor(this), authorId);
+        dialog.setVisible(true);
+
+        RecipeDraft selectedDraft = dialog.getSelectedDraft();
+        if (selectedDraft != null) {
+            loadDraftIntoForm(selectedDraft);
+        }
+    }
+
+    private void loadDraftIntoForm(RecipeDraft draft) {
+        currentDraftId = draft.getDraftId();
+        titleField.setText(draft.getTitle());
+        descriptionArea.setText(draft.getDescription());
+        categoryField.setText(draft.getCategory());
+        imagePathField.setText(draft.getImagePath());
+
+        if (draft.getTags() != null) {
+            tagsField.setText(String.join(", ", draft.getTags()));
+        } else {
+            tagsField.setText("");
+        }
+
+        if (draft.getIngredients() != null) {
+            StringBuilder ingredientsText = new StringBuilder();
+            for (entity.RecipeDraft.IngredientDTO ingredient : draft.getIngredients()) {
+                ingredientsText.append(ingredient.getName())
+                        .append(",")
+                        .append(ingredient.getQuantity())
+                        .append("\n");
+            }
+            ingredientsArea.setText(ingredientsText.toString());
+        } else {
+            ingredientsArea.setText("");
+        }
+
+        messageLabel.setText("Draft loaded successfully");
+        messageLabel.setForeground(new Color(0, 100, 200));
+    }
+
+    private List<entity.RecipeDraft.IngredientDTO> parseDraftIngredients(String text) {
+        List<entity.RecipeDraft.IngredientDTO> ingredients = new ArrayList<>();
+        String[] lines = text.split("\n");
+
+        for (String line : lines) {
+            line = line.trim();
+            if (!line.isEmpty()) {
+                String[] parts = line.split(",", 2);
+                if (parts.length == 2) {
+                    String name = parts[0].trim();
+                    String quantity = parts[1].trim();
+                    ingredients.add(new entity.RecipeDraft.IngredientDTO(name, quantity));
+                } else if (parts.length == 1) {
+                    ingredients.add(new entity.RecipeDraft.IngredientDTO(parts[0].trim(), ""));
+                }
+            }
+        }
+
+        return ingredients;
+    }
+
+    private PostRecipeInputData createInputDataFromForm() {
+        // Get the current logged-in user from RecipeSearchViewModel
+        String authorId = recipeSearchViewModel.getState().getCurrentUser();
+
+        if (authorId == null || authorId.isEmpty()) {
+            messageLabel.setText("Error: You must be logged in to post a recipe");
+            messageLabel.setForeground(Color.RED);
+            JOptionPane.showMessageDialog(this,
+                    "You must be logged in to post a recipe",
+                    "Not Logged In",
+                    JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+
+        String title = titleField.getText().trim();
+        String description = descriptionArea.getText().trim();
+        String category = categoryField.getText().trim();
+        String imagePath = imagePathField.getText().trim();
+        String tagsText = tagsField.getText().trim();
+        List<String> tags = Arrays.stream(tagsText.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
 
         List<PostRecipeInputData.IngredientDTO> ingredients = parseIngredients(ingredientsArea.getText());
 
-        return new PostRecipeInputData(authorId, title, description, ingredients, category, imagePath);
+        return new PostRecipeInputData(authorId, title, description, ingredients, category, imagePath, tags);
     }
 
     // Function to allow comma parsing of ingredients
@@ -265,6 +435,7 @@ public class PostRecipeView extends JPanel implements ActionListener, PropertyCh
             messageLabel.setText(state.getSuccessMessage());
             messageLabel.setForeground(new Color(0, 128, 0));
             JOptionPane.showMessageDialog(this, state.getSuccessMessage(), "Success", JOptionPane.INFORMATION_MESSAGE);
+            clearForm();
         } else if ("draft_saved".equals(evt.getPropertyName())) {
             messageLabel.setText(state.getSuccessMessage());
             messageLabel.setForeground(new Color(0, 100, 200));

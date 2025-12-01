@@ -1,42 +1,35 @@
 package use_case.recommend_recipe;
 
 import entity.Recipe;
-import entity.User;
 
 import java.util.*;
 
 public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
 
-    final RecommendRecipeDataAccessInterface userDataAccessObject;
-    final RecommendRecipeOutputBoundary userPresenter;
+    final RecommendRecipeDataAccessInterface dataAccessObject;
+    final RecommendRecipeOutputBoundary presenter;
 
-    public RecommendRecipeInteractor(RecommendRecipeDataAccessInterface userDataAccessInterface,
+    public RecommendRecipeInteractor(RecommendRecipeDataAccessInterface dataAccessInterface,
                                      RecommendRecipeOutputBoundary recommendRecipeOutputBoundary) {
-        this.userDataAccessObject = userDataAccessInterface;
-        this.userPresenter = recommendRecipeOutputBoundary;
+        this.dataAccessObject = dataAccessInterface;
+        this.presenter = recommendRecipeOutputBoundary;
     }
 
     @Override
     public void execute(RecommendRecipeInputData inputData) {
         String username = inputData.getUsername();
 
-        User user = userDataAccessObject.getUser(username);
-        if (user == null) {
-            userPresenter.prepareFailView("User not found: " + username);
-            return;
-        }
-
-        List<Recipe> favorites = user.getSavedRecipes();
+        List<Recipe> favorites = dataAccessObject.getSavedRecipes(username);
 
         if (favorites == null || favorites.isEmpty()) {
-            userPresenter.prepareFailView("No favorites found. Please save some recipes first!");
+            presenter.prepareFailView("No favorites found. Please save some recipes first!");
             return;
         }
 
         List<String> rankedCategories = getFavouriteCategoriesRanked(favorites);
 
         if (rankedCategories.isEmpty()) {
-            userPresenter.prepareFailView("Could not determine favorite category.");
+            presenter.prepareFailView("Could not determine favorite category.");
             return;
         }
 
@@ -45,14 +38,14 @@ public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
 
         for (int i = 0; i < categoriesToFetch; i++) {
             String category = rankedCategories.get(i);
-            List<Recipe> recipes = userDataAccessObject.getRecipesByCategory(category);
+            List<Recipe> recipes = dataAccessObject.getRecipesByCategory(category);
             if (recipes != null) {
                 finalRecommendations.addAll(recipes);
             }
         }
 
         if (finalRecommendations.isEmpty()) {
-            userPresenter.prepareFailView("Sorry, no recommendations found.");
+            presenter.prepareFailView("Sorry, no recommendations found.");
             return;
         }
 
@@ -63,7 +56,7 @@ public class RecommendRecipeInteractor implements RecommendRecipeInputBoundary {
         }
 
         RecommendRecipeOutputData outputData = new RecommendRecipeOutputData(finalRecommendations, "Mix of your Top Favorites");
-        userPresenter.prepareSuccessView(outputData);
+        presenter.prepareSuccessView(outputData);
     }
 
     private List<String> getFavouriteCategoriesRanked(List<Recipe> favorites) {
