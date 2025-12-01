@@ -36,8 +36,7 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
                 .build();
         try {
             Response response = client.newCall(request).execute();
-            if (response.code() != SUCCESS_CODE)
-                throw new RuntimeException("API request failed");
+            if (response.code() != SUCCESS_CODE) throw new RuntimeException("API request failed");
 
             JSONObject json = new JSONObject(response.body().string());
             JSONArray arr = json.getJSONArray("categories");
@@ -46,9 +45,7 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
             for (int i = 0; i < arr.length(); i++) {
                 categories.add(arr.getJSONObject(i).getString("strCategory"));
             }
-
             return categories;
-
         } catch (IOException | JSONException e) {
             throw new RuntimeException(e);
         }
@@ -67,7 +64,6 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         Request request = new Request.Builder()
                 .url(String.format("https://www.themealdb.com/api/json/v1/1/search.php?s=%s", name))
                 .build();
-
         return executeAndParse(request);
     }
 
@@ -75,11 +71,9 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         Request request = new Request.Builder()
                 .url(String.format("https://www.themealdb.com/api/json/v1/1/filter.php?c=%s", category))
                 .build();
-
         try {
             Response response = client.newCall(request).execute();
-            if (response.code() != SUCCESS_CODE)
-                throw new RuntimeException("API request failed");
+            if (response.code() != SUCCESS_CODE) throw new RuntimeException("API request failed");
 
             JSONObject json = new JSONObject(response.body().string());
             if (json.isNull("meals")) {
@@ -88,12 +82,11 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
 
             JSONArray meals = json.getJSONArray("meals");
             List<JSONObject> filtered = new ArrayList<>();
-
             for (int i = 0; i < meals.length(); i++) {
                 filtered.add(meals.getJSONObject(i));
             }
 
-            // name filter
+            // Filter by name in memory (API does not support filtering by category and name simultaneously)
             if (name != null && !name.isEmpty()) {
                 String lower = name.toLowerCase();
                 filtered = filtered.stream()
@@ -101,7 +94,7 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
                         .collect(Collectors.toList());
             }
 
-            // now lookup full detail via ID
+            // Get details (Filter endpoint only returns ID and name, need to lookup details)
             List<Recipe> recipes = new ArrayList<>();
             for (JSONObject meal : filtered) {
                 List<Recipe> lookedUp = lookupById(meal.getString("idMeal"));
@@ -109,9 +102,7 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
                     recipes.add(lookedUp.get(0));
                 }
             }
-
             return recipes;
-
         } catch (IOException | JSONException e) {
             throw new RuntimeException(e);
         }
@@ -121,14 +112,6 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
     // PART 2: View Recipe Detail
     // =================================================================================
 
-    private List<Recipe> lookupById(String id) {
-        Request request = new Request.Builder()
-                .url(String.format("https://www.themealdb.com/api/json/v1/1/lookup.php?i=%s", id))
-                .build();
-
-        return executeAndParse(request);
-    }
-
     @Override
     public Recipe findById(String recipeId) {
         List<Recipe> list = lookupById(recipeId);
@@ -136,24 +119,31 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         return null;
     }
 
-    @Override
-    public void recordView(String recipeId) {
-        // no-op, since this DAO is read-only
+    private List<Recipe> lookupById(String id) {
+        Request request = new Request.Builder()
+                .url(String.format("https://www.themealdb.com/api/json/v1/1/lookup.php?i=%s", id))
+                .build();
+        return executeAndParse(request);
     }
 
+    @Override
+    public void recordView(String recipeId) {
+        // This is a read-only DAO, no need to record view counts here.
+    }
+
+    // If your Interface doesn't need save, you can remove this method.
     public void save(Recipe recipe) {
-        System.out.println("Recipe saved (not really, read-only DAO): " + recipe.getTitle());
+        System.out.println("Recipe saved (simulated): " + recipe.getTitle());
     }
 
     // =================================================================================
-    // PART 3: Core Fetch + Parse
+    // PART 3: Helper Methods (Network Requests & Parsing)
     // =================================================================================
 
     private List<Recipe> executeAndParse(Request request) {
         try {
             Response response = client.newCall(request).execute();
-            if (response.code() != SUCCESS_CODE)
-                throw new RuntimeException("API request failed");
+            if (response.code() != SUCCESS_CODE) throw new RuntimeException("API request failed");
 
             JSONObject json = new JSONObject(response.body().string());
             if (json.isNull("meals")) {
@@ -162,28 +152,24 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
 
             JSONArray meals = json.getJSONArray("meals");
             List<Recipe> recipes = new ArrayList<>();
-
             for (int i = 0; i < meals.length(); i++) {
                 recipes.add(parseRecipe(meals.getJSONObject(i)));
             }
-
             return recipes;
-
         } catch (IOException | JSONException e) {
             throw new RuntimeException(e);
         }
     }
 
     private Recipe parseRecipe(JSONObject recipeJson) {
-
-        // --------- image ----------
+        // 1. Handle image (use optString to prevent null, increase robustness)
         String imageUrl = recipeJson.optString("strMealThumb", null);
         BufferedImage image = null;
-        if (imageUrl != null) {
+        if (imageUrl != null && !imageUrl.isEmpty()) {
             image = downloadImage(imageUrl);
         }
 
-        // --------- ingredients ----------
+        // 2. Handle ingredients (trim whitespace)
         List<Ingredient> ingredients = new ArrayList<>();
         for (int i = 1; i <= 20; i++) {
             String ing = recipeJson.optString("strIngredient" + i);
@@ -194,10 +180,10 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
             }
         }
 
-        // --------- tags ----------
+        // 3. Handle tags
         String tagStr = recipeJson.optString("strTags", "");
         List<String> tags = new ArrayList<>();
-        if (!tagStr.isBlank()) {
+        if (!tagStr.trim().isEmpty()) {
             tags = Arrays.stream(tagStr.split(","))
                     .map(String::trim)
                     .filter(s -> !s.isEmpty())
@@ -206,7 +192,7 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
 
         return new Recipe(
                 recipeJson.getString("idMeal"),
-                "N/A",
+                "N/A", // API does not provide User info
                 recipeJson.getString("strMeal"),
                 recipeJson.getString("strInstructions"),
                 ingredients,
@@ -224,7 +210,8 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
         try {
             return ImageIO.read(new URL(imageUrl));
         } catch (IOException e) {
-            return null; // fail silently
+            // Image download failure should not crash the program, just return null
+            return null;
         }
     }
 }
