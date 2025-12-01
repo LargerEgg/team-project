@@ -19,9 +19,9 @@ public class SaveRecipePresenter implements SaveRecipeOutputBoundary {
         state.setSaved(outputData.isSaved());
 
         if (outputData.isSaved()) {
-            state.setMessage("Saved" + outputData.getRecipeName());
+            state.setMessage("Saved " + outputData.getRecipeName());
         } else {
-            state.setMessage("Unsaved" + outputData.getRecipeName());
+            state.setMessage("Unsaved " + outputData.getRecipeName());
         }
 
         viewModel.setState(state);
