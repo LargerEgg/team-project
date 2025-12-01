@@ -90,6 +90,11 @@ class RecommendRecipeInteractorTest {
         }
 
         @Override
+        public List<Recipe> getSavedRecipes(String username) {
+            return List.of();
+        }
+
+        @Override
         public List<Recipe> getRecipesByCategory(String category) {
             return new ArrayList<>(); // Default behavior
         }
