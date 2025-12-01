@@ -125,6 +125,11 @@ public class SavedRecipesView extends JPanel implements PropertyChangeListener {
         item.add(imageLabel, BorderLayout.WEST);
         item.add(center, BorderLayout.CENTER);
 
+        JLabel viewsLabel = new JLabel(recipe.getViews() + " views");
+        viewsLabel.setFont(new Font("SansSerif", Font.ITALIC, 14));
+        viewsLabel.setBorder(new EmptyBorder(0, 0, 0, 10));
+        item.add(viewsLabel, BorderLayout.EAST);
+
         return item;
     }
 
