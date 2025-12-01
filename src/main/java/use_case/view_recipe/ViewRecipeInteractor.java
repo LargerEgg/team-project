@@ -2,6 +2,7 @@ package use_case.view_recipe;
 
 import data_access.FirebaseSaveRecipeDataAccessObject;
 import entity.Recipe;
+import use_case.edit_review.EditReviewDataAccessInterface;
 import use_case.save_recipe.SaveRecipeDataAccessInterface;
 
 public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
@@ -9,13 +10,15 @@ public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
     private final ViewRecipeDataAccessInterface repo;
     private final ViewRecipeOutputBoundary presenter;
     private final SaveRecipeDataAccessInterface saveRecipeDAO;
+    private final EditReviewDataAccessInterface editReviewDAO;
 
     public ViewRecipeInteractor(ViewRecipeDataAccessInterface repo,
                                 ViewRecipeOutputBoundary presenter,
-                                SaveRecipeDataAccessInterface saveRecipeDAO) {
+                                SaveRecipeDataAccessInterface saveRecipeDAO, EditReviewDataAccessInterface editReviewDAO) {
         this.repo = repo;
         this.presenter = presenter;
         this.saveRecipeDAO = saveRecipeDAO;
+        this.editReviewDAO = editReviewDAO;
     }
 
     @Override
@@ -27,6 +30,8 @@ public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
             presenter.prepareFailView("Recipe not found.");
             return;
         }
+
+        recipe.setReviews(editReviewDAO.findByRecipe(recipe.getRecipeId()));
 
         // Increment the local view count immediately for UI display
         recipe.incrementViews();

@@ -4,13 +4,11 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
 
-import entity.Recipe;
 import entity.Review;
 import entity.User;
 
 import use_case.edit_review.EditReviewDataAccessInterface;
 
-import javax.swing.text.Document;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -40,6 +38,7 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
             reviewDocRef.update("title", review.getTitle());
             reviewDocRef.update("description", review.getDescription());
             reviewDocRef.update("rating", review.getRating());
+            reviewDocRef.update("dateCreated", review.getDateCreated());
 
             DocumentReference recipeDocRef = recipesCollection.document(review.getRecipeId());
             ApiFuture<DocumentSnapshot> future = recipeDocRef.get();
@@ -77,8 +76,7 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
             double averageRating = totalRating / tempReviews.size();
             recipeDocRef.update("reviews", reviews);
             recipeDocRef.update("averageRating", averageRating);
-        }
-        catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Error editing review", e);
         }
 
@@ -95,6 +93,7 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
             data.put("title", review.getTitle());
             data.put("description", review.getDescription());
             data.put("rating", review.getRating());
+            data.put("dateCreated", review.getDateCreated());
 
             reviewsCollection.document(review.getReviewId()).set(data).get();
 
@@ -122,7 +121,10 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
                     String reviewRecipeId = (String) map.get("recipeId");
                     String authorId1 = (String) map.get("authorId");
                     Timestamp ts = (Timestamp) map.get("dateCreated");
-                    Date dateCreated = ts.toDate();
+                    Date dateCreated = new Date();
+                    if (ts != null) {
+                        dateCreated = ts.toDate();
+                    }
                     String title1 = (String) map.get("title");
                     String description1 = (String) map.get("description");
                     Long ratingLong = (Long) map.get("rating");
@@ -148,7 +150,7 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
     public boolean existsByReviewId(String reviewId) {
         try {
             DocumentReference docref = reviewsCollection.document(reviewId);
-            ApiFuture<DocumentSnapshot> future =docref.get();
+            ApiFuture<DocumentSnapshot> future = docref.get();
             DocumentSnapshot document = future.get();
             return document.exists();
 
@@ -172,6 +174,49 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
 
         } catch (InterruptedException | ExecutionException | NullPointerException e) {
             throw new RuntimeException("Error retrieving review", e);
+        }
+    }
+
+    @Override
+    public Review findByAuthor(String authorId, String recipeId) {
+        List<Review> reviews = findByRecipe(recipeId);
+
+        if (reviews == null || reviews.isEmpty()) {
+            return null;
+        }
+
+        for (Review review : reviews) {
+            if (review.getAuthorId().equals(authorId)) {
+                return review;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public List<Review> findByRecipe(String recipeId) {
+        try {
+            ApiFuture<QuerySnapshot> future = reviewsCollection.get();
+            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+            List<Review> reviews = new ArrayList<>();
+
+            for (DocumentSnapshot doc : documents) {
+                Review tempReview = documentToReview(doc);
+                if (tempReview != null && tempReview.getRecipeId().equals(recipeId)) {
+                    reviews.add(tempReview);
+                }
+            }
+
+            // legacy from when multiple reviews could be made by one guy
+            if (reviews.isEmpty()) {
+                return null;
+            }
+            return reviews;
+
+        } catch (InterruptedException | ExecutionException e) {
+            System.err.println("Error finding recipes by recipe: " + e.getMessage());
+            throw new RuntimeException("Error finding recipes by recipe", e);
         }
     }
 
@@ -208,15 +253,18 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
         }
     }
 
-    public User findUserByUsername(String username){
+    public User findUserByUsername(String username) {
         return null;
     }
 
-    private Review documentToReview(DocumentSnapshot document){
+    private Review documentToReview(DocumentSnapshot document) {
         String reviewId = document.getString("review_id");
         String recipeId = document.getString("recipe_id");
         String authorId = document.getString("author_id");
         Date dateCreated = document.getDate("dateCreated");
+        if (dateCreated == null) {
+            dateCreated = new Date();
+        }
         String title = document.getString("title");
         String description = document.getString("description");
 

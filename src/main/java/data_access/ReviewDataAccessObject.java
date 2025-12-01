@@ -4,6 +4,8 @@ import entity.Review;
 import entity.User;
 import use_case.edit_review.EditReviewDataAccessInterface;
 
+import java.util.List;
+
 public class ReviewDataAccessObject implements EditReviewDataAccessInterface {
     //TODO: implement methods
     @Override
@@ -36,6 +38,16 @@ public class ReviewDataAccessObject implements EditReviewDataAccessInterface {
 
     @Override
     public Review findByAuthor(String authorId) {
+        return null;
+    }
+
+    @Override
+    public Review findByAuthor(String authorId, String recipeId) {
+        return null;
+    }
+
+    @Override
+    public List<Review> findByRecipe(String recipeId) {
         return null;
     }
 }

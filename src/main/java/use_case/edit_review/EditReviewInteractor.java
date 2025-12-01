@@ -40,12 +40,12 @@ public class EditReviewInteractor implements EditReviewInputBoundary {
         final Review review = new Review(reviewId, inputData.getRecipeId(), inputData.getAuthorId(),
                 new Date(), inputData.getReview(), inputData.getDescription(), inputData.getRating());
 
-        Review previousReview = reviewDataAccessObject.findByAuthor(inputData.getAuthorId());
+        Review previousReview = reviewDataAccessObject.findByAuthor(inputData.getAuthorId(), inputData.getRecipeId());
         if (previousReview != null && !(previousReview.getAuthorId().equals("Anonymous"))) {
             review.setReviewId(previousReview.getReviewId());
             try {
                 reviewDataAccessObject.changeReview(review);
-                EditReviewOutputData outputData = new EditReviewOutputData(reviewId,"Review edited successfully: ");
+                EditReviewOutputData outputData = new EditReviewOutputData(reviewId,"Review edited successfully:");
                 reviewPresenter.prepareSuccessView(outputData);
             } catch (RuntimeException e) {
                 reviewPresenter.prepareFailView("Failed to publish review: " + e.getMessage(), inputData);
@@ -55,7 +55,7 @@ public class EditReviewInteractor implements EditReviewInputBoundary {
             try {
                 reviewDataAccessObject.saveReview(review);
                 reviewDataAccessObject.recordReviewRecipe(inputData.getRecipeId(), review);
-                EditReviewOutputData outputData = new EditReviewOutputData(reviewId,"Review published successfully: ");
+                EditReviewOutputData outputData = new EditReviewOutputData(reviewId,"Review published successfully:");
                 reviewPresenter.prepareSuccessView(outputData);
             } catch (RuntimeException e) {
                 reviewPresenter.prepareFailView("Failed to publish review: " + e.getMessage(), inputData);
