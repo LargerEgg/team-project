@@ -2,397 +2,300 @@ package use_case;
 
 import entity.Recipe;
 import entity.User;
-import use_case.recommend_recipe.*;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import use_case.recommend_recipe.RecommendRecipeDataAccessInterface;
+import use_case.recommend_recipe.RecommendRecipeInteractor;
+import use_case.recommend_recipe.RecommendRecipeOutputData;
+import use_case.recommend_recipe.RecommendRecipeInputData;
+import use_case.recommend_recipe.RecommendRecipeOutputBoundary;
 
-import java.util.ArrayList;
-import java.util.Date; // Added import for Date
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Unit Test for RecommendRecipeInteractor.
- * This test suite aims for 100% code coverage, including edge cases and exception handling.
- */
 class RecommendRecipeInteractorTest {
 
-    // ==============================================================================
-    // Helper Classes (Stubs & Fakes)
-    // These internal classes allow testing without external mocking frameworks like Mockito.
-    // ==============================================================================
+    private TestDataAccess dataAccessObject;
+    private TestPresenter presenter;
+    private RecommendRecipeInteractor interactor;
 
-    /**
-     * A concrete implementation of Recipe for testing purposes.
-     */
-    static class TestRecipe extends Recipe {
-        private final String category;
-        // Flag to simulate an exception when getCategory is called
-        private final boolean shouldThrowException;
-
-        public TestRecipe(String category) {
-            // Fix: Updated super() to match the 11-argument constructor in Recipe.java
-            super(
-                    "id",                   // recipeId
-                    "author",               // authorId
-                    "title",                // title
-                    "desc",                 // description
-                    new ArrayList<>(),      // ingredients
-                    category,               // category
-                    new ArrayList<>(),      // tags
-                    Recipe.Status.PUBLISHED,// status (Enum)
-                    new Date(),             // creationDate
-                    new Date(),             // updateDate
-                    "image/path"            // imagePath
-            );
-            this.category = category;
-            this.shouldThrowException = false;
-        }
-
-        public TestRecipe(boolean shouldThrowException) {
-            // Fix: Updated super() here as well
-            super(
-                    "id",
-                    "author",
-                    "title",
-                    "desc",
-                    new ArrayList<>(),
-                    null,
-                    new ArrayList<>(),
-                    Recipe.Status.PUBLISHED,
-                    new Date(),
-                    new Date(),
-                    "image/path"
-            );
-            this.category = null;
-            this.shouldThrowException = shouldThrowException;
-        }
-
-        @Override
-        public String getCategory() {
-            if (shouldThrowException) {
-                throw new RuntimeException("Database error simulation");
-            }
-            return category;
-        }
+    @BeforeEach
+    void setUp() {
+        // Use our own defined "fake" implementation instead of Mockito mock
+        dataAccessObject = new TestDataAccess();
+        presenter = new TestPresenter();
+        interactor = new RecommendRecipeInteractor((RecommendRecipeDataAccessInterface) dataAccessObject, presenter);
     }
 
     /**
-     * A simple Stub for the Data Access Interface.
-     * We can override methods dynamically in tests using anonymous classes,
-     * but this provides a base structure.
+     * Helper method: Create a real Recipe object.
      */
-    static class DataAccessStub implements RecommendRecipeDataAccessInterface {
-        @Override
-        public User getUser(String username) {
-            return null; // Default behavior
+    private Recipe createRecipe(String id, String title, String category) {
+        return new Recipe(
+                id,
+                "Author1",
+                title,
+                "Description",
+                new ArrayList<>(), // ingredients
+                category,
+                new ArrayList<>(), // tags
+                Recipe.Status.PUBLISHED,
+                new Date(),
+                new Date(),
+                "" // imagePath
+        );
+    }
+
+    @Test
+    void execute_NoFavorites_ShouldPrepareFailView() {
+        // Arrange
+        String username = "UserEmpty";
+        RecommendRecipeInputData inputData = new RecommendRecipeInputData(username);
+
+        // Act
+        interactor.execute(inputData);
+
+        // Assert
+        assertEquals("No favorites found. Please save some recipes first!", presenter.getFailMessage());
+        assertNull(presenter.getOutputData());
+    }
+
+    /**
+     * New test: Covers the branch where favorites == null
+     */
+    @Test
+    void execute_FavoritesIsNull_ShouldPrepareFailView() {
+        // Arrange
+        String username = "UserNullFav";
+        // Force DAO to return null
+        dataAccessObject.setReturnNullForSavedRecipes(true);
+        RecommendRecipeInputData inputData = new RecommendRecipeInputData(username);
+
+        // Act
+        interactor.execute(inputData);
+
+        // Assert
+        // Should be treated the same as an empty list, entering Fail View
+        assertEquals("No favorites found. Please save some recipes first!", presenter.getFailMessage());
+    }
+
+    @Test
+    void execute_FavoritesExistButNoCategories_ShouldPrepareFailView() {
+        // Arrange
+        String username = "UserNoCat";
+        dataAccessObject.saveRecipeForUser(username, createRecipe("r1", "Food1", null));
+        dataAccessObject.saveRecipeForUser(username, createRecipe("r2", "Food2", ""));
+        dataAccessObject.saveRecipeForUser(username, createRecipe("r3", "Food3", "   "));
+
+        RecommendRecipeInputData inputData = new RecommendRecipeInputData(username);
+
+        // Act
+        interactor.execute(inputData);
+
+        // Assert
+        assertEquals("Could not determine favorite category.", presenter.getFailMessage());
+    }
+
+    @Test
+    void execute_CategoriesExistButNoRecommendationsFound_ShouldPrepareFailView() {
+        // Arrange
+        String username = "UserNoRec";
+        dataAccessObject.saveRecipeForUser(username, createRecipe("r1", "Pizza", "Italian"));
+
+        // Database returns empty list by default, not null
+
+        RecommendRecipeInputData inputData = new RecommendRecipeInputData(username);
+
+        // Act
+        interactor.execute(inputData);
+
+        // Assert
+        assertEquals("Sorry, no recommendations found.", presenter.getFailMessage());
+    }
+
+    @Test
+    void execute_Success_WithRankingLogic() {
+        // Arrange
+        String username = "UserRank";
+
+        dataAccessObject.saveRecipeForUser(username, createRecipe("f1", "Sushi", "Asian"));
+        dataAccessObject.saveRecipeForUser(username, createRecipe("f2", "Ramen", "Asian"));
+        dataAccessObject.saveRecipeForUser(username, createRecipe("f3", "Dumpling", "Asian"));
+        dataAccessObject.saveRecipeForUser(username, createRecipe("f4", "Burger", "Western"));
+
+        // Construct recommendation pool in database:
+        // Even if Western is saved, if Asian count is higher, algorithm should prioritize or include Asian
+        dataAccessObject.addRecipeToLibrary(createRecipe("rec1", "Kung Pao Chicken", "Asian"));
+        dataAccessObject.addRecipeToLibrary(createRecipe("rec2", "Steak", "Western"));
+
+        RecommendRecipeInputData inputData = new RecommendRecipeInputData(username);
+
+        // Act
+        interactor.execute(inputData);
+
+        // Assert
+        assertNull(presenter.getFailMessage());
+        assertNotNull(presenter.getOutputData());
+
+        List<Recipe> recommendations = presenter.getOutputData().getRecipes();
+        assertEquals(2, recommendations.size());
+
+        // Simple verification of content (since interactor might shuffle, we only verify these dishes are included)
+        boolean hasAsian = recommendations.stream().anyMatch(r -> r.getCategory().equals("Asian"));
+        boolean hasWestern = recommendations.stream().anyMatch(r -> r.getCategory().equals("Western"));
+        assertTrue(hasAsian);
+        assertTrue(hasWestern);
+    }
+
+    /**
+     * New test: Covers branch where getRecipesByCategory returns null.
+     * Corresponds to if (recipes != null) in code.
+     */
+    @Test
+    void execute_OneCategoryReturnsNull_ShouldSkipAndContinue() {
+        // Arrange
+        String username = "UserMixedNull";
+
+        // User likes Asian and Western
+        dataAccessObject.saveRecipeForUser(username, createRecipe("f1", "Sushi", "Asian"));
+        dataAccessObject.saveRecipeForUser(username, createRecipe("f2", "Burger", "Western"));
+
+        // Database has Western recommendations, but we force it to return null when fetching Asian (simulating DB error or no data)
+        dataAccessObject.addRecipeToLibrary(createRecipe("rec1", "Steak", "Western"));
+        dataAccessObject.setCategoryToReturnNull("Asian");
+
+        RecommendRecipeInputData inputData = new RecommendRecipeInputData(username);
+
+        // Act
+        interactor.execute(inputData);
+
+        // Assert
+        // Should skip Asian (null), but keep Western results, so it is Success View
+        assertNotNull(presenter.getOutputData());
+        List<Recipe> recommendations = presenter.getOutputData().getRecipes();
+
+        // Should have only 1 recommendation (Western), Asian was skipped
+        assertEquals(1, recommendations.size());
+        assertEquals("Western", recommendations.get(0).getCategory());
+    }
+
+    @Test
+    void execute_Success_TruncatesTo20() {
+        // Arrange
+        String username = "UserTruncate";
+        // User likes Dessert
+        dataAccessObject.saveRecipeForUser(username, createRecipe("fav1", "Cake", "Dessert"));
+
+        // Database has 25 Dessert recipes
+        for (int i = 0; i < 25; i++) {
+            dataAccessObject.addRecipeToLibrary(createRecipe("rec" + i, "Cookie " + i, "Dessert"));
+        }
+
+        RecommendRecipeInputData inputData = new RecommendRecipeInputData(username);
+
+        // Act
+        interactor.execute(inputData);
+
+        // Assert
+        assertNotNull(presenter.getOutputData());
+        assertEquals(20, presenter.getOutputData().getRecipes().size());
+    }
+
+
+    // ==============================================================================
+    // TestDataAccess (Updated to support forcing NULL returns)
+    // ==============================================================================
+
+    /**
+     * Simulated DataAccessObject.
+     * Uses HashMap and List to store data in memory.
+     */
+    private static class TestDataAccess implements RecommendRecipeDataAccessInterface {
+        // Simulated user favorites table: Username -> List<Recipe>
+        private final Map<String, List<Recipe>> userFavorites = new HashMap<>();
+        // Simulated large recipe library: Category -> List<Recipe>
+        private final Map<String, List<Recipe>> allRecipesByCategory = new HashMap<>();
+
+        // Added: Control Flag, used for testing null branches
+        private boolean returnNullForSavedRecipes = false;
+        private final Set<String> categoriesReturningNull = new HashSet<>();
+
+        public void setReturnNullForSavedRecipes(boolean value) {
+            this.returnNullForSavedRecipes = value;
+        }
+
+        public void setCategoryToReturnNull(String category) {
+            this.categoriesReturningNull.add(category);
+        }
+
+        // --- Helper methods: Used to prepare data before tests ---
+
+        public void saveRecipeForUser(String username, Recipe recipe) {
+            userFavorites.computeIfAbsent(username, k -> new ArrayList<>()).add(recipe);
+        }
+
+        public void addRecipeToLibrary(Recipe recipe) {
+            String category = recipe.getCategory();
+            if (category != null) {
+                allRecipesByCategory.computeIfAbsent(category, k -> new ArrayList<>()).add(recipe);
+            }
         }
 
         @Override
+        public User getUser(String username) {
+            return null;
+        }
+
+        // --- Interface implementation ---
+
+        @Override
         public List<Recipe> getSavedRecipes(String username) {
-            return List.of();
+            // If test requires returning null, return null
+            if (returnNullForSavedRecipes) {
+                return null;
+            }
+            return userFavorites.getOrDefault(username, new ArrayList<>());
         }
 
         @Override
         public List<Recipe> getRecipesByCategory(String category) {
-            return new ArrayList<>(); // Default behavior
+            // If test requires this category to return null, return null
+            if (categoriesReturningNull.contains(category)) {
+                return null;
+            }
+            return allRecipesByCategory.getOrDefault(category, new ArrayList<>());
         }
     }
 
-    /**
-     * A capturing fake for the Output Boundary (Presenter).
-     * It allows us to verify what data was passed to the success or fail views.
-     */
-    static class TestPresenter implements RecommendRecipeOutputBoundary {
-        String successCategory;
-        List<Recipe> successRecipes;
-        String failMessage;
+    // ==============================================================================
+    // TestPresenter
+    // ==============================================================================
 
-        @Override
-        public void prepareSuccessView(RecommendRecipeOutputData outputData) {
-            // Updated to match your RecommendRecipeOutputData.java file: getCategoryName()
-            this.successCategory = outputData.getCategoryName();
-            this.successRecipes = outputData.getRecipes();
-        }
+    /**
+     * Simulated Presenter.
+     * It won't update UI, but stores results in variables for test inspection.
+     */
+    private static class TestPresenter implements RecommendRecipeOutputBoundary {
+        private String failMessage = null;
+        private RecommendRecipeOutputData outputData = null;
 
         @Override
         public void prepareFailView(String error) {
             this.failMessage = error;
         }
-    }
 
-    // ==============================================================================
-    // Test Cases
-    // ==============================================================================
+        @Override
+        public void prepareSuccessView(RecommendRecipeOutputData outputData) {
+            this.outputData = outputData;
+        }
 
-    /**
-     * Test the "Happy Path":
-     * - User exists.
-     * - User has saved recipes.
-     * - A clear favorite category exists.
-     * - Recommendations exist for that category.
-     */
-    @Test
-    void testExecute_Success() {
-        // Arrange
-        String username = "ChefAlice";
-        TestPresenter presenter = new TestPresenter();
+        public String getFailMessage() {
+            return failMessage;
+        }
 
-        RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
-            @Override
-            public User getUser(String name) {
-                User user = new User(name, "pass");
-                // User likes Italian food mostly
-                // Updated method call to match User.java: saveRecipe()
-                user.saveRecipe(new TestRecipe("Italian"));
-                user.saveRecipe(new TestRecipe("Italian"));
-                user.saveRecipe(new TestRecipe("French"));
-                return user;
-            }
-
-            @Override
-            public List<Recipe> getRecipesByCategory(String category) {
-                if ("Italian".equals(category)) {
-                    List<Recipe> recs = new ArrayList<>();
-                    recs.add(new TestRecipe("Italian Pizza"));
-                    return recs;
-                }
-                return new ArrayList<>();
-            }
-        };
-
-        RecommendRecipeInteractor interactor = new RecommendRecipeInteractor(dao, presenter);
-
-        // Act
-        interactor.execute(new RecommendRecipeInputData(username));
-
-        // Assert
-        assertEquals("Italian", presenter.successCategory, "The algorithm should identify Italian as the favorite.");
-        assertNotNull(presenter.successRecipes);
-        assertEquals(1, presenter.successRecipes.size());
-        assertNull(presenter.failMessage, "Fail view should not be triggered.");
-    }
-
-    /**
-     * Edge Case: User Not Found.
-     * Verifies the fail view logic when DAO returns null for the user.
-     */
-    @Test
-    void testExecute_UserNotFound() {
-        // Arrange
-        TestPresenter presenter = new TestPresenter();
-        RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
-            @Override
-            public User getUser(String name) {
-                return null; // Simulate user not found
-            }
-        };
-        RecommendRecipeInteractor interactor = new RecommendRecipeInteractor(dao, presenter);
-
-        // Act
-        interactor.execute(new RecommendRecipeInputData("GhostUser"));
-
-        // Assert
-        assertEquals("User not found: GhostUser", presenter.failMessage);
-        assertNull(presenter.successCategory);
-    }
-
-    /**
-     * Edge Case: No Favorites (Empty List).
-     * Verifies logic when user exists but saved recipes list is empty.
-     */
-    @Test
-    void testExecute_NoFavorites_EmptyList() {
-        // Arrange
-        TestPresenter presenter = new TestPresenter();
-        RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
-            @Override
-            public User getUser(String name) {
-                // User with empty saved recipes
-                return new User(name, "pass");
-            }
-        };
-        RecommendRecipeInteractor interactor = new RecommendRecipeInteractor(dao, presenter);
-
-        // Act
-        interactor.execute(new RecommendRecipeInputData("NewUser"));
-
-        // Assert
-        assertEquals("No favorites found. Please save some recipes first!", presenter.failMessage);
-    }
-
-    /**
-     * Edge Case: No Favorites (Null List).
-     * Verifies robustness when User object returns null instead of an empty list.
-     * This covers the "favorites == null" check in the Interactor.
-     */
-    @Test
-    void testExecute_NoFavorites_NullList() {
-        // Arrange
-        TestPresenter presenter = new TestPresenter();
-        RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
-            @Override
-            public User getUser(String name) {
-                // Create a generic user, assuming getSavedRecipes() might default to null
-                // depending on implementation, or we simulate it here:
-                return new User(name, "pass") {
-                    @Override
-                    public List<Recipe> getSavedRecipes() {
-                        return null; // Force null return
-                    }
-                };
-            }
-        };
-        RecommendRecipeInteractor interactor = new RecommendRecipeInteractor(dao, presenter);
-
-        // Act
-        interactor.execute(new RecommendRecipeInputData("BuggyUser"));
-
-        // Assert
-        assertEquals("No favorites found. Please save some recipes first!", presenter.failMessage);
-    }
-
-    /**
-     * Complex Edge Case: Dirty Data Handling.
-     * This tests the loop inside 'getFavouriteCategoriesRanked'.
-     * We inject:
-     * 1. A null recipe.
-     * 2. A recipe with a null category.
-     * 3. A recipe with an empty/whitespace category.
-     * 4. A recipe that throws an exception when accessed.
-     * * The system should ignore these and fail gracefully if no valid category remains.
-     */
-    @Test
-    void testExecute_DirtyData_And_Exceptions() {
-        // Arrange
-        TestPresenter presenter = new TestPresenter();
-        RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
-            @Override
-            public User getUser(String name) {
-                User user = new User(name, "pass");
-                // Updated to use saveRecipe
-                user.saveRecipe(null); // Null recipe
-                user.saveRecipe(new TestRecipe((String) null)); // Null category
-                user.saveRecipe(new TestRecipe("   ")); // Whitespace category
-                user.saveRecipe(new TestRecipe(true)); // Throws Exception
-                return user;
-            }
-        };
-        RecommendRecipeInteractor interactor = new RecommendRecipeInteractor(dao, presenter);
-
-        // Act
-        interactor.execute(new RecommendRecipeInputData("MessyUser"));
-
-        // Assert
-        // Since all inputs were invalid, rankedCategories should be empty.
-        assertEquals("Could not determine favorite category.", presenter.failMessage);
-    }
-
-    /**
-     * Edge Case: Whitespace Trimming.
-     * Verifies that " Italian " is treated as "Italian".
-     */
-    @Test
-    void testExecute_WhitespaceTrimming() {
-        // Arrange
-        TestPresenter presenter = new TestPresenter();
-        RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
-            @Override
-            public User getUser(String name) {
-                User user = new User(name, "pass");
-                // Updated to use saveRecipe
-                user.saveRecipe(new TestRecipe(" Italian ")); // Should be trimmed
-                return user;
-            }
-            @Override
-            public List<Recipe> getRecipesByCategory(String category) {
-                if ("Italian".equals(category)) {
-                    List<Recipe> list = new ArrayList<>();
-                    list.add(new TestRecipe("Pasta"));
-                    return list;
-                }
-                return new ArrayList<>();
-            }
-        };
-        RecommendRecipeInteractor interactor = new RecommendRecipeInteractor(dao, presenter);
-
-        // Act
-        interactor.execute(new RecommendRecipeInputData("TrimUser"));
-
-        // Assert
-        assertEquals("Italian", presenter.successCategory, "Category should be trimmed before processing.");
-        assertNull(presenter.failMessage);
-    }
-
-    /**
-     * Edge Case: No Recommendations Found.
-     * The user has a favorite category, but the API/DB returns no recipes for it.
-     */
-    @Test
-    void testExecute_NoRecommendationsAvailable() {
-        // Arrange
-        TestPresenter presenter = new TestPresenter();
-        RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
-            @Override
-            public User getUser(String name) {
-                User user = new User(name, "pass");
-                // Updated to use saveRecipe
-                user.saveRecipe(new TestRecipe("RareCuisine"));
-                return user;
-            }
-
-            @Override
-            public List<Recipe> getRecipesByCategory(String category) {
-                return new ArrayList<>(); // Empty result from API
-            }
-        };
-        RecommendRecipeInteractor interactor = new RecommendRecipeInteractor(dao, presenter);
-
-        // Act
-        interactor.execute(new RecommendRecipeInputData("GourmetUser"));
-
-        // Assert
-        assertEquals("Sorry, no recommendations found for category: RareCuisine", presenter.failMessage);
-    }
-
-    /**
-     * Edge Case: Tie Breaker.
-     * When two categories have the exact same count, the system should simply pick one (usually the first one encountered/sorted).
-     * This ensures the system doesn't crash or return null on a tie.
-     */
-    @Test
-    void testExecute_TieBreaker() {
-        // Arrange
-        TestPresenter presenter = new TestPresenter();
-        RecommendRecipeDataAccessInterface dao = new DataAccessStub() {
-            @Override
-            public User getUser(String name) {
-                User user = new User(name, "pass");
-                // Updated to use saveRecipe
-                user.saveRecipe(new TestRecipe("Mexican"));
-                user.saveRecipe(new TestRecipe("Chinese"));
-                // Count is 1 vs 1.
-                return user;
-            }
-
-            @Override
-            public List<Recipe> getRecipesByCategory(String category) {
-                // Return a dummy recipe regardless of which category wins
-                List<Recipe> recs = new ArrayList<>();
-                recs.add(new TestRecipe("Tasty Dish"));
-                return recs;
-            }
-        };
-        RecommendRecipeInteractor interactor = new RecommendRecipeInteractor(dao, presenter);
-
-        // Act
-        interactor.execute(new RecommendRecipeInputData("IndecisiveUser"));
-
-        // Assert
-        // We just want to ensure it succeeded and picked ONE of them.
-        assertNotNull(presenter.successCategory);
-        assertTrue(presenter.successCategory.equals("Mexican") || presenter.successCategory.equals("Chinese"));
-        assertNull(presenter.failMessage);
+        public RecommendRecipeOutputData getOutputData() {
+            return outputData;
+        }
     }
 }
