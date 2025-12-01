@@ -27,13 +27,13 @@ public class Review {
      */
     public Review(String reviewId, String recipeId, String authorId, Date dateCreated, String title, String description, int rating) {
         if ("".equals(title)) {
-            throw new IllegalArgumentException("Title cannot be empty");
+            throw new IllegalArgumentException("Title cannot be empty.");
         }
         if ("".equals(description)) {
-            throw new IllegalArgumentException("Description cannot be empty");
+            throw new IllegalArgumentException("Description cannot be empty.");
         }
         if (rating < 1 || rating > 5) {
-            throw new IllegalArgumentException("Rating should be between 1 and 5");
+            throw new IllegalArgumentException("Rating must be between 1 and 5.");
         }
         this.reviewId = reviewId;
         this.recipeId = recipeId;

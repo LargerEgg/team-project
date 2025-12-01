@@ -8,7 +8,7 @@ public class EditReviewInputData {
     private final String review; //title
     private final String description;
     private final int rating;
-    private final String authorId;
+    private String authorId;
     private final String recipeId;
 
     public EditReviewInputData(String review, String description, int rating, String authorId, String recipeId) {
@@ -39,4 +39,7 @@ public class EditReviewInputData {
         return recipeId;
     }
 
+    public void setAuthorId(String authorId) {
+        this.authorId = authorId;
+    }
 }

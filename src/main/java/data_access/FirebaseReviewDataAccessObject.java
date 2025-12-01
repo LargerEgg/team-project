@@ -20,23 +20,24 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
     private final Firestore db;
     private final CollectionReference reviewsCollection;
     private final CollectionReference recipesCollection;
-    private final FirebaseRecipeDataAccessObject firebaseRecipeDataAccessObject;
 
 
     public FirebaseReviewDataAccessObject() {
         this.db = FirebaseInitializer.getFirestore();
         this.reviewsCollection = db.collection("reviews");
         this.recipesCollection = db.collection("recipes");
-        this.firebaseRecipeDataAccessObject = new FirebaseRecipeDataAccessObject();
     }
 
 
     @Override
     public void changeReview(Review review) {
         try {
-            DocumentReference reviewDocRef = recipesCollection.document(review.getReviewId());
-            reviewDocRef.update("title", review.getTitle());
-            reviewDocRef.update("description", review.getDescription());
+            String title = review.getTitle();
+            String description = review.getDescription();
+            DocumentReference reviewDocRef = reviewsCollection.document(review.getReviewId());
+
+            reviewDocRef.update("title", title);
+            reviewDocRef.update("description", description);
             reviewDocRef.update("rating", review.getRating());
             reviewDocRef.update("dateCreated", review.getDateCreated());
 
@@ -118,7 +119,6 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
             } else {
                 for (HashMap<String, Object> map : hashmap) {
                     String reviewId = (String) map.get("reviewId");
-                    String reviewRecipeId = (String) map.get("recipeId");
                     String authorId1 = (String) map.get("authorId");
                     Timestamp ts = (Timestamp) map.get("dateCreated");
                     Date dateCreated = new Date();
@@ -129,7 +129,7 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
                     String description1 = (String) map.get("description");
                     Long ratingLong = (Long) map.get("rating");
                     int rating = ratingLong.intValue();
-                    reviews.add(new Review(reviewId, reviewRecipeId, authorId1, dateCreated, title1, description1, rating));
+                    reviews.add(new Review(reviewId, recipeId, authorId1, dateCreated, title1, description1, rating));
                 }
             }
             reviews.add(review);
@@ -171,7 +171,6 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
             }
 
             return documentToReview(document);
-
         } catch (InterruptedException | ExecutionException | NullPointerException e) {
             throw new RuntimeException("Error retrieving review", e);
         }
@@ -217,39 +216,6 @@ public class FirebaseReviewDataAccessObject implements EditReviewDataAccessInter
         } catch (InterruptedException | ExecutionException e) {
             System.err.println("Error finding recipes by recipe: " + e.getMessage());
             throw new RuntimeException("Error finding recipes by recipe", e);
-        }
-    }
-
-    @Override
-    public Review findByAuthor(String authorId) {
-        try {
-            ApiFuture<QuerySnapshot> future = reviewsCollection.get();
-
-            List<QueryDocumentSnapshot> documents = future.get().getDocuments();
-            List<Review> reviews = new ArrayList<>();
-
-            for (DocumentSnapshot doc : documents) {
-                Review tempReview = documentToReview(doc);
-                if (tempReview != null && tempReview.getAuthorId().equals(authorId)) {
-                    reviews.add(tempReview);
-                }
-            }
-
-            for (Review review : reviews) {
-                if (review.getAuthorId().equals(authorId)) {
-                    return review;
-                }
-            }
-
-            // legacy from when multiple reviews could be made by one guy
-            if (reviews.isEmpty()) {
-                return null;
-            }
-            return null;
-
-        } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Error finding recipes by author: " + e.getMessage());
-            throw new RuntimeException("Error finding recipes by author", e);
         }
     }
 

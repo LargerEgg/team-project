@@ -40,8 +40,6 @@ public interface EditReviewDataAccessInterface {
 
     void recordReviewRecipe(String recipeId, Review review);
 
-    Review findByAuthor(String authorId);
-
     Review findByAuthor(String authorId, String recipeId);
 
     List<Review> findByRecipe(String recipeId);

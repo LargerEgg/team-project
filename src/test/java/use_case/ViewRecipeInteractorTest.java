@@ -22,13 +22,15 @@ class ViewRecipeInteractorTest {
     private TestViewRecipePresenter presenter;
     private TestSaveRecipeDataAccess saveRecipeDataAccess;
     private ViewRecipeInteractor interactor;
+    private EditReviewInteractorTest.TestEditReviewDataAccess editReviewDataAccess;
 
     @BeforeEach
     void setUp() {
         dataAccess = new TestViewRecipeDataAccess();
         presenter = new TestViewRecipePresenter();
         saveRecipeDataAccess = new TestSaveRecipeDataAccess();
-        interactor = new ViewRecipeInteractor(dataAccess, presenter, saveRecipeDataAccess);
+        editReviewDataAccess = new EditReviewInteractorTest.TestEditReviewDataAccess();
+        interactor = new ViewRecipeInteractor(dataAccess, presenter, saveRecipeDataAccess, editReviewDataAccess);
     }
 
     @Test

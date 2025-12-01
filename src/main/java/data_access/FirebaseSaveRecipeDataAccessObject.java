@@ -1,17 +1,16 @@
 package data_access;
 
 import com.google.api.core.ApiFuture;
+import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
 import entity.Ingredient;
 import entity.Recipe;
+import entity.Review;
 import use_case.save_recipe.SaveRecipeDataAccessInterface;
 import use_case.saved_recipes.ShowSavedRecipesDataAccessInterface;
 import use_case.unsave_recipe.UnsaveRecipeDataAccessInterface;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class FirebaseSaveRecipeDataAccessObject implements SaveRecipeDataAccessInterface, ShowSavedRecipesDataAccessInterface, UnsaveRecipeDataAccessInterface {
@@ -95,6 +94,23 @@ public class FirebaseSaveRecipeDataAccessObject implements SaveRecipeDataAccessI
         }
 
         @SuppressWarnings("unchecked")
+        List<HashMap<String, Object>> hashmap = (List<HashMap<String, Object>>) doc.get("reviews");
+        List<Review> reviews = new ArrayList<>();
+        if (hashmap != null && !hashmap.isEmpty()) {
+            for (HashMap<String, Object> map : hashmap) {
+                String reviewId = (String) map.get("reviewId");
+                String authorId1 = (String) map.get("authorId");
+                Timestamp ts = (Timestamp) map.get("dateCreated");
+                Date dateCreated = ts.toDate();
+                String title1 = (String) map.get("title");
+                String description1 = (String) map.get("description");
+                Long ratingLong = (Long) map.get("rating");
+                int rating = ratingLong.intValue();
+                reviews.add(new Review(reviewId, recipeId, authorId1, dateCreated, title1, description1, rating));
+            }
+        }
+
+        @SuppressWarnings("unchecked")
         List<Map<String, String>> ingredientsData = (List<Map<String, String>>) doc.get("ingredients");
         List<Ingredient> ingredients = new ArrayList<>();
         if (ingredientsData != null) {
@@ -116,7 +132,6 @@ public class FirebaseSaveRecipeDataAccessObject implements SaveRecipeDataAccessI
                 status = Recipe.Status.DRAFT;
             }
         }
-
 
         Recipe recipe = new Recipe(
                 recipeId,
@@ -140,6 +155,7 @@ public class FirebaseSaveRecipeDataAccessObject implements SaveRecipeDataAccessI
         if (saves != null) recipe.setSaves(saves.intValue());
         if (shareable != null) recipe.setShareable(shareable);
 
+        recipe.setReviews(reviews);
         recipe.recalculateAverageRating();
 
         return recipe;

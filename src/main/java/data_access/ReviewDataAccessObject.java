@@ -37,11 +37,6 @@ public class ReviewDataAccessObject implements EditReviewDataAccessInterface {
     }
 
     @Override
-    public Review findByAuthor(String authorId) {
-        return null;
-    }
-
-    @Override
     public Review findByAuthor(String authorId, String recipeId) {
         return null;
     }

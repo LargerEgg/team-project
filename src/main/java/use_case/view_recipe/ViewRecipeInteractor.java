@@ -32,6 +32,7 @@ public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
         }
 
         recipe.setReviews(editReviewDAO.findByRecipe(recipe.getRecipeId()));
+        recipe.recalculateAverageRating();
 
         // Increment the local view count immediately for UI display
         recipe.incrementViews();
