@@ -5,6 +5,9 @@ import entity.Recipe;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+N.
+ */
 public class RecommendRecipeState {
     private List<Recipe> recommendations = new ArrayList<>();
     private String recommendationError = null;

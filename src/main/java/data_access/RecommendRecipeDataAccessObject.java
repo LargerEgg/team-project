@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * Data Access Object for fetching recipe recommendations from MealDB API.
- * This class only handles API calls for getting recipes by category.
+ * This class only handles API calls for getting recipes by category
  * For getting user's saved recipes, use CompositeRecommendRecipeDAO which
  * combines this with FirebaseSaveRecipeDataAccessObject.
  */

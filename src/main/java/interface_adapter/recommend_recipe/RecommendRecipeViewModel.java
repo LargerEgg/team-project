@@ -5,6 +5,9 @@ import interface_adapter.ViewModel;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+/*
+N.
+ */
 public class RecommendRecipeViewModel extends ViewModel {
 
     public static final String TITLE_LABEL = "Recommend View";

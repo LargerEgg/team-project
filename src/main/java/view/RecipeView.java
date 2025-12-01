@@ -23,6 +23,9 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/*
+N.
+ */
 public class RecipeView extends JPanel implements ActionListener, PropertyChangeListener {
     public final String viewName = "view recipe";
     private final ViewRecipeViewModel viewRecipeViewModel;

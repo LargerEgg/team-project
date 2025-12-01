@@ -27,9 +27,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/*
-N.
- */
 public class RecipeSearchView extends JPanel implements ActionListener, PropertyChangeListener {
     public final String viewName = "recipe search";
 
@@ -39,10 +36,8 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     private final ViewManagerModel viewManagerModel;
     private final ViewRecipeController viewRecipeController;
 
-    // Unique to Source A (You)
     private final RecommendRecipeController recommendRecipeController;
 
-    // Unique to Source B (Classmate)
     private final ShowSavedRecipesController showSavedRecipesController;
     private final EditReviewViewModel editReviewViewModel;
 
@@ -58,8 +53,8 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     private JButton loginButton;
     private JButton logoutButton;
     private JButton postRecipeButton;
-    private JButton recommendButton; // From Source A
-    private JButton savedRecipesButton; // From Source B
+    private JButton recommendButton;
+    private JButton savedRecipesButton;
 
     private JLabel currentUserLabel;
 
@@ -286,7 +281,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             imageLabel.setText("[IMG]");
         }
 
-        // Popularity / Hot Label logic
         String hotPrefix = PopularityCalculator.isPopular(recipe)
                 ? "<font color='red'><b>[Hot]</b></font> "
                 : "";

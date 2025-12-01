@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
+/*
+N.
+ */
 public class SavedRecipesView extends JPanel implements PropertyChangeListener {
     public final String viewName = "Saved Recipes";
 

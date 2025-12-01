@@ -18,7 +18,7 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 /*
-N.
+NN.
  */
 public class RecommendRecipeView extends JPanel implements ActionListener, PropertyChangeListener {
     public final String viewName = "recommend recipe";

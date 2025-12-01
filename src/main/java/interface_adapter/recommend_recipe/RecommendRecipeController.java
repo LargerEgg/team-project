@@ -3,6 +3,9 @@ package interface_adapter.recommend_recipe;
 import use_case.recommend_recipe.RecommendRecipeInputBoundary;
 import use_case.recommend_recipe.RecommendRecipeInputData;
 
+/*
+N.
+ */
 public class RecommendRecipeController {
 
     final RecommendRecipeInputBoundary recommendRecipeUseCaseInteractor;

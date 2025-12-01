@@ -4,6 +4,9 @@ import interface_adapter.ViewManagerModel;
 import use_case.recommend_recipe.RecommendRecipeOutputBoundary;
 import use_case.recommend_recipe.RecommendRecipeOutputData;
 
+/*
+N.
+ */
 public class RecommendRecipePresenter implements RecommendRecipeOutputBoundary {
 
     private final RecommendRecipeViewModel recommendRecipeViewModel;
