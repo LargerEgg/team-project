@@ -1,9 +1,7 @@
 package data_access;
 
 import entity.Recipe;
-import entity.User;
 import entity.Ingredient;
-import use_case.recommend_recipe.RecommendRecipeDataAccessInterface;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -18,18 +16,22 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class RecommendRecipeDataAccessObject implements RecommendRecipeDataAccessInterface {
+/**
+ * Data Access Object for fetching recipe recommendations from MealDB API.
+ * This class only handles API calls for getting recipes by category.
+ * For getting user's saved recipes, use CompositeRecommendRecipeDAO which
+ * combines this with FirebaseSaveRecipeDataAccessObject.
+ */
+public class RecommendRecipeDataAccessObject {
 
-    private static final String API_KEY = "1";
     private static final String API_BASE_URL = "https://www.themealdb.com/api/json/v1/1/filter.php";
 
-    @Override
-    public User getUser(String username) {
-        System.out.println("Warning: getUser implementation is missing in DataAccessObject.");
-        return null;
-    }
-
-    @Override
+    /**
+     * Get recipes by category from MealDB API.
+     *
+     * @param category the category name
+     * @return a list of recipes matching the category
+     */
     public List<Recipe> getRecipesByCategory(String category) {
         List<Recipe> recipes = new ArrayList<>();
 
