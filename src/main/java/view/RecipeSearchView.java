@@ -65,6 +65,18 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         this.showSavedRecipesController = showSavedRecipesController;
         this.editReviewViewModel = editReviewViewModel;
 
+        // Listen to view changes to refresh when returning to this view
+        this.viewManagerModel.addPropertyChangeListener(evt -> {
+            if ("state".equals(evt.getPropertyName()) && viewName.equals(evt.getNewValue())) {
+                // Refresh the view when navigating back to recipe search
+                List<Recipe> currentRecipes = new ArrayList<>(recipeSearchViewModel.getState().getRecipeList());
+                if (!currentRecipes.isEmpty()) {
+                    sortRecipes(currentRecipes);
+                    updateView(currentRecipes);
+                }
+            }
+        });
+
         setLayout(new BorderLayout());
         add(createNavigationBar(), BorderLayout.NORTH);
         JPanel searchAndResultsPanel = new JPanel(new BorderLayout());
