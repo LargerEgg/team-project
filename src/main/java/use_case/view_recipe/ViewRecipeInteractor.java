@@ -24,10 +24,19 @@ public class ViewRecipeInteractor implements ViewRecipeInputBoundary {
     @Override
     public void execute(ViewRecipeInputData input) {
         String username = input.getUsername();
-        Recipe recipe = input.getRecipe();
+        Recipe recipe;
+
+        if (input.getRecipe() != null) {
+            recipe = input.getRecipe();
+        } else if (input.getRecipeId() != null && !input.getRecipeId().isEmpty()) {
+            recipe = repo.findById(input.getRecipeId());
+        } else {
+            presenter.prepareFailView("Recipe not found: No recipe object or ID provided.");
+            return;
+        }
 
         if (recipe == null) {
-            presenter.prepareFailView("Recipe not found.");
+            presenter.prepareFailView("Recipe not found with ID: " + input.getRecipeId());
             return;
         }
 

@@ -121,6 +121,7 @@ public class AppBuilder {
 
     private EditReviewViewModel editReviewViewModel;
     private EditReviewController editReviewController;
+    private ViewRecipeController viewRecipeController; // Corrected member variable
 
     public AppBuilder() {
         cardPanel.setLayout(cardLayout);
@@ -284,7 +285,8 @@ public class AppBuilder {
                 ? firebaseReviewDataAccessObject
                 : new ReviewDataAccessObject();
         ViewRecipeInputBoundary viewRecipeInteractor = new ViewRecipeInteractor(viewRecipeDataAccessObject, viewRecipeOutputBoundary, saveRecipeDAO, editReviewDAO);
-        return new ViewRecipeController(viewRecipeInteractor);
+        this.viewRecipeController = new ViewRecipeController(viewRecipeInteractor); // Assign to member variable
+        return this.viewRecipeController; // Return the assigned member variable
     }
 
     public AppBuilder addPostRecipeView() {
@@ -307,7 +309,12 @@ public class AppBuilder {
     }
 
     public AppBuilder addEditReviewUseCase() {
-        EditReviewOutputBoundary editReviewOutputBoundary = new EditReviewPresenter(viewManagerModel, editReviewViewModel);
+        EditReviewOutputBoundary editReviewOutputBoundary = new EditReviewPresenter(
+                viewManagerModel,
+                editReviewViewModel,
+                viewRecipeViewModel,
+                this.viewRecipeController // Use the member variable here
+        );
         EditReviewDataAccessInterface editReviewDataAccess = USE_FIREBASE && firebaseReviewDataAccessObject != null
                 ? firebaseReviewDataAccessObject
                 : new ReviewDataAccessObject();

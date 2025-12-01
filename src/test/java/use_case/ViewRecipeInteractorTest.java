@@ -43,7 +43,7 @@ class ViewRecipeInteractorTest {
         Recipe expectedRecipe = createTestRecipe(recipeId, username);
         dataAccess.setRecipeToReturn(expectedRecipe);
 
-        ViewRecipeInputData inputData = new ViewRecipeInputData(expectedRecipe, username);
+        ViewRecipeInputData inputData = new ViewRecipeInputData(recipeId, username);
 
         // Act
         interactor.execute(inputData);
@@ -63,8 +63,10 @@ class ViewRecipeInteractorTest {
     @DisplayName("View Recipe: Failure - Recipe not found")
     void testViewRecipeFailureNotFound() {
         // Arrange
+        String nonExistentRecipeId = "nonExistentId";
         String username = "testUser";
-        ViewRecipeInputData inputData = new ViewRecipeInputData(null, username);
+        dataAccess.setRecipeToReturn(null); // Ensure the recipe is not found
+        ViewRecipeInputData inputData = new ViewRecipeInputData(nonExistentRecipeId, username);
 
         // Act
         interactor.execute(inputData);
@@ -72,7 +74,7 @@ class ViewRecipeInteractorTest {
         // Assert
         assertTrue(presenter.failViewCalled);
         assertFalse(presenter.successViewCalled);
-        assertEquals("Recipe not found.", presenter.errorMessage);
+        assertEquals("Recipe not found with ID: " + nonExistentRecipeId, presenter.errorMessage);
     }
 
     @Test
@@ -82,7 +84,7 @@ class ViewRecipeInteractorTest {
         String recipeId = "testRecipeId";
         Recipe expectedRecipe = createTestRecipe(recipeId, null);
         dataAccess.setRecipeToReturn(expectedRecipe);
-        ViewRecipeInputData inputData = new ViewRecipeInputData(expectedRecipe, null);
+        ViewRecipeInputData inputData = new ViewRecipeInputData(recipeId, null);
 
         // Act
         interactor.execute(inputData);
@@ -101,7 +103,7 @@ class ViewRecipeInteractorTest {
         String recipeId = "testRecipeId";
         Recipe expectedRecipe = createTestRecipe(recipeId, "");
         dataAccess.setRecipeToReturn(expectedRecipe);
-        ViewRecipeInputData inputData = new ViewRecipeInputData(expectedRecipe, "");
+        ViewRecipeInputData inputData = new ViewRecipeInputData(recipeId, "");
 
         // Act
         interactor.execute(inputData);
@@ -122,7 +124,7 @@ class ViewRecipeInteractorTest {
         Recipe expectedRecipe = createTestRecipe(recipeId, username);
         dataAccess.setRecipeToReturn(expectedRecipe);
         dataAccess.setShouldThrowException(true); // Configure to throw an exception
-        ViewRecipeInputData inputData = new ViewRecipeInputData(expectedRecipe, username);
+        ViewRecipeInputData inputData = new ViewRecipeInputData(recipeId, username);
 
         // Act
         interactor.execute(inputData);
