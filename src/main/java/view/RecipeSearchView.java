@@ -1,16 +1,16 @@
 package view;
 
 import entity.Ingredient;
-import entity.PopularityCalculator; // 来自同学的引入
+import entity.PopularityCalculator;
 import entity.Recipe;
 import interface_adapter.ViewManagerModel;
-import interface_adapter.edit_review.EditReviewState; // 来自同学的引入
-import interface_adapter.edit_review.EditReviewViewModel; // 来自同学的引入
+import interface_adapter.edit_review.EditReviewState;
+import interface_adapter.edit_review.EditReviewViewModel;
 import interface_adapter.recipe_search.RecipeSearchController;
 import interface_adapter.recipe_search.RecipeSearchState;
 import interface_adapter.recipe_search.RecipeSearchViewModel;
-import interface_adapter.recommend_recipe.RecommendRecipeController; // 来自你的引入
-import interface_adapter.saved_recipes.ShowSavedRecipesController; // 来自同学的引入
+import interface_adapter.recommend_recipe.RecommendRecipeController;
+import interface_adapter.saved_recipes.ShowSavedRecipesController;
 import interface_adapter.view_recipe.ViewRecipeController;
 
 import javax.swing.*;
@@ -65,7 +65,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     private JProgressBar progressBar;
     private JLabel loadingLabel;
 
-    // 构造函数整合了所有的 Controller 和 ViewModel
     public RecipeSearchView(RecipeSearchViewModel recipeSearchViewModel,
                             RecipeSearchController recipeSearchController,
                             ViewManagerModel viewManagerModel,
@@ -92,7 +91,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         searchAndResultsPanel.add(createResultsScrollPane(), BorderLayout.CENTER);
         add(searchAndResultsPanel, BorderLayout.CENTER);
 
-        // 使用整合后的 UI 更新逻辑
         updateUserRelatedUI(recipeSearchViewModel.getState());
     }
 
@@ -128,7 +126,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         loginButton = new JButton("Login");
         logoutButton = new JButton("Logout");
         postRecipeButton = new JButton("Post a Recipe");
-        recommendButton = new JButton("Get Recommendations"); // 保留你的推荐按钮
+        recommendButton = new JButton("Get Recommendations");
 
         signupButton.addActionListener(this);
         loginButton.addActionListener(this);
@@ -136,8 +134,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         postRecipeButton.addActionListener(this);
         recommendButton.addActionListener(this);
 
-        // 将所有按钮加入面板
-        buttonPanel.add(recommendButton); // Recommend (A)
+        buttonPanel.add(recommendButton);
         buttonPanel.add(postRecipeButton);
         buttonPanel.add(signupButton);
         buttonPanel.add(loginButton);
@@ -197,7 +194,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         gbc.anchor = GridBagConstraints.WEST;
         headerPanel.add(searchButton, gbc);
 
-        // 保留同学添加的 Saved Recipes 按钮
         savedRecipesButton = new JButton("Show Saved Recipes");
         savedRecipesButton.addActionListener(this);
         gbc.gridx = 2;
@@ -245,7 +241,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         return resultsScrollPane;
     }
 
-    // 采用同学的 createRecipeItem，因为包含了 Hot 标签逻辑和更好的鼠标交互
     private JPanel createRecipeItem(Recipe recipe) {
         JPanel itemPanel = new JPanel();
         itemPanel.setLayout(new BoxLayout(itemPanel, BoxLayout.X_AXIS));
@@ -405,7 +400,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             viewManagerModel.firePropertyChange();
 
         } else if (evt.getSource() == logoutButton) {
-            // 整合了同学更完善的 Logout 逻辑
             RecipeSearchState currentState = recipeSearchViewModel.getState();
             currentState.setCurrentUser(null);
             EditReviewState editReviewState = editReviewViewModel.getState();
@@ -413,7 +407,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             recipeSearchViewModel.firePropertyChange();
 
         } else if (evt.getSource() == savedRecipesButton) {
-            // 来自 Source B 的功能
             String name = recipeSearchViewModel.getState().getCurrentUser();
             showSavedRecipesController.execute(name);
 
@@ -422,7 +415,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
             viewManagerModel.firePropertyChange();
 
         } else if (evt.getSource() == recommendButton) {
-            // 来自 Source A (你) 的功能
             String username = recipeSearchViewModel.getState().getCurrentUser();
             if (username != null) {
                 recommendRecipeController.execute(username);
@@ -432,7 +424,6 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         }
     }
 
-    // 整合了状态更新 UI 的逻辑
     private void updateUserRelatedUI(RecipeSearchState state) {
         if (state.getCurrentUser() != null && !state.getCurrentUser().isEmpty()) {
             currentUserLabel.setText("<html>Signed in as <font color='blue'>" + state.getCurrentUser() + "</font></html>");
@@ -443,11 +434,10 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
 
             postRecipeButton.setEnabled(true);
             savedRecipesButton.setEnabled(true);
-            recommendButton.setVisible(true); // 你的推荐按钮
+            recommendButton.setVisible(true);
         } else {
             currentUserLabel.setText("Not signed in");
 
-            // 未登录状态：显示登录注册，禁用/隐藏功能按钮
             signupButton.setVisible(true);
             loginButton.setVisible(true);
             logoutButton.setVisible(false);
@@ -462,7 +452,7 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
     public void propertyChange(PropertyChangeEvent evt) {
         if ("state".equals(evt.getPropertyName())) {
             RecipeSearchState state = (RecipeSearchState) evt.getNewValue();
-            updateUserRelatedUI(state); // 调用整合后的 UI 更新方法
+            updateUserRelatedUI(state);
 
             if (state.getSearchError() != null && !state.getSearchError().isEmpty()) {
                 resultsPanel.removeAll();

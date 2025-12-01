@@ -2,12 +2,10 @@ package data_access;
 
 import entity.Ingredient;
 import entity.Recipe;
-import entity.User;
 import use_case.recipe_search.RecipeSearchOutputBoundary;
 import use_case.recipe_search.RecipeSearchRecipeDataAccessInterface;
 import use_case.recipe_search.RecipeSearchOutputData;
 import use_case.view_recipe.ViewRecipeDataAccessInterface;
-import use_case.recommend_recipe.RecommendRecipeDataAccessInterface;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -24,7 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInterface, ViewRecipeDataAccessInterface, RecommendRecipeDataAccessInterface {
+public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInterface, ViewRecipeDataAccessInterface {
 
     private static final int SUCCESS_CODE = 200;
     private final OkHttpClient client = new OkHttpClient().newBuilder().build();
@@ -146,56 +144,7 @@ public class RecipeDataAccessObject implements RecipeSearchRecipeDataAccessInter
     }
 
     // =================================================================================
-    // PART 3: Recommend Recipe Implementation (Mock Data Simplified)
-    // =================================================================================
-
-    public User getUser(String username) {
-        return null;
-    }
-
-    @Override
-    public List<Recipe> getRecipesByCategory(String category) {
-        List<Recipe> recipes = new ArrayList<>();
-        if (category == null || category.isEmpty()) return recipes;
-
-        Request request = new Request.Builder()
-                .url(String.format("https://www.themealdb.com/api/json/v1/1/filter.php?c=%s", category))
-                .build();
-
-        try {
-            Response response = client.newCall(request).execute();
-            if (response.code() != SUCCESS_CODE) throw new RuntimeException("API request failed");
-
-            JSONObject responseJson = new JSONObject(response.body().string());
-            if (responseJson.isNull("meals")) {
-                return recipes;
-            }
-            JSONArray meals = responseJson.getJSONArray("meals");
-
-            int limit = Math.min(meals.length(), 10);
-
-            for (int i = 0; i < limit; i++) {
-                JSONObject recipeJson = meals.getJSONObject(i);
-                String title = recipeJson.getString("strMeal");
-                String imageUrl = recipeJson.getString("strMealThumb");
-                String id = recipeJson.getString("idMeal");
-
-                Recipe recipe = new Recipe(
-                        id, "TheMealDB", title, "Recommended from TheMealDB",
-                        new ArrayList<>(), category, new ArrayList<>(),
-                        Recipe.Status.PUBLISHED, new Date(), new Date(),
-                        imageUrl, null
-                );
-                recipes.add(recipe);
-            }
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-        }
-        return recipes;
-    }
-
-    // =================================================================================
-    // PART 4: Helper Methods
+    // PART 3: Helper Methods
     // =================================================================================
 
     private List<Recipe> executeAndParse(Request request, RecipeSearchOutputBoundary presenter) {
