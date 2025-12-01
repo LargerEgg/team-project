@@ -230,13 +230,14 @@ public class RecipeSearchView extends JPanel implements ActionListener, Property
         gbc.gridx = 1;
         headerPanel.add(sortByComboBox, gbc);
 
-        gbc.gridx = 3;
-        headerPanel.add(new JLabel("Ascending?"), gbc);
-
+        JPanel ascendingPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+        ascendingPanel.add(new JLabel("Ascending?"));
         ascendingCheckBox = new JCheckBox();
         ascendingCheckBox.addActionListener(this);
-        gbc.gridx = 4;
-        headerPanel.add(ascendingCheckBox, gbc);
+        ascendingPanel.add(ascendingCheckBox);
+        gbc.gridx = 2;
+        gbc.gridwidth = 2;
+        headerPanel.add(ascendingPanel, gbc);
 
         return headerPanel;
     }
