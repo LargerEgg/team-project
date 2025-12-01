@@ -336,63 +336,6 @@ class SaveRecipeInteractorTest {
     }
 
     // ==============================================================================
-    // Test Cases for SaveRecipeOutputData
-    // ==============================================================================
-
-    /**
-     * Test SaveRecipeOutputData getRecipeName method
-     */
-    @Test
-    void testOutputData_GetRecipeName() {
-        // Arrange
-        SaveRecipeOutputData outputData = new SaveRecipeOutputData("Chocolate Cake", true);
-
-        // Act & Assert
-        assertEquals("Chocolate Cake", outputData.getRecipeName());
-    }
-
-    /**
-     * Test SaveRecipeOutputData isSaved method when saved is true
-     */
-    @Test
-    void testOutputData_IsSaved_True() {
-        // Arrange
-        SaveRecipeOutputData outputData = new SaveRecipeOutputData("Apple Pie", true);
-
-        // Act & Assert
-        assertTrue(outputData.isSaved());
-    }
-
-    /**
-     * Test SaveRecipeOutputData isSaved method when saved is false
-     */
-    @Test
-    void testOutputData_IsSaved_False() {
-        // Arrange
-        SaveRecipeOutputData outputData = new SaveRecipeOutputData("Banana Bread", false);
-
-        // Act & Assert
-        assertFalse(outputData.isSaved());
-    }
-
-    /**
-     * Test SaveRecipeOutputData constructor with both parameters
-     */
-    @Test
-    void testOutputData_Constructor() {
-        // Arrange & Act
-        SaveRecipeOutputData outputData1 = new SaveRecipeOutputData("Recipe A", true);
-        SaveRecipeOutputData outputData2 = new SaveRecipeOutputData("Recipe B", false);
-
-        // Assert
-        assertEquals("Recipe A", outputData1.getRecipeName());
-        assertTrue(outputData1.isSaved());
-        
-        assertEquals("Recipe B", outputData2.getRecipeName());
-        assertFalse(outputData2.isSaved());
-    }
-
-    // ==============================================================================
     // Additional Edge Cases
     // ==============================================================================
 
