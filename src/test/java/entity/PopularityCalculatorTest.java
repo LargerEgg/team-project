@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -173,6 +175,30 @@ class PopularityCalculatorTest {
             // saves = 1, views = 10000, engagement = 0.01% = 0.0001
             Recipe recipe = createTestRecipe(10000, 1, 4.5);
             assertEquals(0.0001, PopularityCalculator.getEngagementRate(recipe), 0.00001);
+        }
+    }
+
+    // ==================== CONSTRUCTOR TESTS ====================
+
+    @Nested
+    @DisplayName("Constructor tests")
+    class ConstructorTests {
+
+        @Test
+        @DisplayName("Private constructor should throw UnsupportedOperationException")
+        void testPrivateConstructor_ThrowsException() throws Exception {
+            Constructor<PopularityCalculator> constructor = 
+                PopularityCalculator.class.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            
+            InvocationTargetException exception = assertThrows(
+                InvocationTargetException.class,
+                () -> constructor.newInstance()
+            );
+            
+            assertTrue(exception.getCause() instanceof UnsupportedOperationException);
+            assertEquals("Utility class cannot be instantiated", 
+                exception.getCause().getMessage());
         }
     }
 
