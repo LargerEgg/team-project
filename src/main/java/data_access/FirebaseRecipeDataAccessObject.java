@@ -408,11 +408,18 @@ public class FirebaseRecipeDataAccessObject implements PostRecipeDataAccessInter
                 imagePath
         );
 
-        Long views = doc.getLong("views");
+        // Fetch views from the separate recipe_views collection
+        try {
+            Integer actualViews = getViewCount(recipeId).get(); // Synchronously get views
+            recipe.setViews(actualViews);
+        } catch (InterruptedException | ExecutionException e) {
+            System.err.println("Error fetching view count for recipe " + recipeId + ": " + e.getMessage());
+            recipe.setViews(0); // Default to 0 on error
+        }
+
         Long saves = doc.getLong("saves");
         Boolean shareable = doc.getBoolean("shareable");
 
-        if (views != null) recipe.setViews(views.intValue());
         if (saves != null) recipe.setSaves(saves.intValue());
         if (shareable != null) recipe.setShareable(shareable);
 

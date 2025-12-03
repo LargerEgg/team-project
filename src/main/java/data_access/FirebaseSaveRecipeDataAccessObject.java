@@ -18,11 +18,13 @@ public class FirebaseSaveRecipeDataAccessObject implements SaveRecipeDataAccessI
     private final Firestore db;
     private final CollectionReference recipesCollection;
     private final RecipeDataAccessObject apiRecipeDAO;
+    private final FirebaseRecipeDataAccessObject firebaseRecipeDAO; // Add this line
 
     public FirebaseSaveRecipeDataAccessObject(RecipeDataAccessObject apiRecipeDAO) {
         this.db = FirebaseInitializer.getFirestore();
         this.recipesCollection = this.db.collection("recipes");
         this.apiRecipeDAO = apiRecipeDAO;
+        this.firebaseRecipeDAO = new FirebaseRecipeDataAccessObject(db); // Initialize it here
     }
 
     @Override
@@ -67,6 +69,23 @@ public class FirebaseSaveRecipeDataAccessObject implements SaveRecipeDataAccessI
             if (apiRecipeDAO != null) {
                 Recipe apiRecipe = apiRecipeDAO.findById(recipeId);
                 if (apiRecipe != null) {
+                    // Fetch views from the separate recipe_views collection
+                    try {
+                        Integer actualViews = firebaseRecipeDAO.getViewCount(recipeId).get();
+                        apiRecipe.setViews(actualViews);
+                    } catch (InterruptedException | ExecutionException e) {
+                        System.err.println("Error fetching view count for API recipe " + recipeId + ": " + e.getMessage());
+                        apiRecipe.setViews(0);
+                    }
+
+                    // Fetch saves from the recipes collection (where it's stored for all recipes, including API ones after saving)
+                    try {
+                        Integer actualSaves = firebaseRecipeDAO.getSaveCount(recipeId).get();
+                        apiRecipe.setSaves(actualSaves);
+                    } catch (InterruptedException | ExecutionException e) {
+                        System.err.println("Error fetching save count for API recipe " + recipeId + ": " + e.getMessage());
+                        apiRecipe.setSaves(0);
+                    }
                     return apiRecipe;
                 }
             }
@@ -147,11 +166,18 @@ public class FirebaseSaveRecipeDataAccessObject implements SaveRecipeDataAccessI
                 imagePath
         );
 
-        Long views = doc.getLong("views");
+        // Fetch views from the separate recipe_views collection using firebaseRecipeDAO
+        try {
+            Integer actualViews = firebaseRecipeDAO.getViewCount(recipeId).get(); // Synchronously get views
+            recipe.setViews(actualViews);
+        } catch (InterruptedException | ExecutionException e) {
+            System.err.println("Error fetching view count for recipe " + recipeId + " in FirebaseSaveRecipeDataAccessObject: " + e.getMessage());
+            recipe.setViews(0); // Default to 0 on error
+        }
+
         Long saves = doc.getLong("saves");
         Boolean shareable = doc.getBoolean("shareable");
 
-        if (views != null) recipe.setViews(views.intValue());
         if (saves != null) recipe.setSaves(saves.intValue());
         if (shareable != null) recipe.setShareable(shareable);
 

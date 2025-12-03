@@ -14,8 +14,7 @@ public class Main {
                         .addLoginView()
                         .addSignupView()
                         .addViewRecipeView()
-                        .addPostRecipeView()
-                        .addEditReviewView(); // Assuming this exists based on your code
+                        .addEditReviewView(); // addPostRecipeView moved below
 
                 // 2. Build Use Cases and get Controllers
                 // Get the ViewRecipeController first as it's needed by other views
@@ -23,6 +22,9 @@ public class Main {
 
                 // 3. Add Recipe Search View (This also initializes Recommend Controller internally)
                 appBuilder.addRecipeSearchView(viewRecipeController);
+
+                // Add Post Recipe View AFTER Recipe Search View is initialized
+                appBuilder.addPostRecipeView();
 
                 // 4. ★★★ Crucial Step: Add Recommend Recipe View ★★★
                 // This connects the recommend view to the app
