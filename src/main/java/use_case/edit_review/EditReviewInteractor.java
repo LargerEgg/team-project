@@ -1,8 +1,6 @@
 package use_case.edit_review;
 
 import entity.Review;
-import use_case.edit_review.EditReviewDataAccessInterface;
-import data_access.FirebaseReviewDataAccessObject;
 
 import java.util.Date;
 import java.util.UUID;
@@ -23,9 +21,10 @@ public class EditReviewInteractor implements EditReviewInputBoundary {
     @Override
     public void publish(EditReviewInputData inputData) {
 
-        if (inputData.getAuthorId() == null || inputData.getAuthorId().isBlank()) {
+        if ((inputData.getAuthorId() == null) || inputData.getAuthorId().isBlank()) {
             inputData.setAuthorId("Anonymous");
         }
+        //Error Messages
         if (inputData.getReview().isBlank()) {
             reviewPresenter.prepareFailView("Title cannot be empty.", inputData);
             return;
@@ -38,13 +37,13 @@ public class EditReviewInteractor implements EditReviewInputBoundary {
             reviewPresenter.prepareFailView("Rating must be between 1 and 5.", inputData);
             return;
         }
-
+        //Create Review
         String reviewId = UUID.randomUUID().toString();
         final Review review = new Review(reviewId, inputData.getRecipeId(), inputData.getAuthorId(),
                 new Date(), inputData.getReview(), inputData.getDescription(), inputData.getRating());
-
+        //Check if Review already exists
         Review previousReview = reviewDataAccessObject.findByAuthor(inputData.getAuthorId(), inputData.getRecipeId());
-        if (previousReview != null && !(previousReview.getAuthorId().equals("Anonymous"))) {
+        if (previousReview != null && !(previousReview.getAuthorId().equals("Anonymous"))) { //Edit Review
             review.setReviewId(previousReview.getReviewId());
             try {
                 reviewDataAccessObject.changeReview(review);
@@ -54,7 +53,7 @@ public class EditReviewInteractor implements EditReviewInputBoundary {
                 reviewPresenter.prepareFailView("Failed to publish review: " + e.getMessage(), inputData);
             }
         }
-        else {
+        else { //Publish Review
             try {
                 reviewDataAccessObject.saveReview(review);
                 reviewDataAccessObject.recordReviewRecipe(inputData.getRecipeId(), review);
